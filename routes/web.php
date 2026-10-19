@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\DoctorManagementController;
+use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Doctor\DoctorQueueController;
 use App\Http\Controllers\Patient\PatientPortalController;
 use App\Http\Controllers\Public\BookingController;
+use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
 use Illuminate\Support\Facades\Route;
@@ -63,11 +66,26 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')
 
 
 // =========================================================================
-// ====== MODULE 2: SPECIALTIES & DOCTORS (Phụ trách: NGUYỄN VÃN ĐẠT) ======
+// ====== MODULE 2: SPECIALTIES & DOCTORS (Phụ trách: NGUYỄN VĂN ĐẠT) ======
 // =========================================================================
-// Cung cấp route Admin Dashboard tích hợp cho Quản trị viên
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Quản lý Chuyên khoa (CRUD & toggle status)
+    Route::patch('/specialties/{specialty}/toggle-status', [SpecialtyController::class, 'toggleStatus'])->name('specialties.toggle-status');
+    Route::resource('specialties', SpecialtyController::class);
+
+    // Quản lý Bác sĩ & Lịch trực tuần
+    Route::get('/doctors/{doctor}/schedule', [DoctorManagementController::class, 'schedule'])->name('doctors.schedule');
+    Route::put('/doctors/{doctor}/schedule', [DoctorManagementController::class, 'updateSchedule'])->name('doctors.schedule.update');
+    Route::patch('/doctors/{doctor}/toggle-availability', [DoctorManagementController::class, 'toggleAvailability'])->name('doctors.toggle-availability');
+    Route::resource('doctors', DoctorManagementController::class);
+});
+
+// Cổng thông tin công chúng: Danh bạ Bác sĩ
+Route::prefix('doctors')->name('public.doctors.')->group(function () {
+    Route::get('/', [DoctorPublicController::class, 'index'])->name('index');
+    Route::get('/{doctor}', [DoctorPublicController::class, 'show'])->name('show');
 });
 
 

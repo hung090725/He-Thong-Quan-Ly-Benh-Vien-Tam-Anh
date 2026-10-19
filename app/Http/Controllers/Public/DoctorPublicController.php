@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Http\Controllers\Public;
+
+use App\Http\Controllers\Controller;
+use App\Models\Doctor;
+use App\Models\Specialty;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class DoctorPublicController extends Controller
+{
+    /**
+     * Display a public directory of doctors.
+     */
+    public function index(Request $request): View
+    {
+        $query = Doctor::query()
+            ->with(['user', 'specialty', 'schedules'])
+            ->where('is_available', true)
+            ->whereHas('specialty', function ($q) {
+                $q->where('is_active', true);
+            });
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('qualification', 'LIKE', "%{$search}%")
+                  ->orWhere('room_number', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($specialtyId = $request->input('specialty_id')) {
+            $query->where('specialty_id', $specialtyId);
+        }
+
+        $doctors = $query->paginate(9)->withQueryString();
+        $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
+
+        return view('public.doctors.index', compact('doctors', 'specialties'));
+    }
+
+    /**
+     * Display the specified doctor profile and weekly schedule.
+     */
+    public function show(Doctor $doctor): View
+    {
+        $doctor->load(['user', 'specialty', 'schedules' => function ($q) {
+            $q->where('is_active', true);
+        }]);
+
+        $days = [
+            'monday' => 'Thứ Hai',
+            'tuesday' => 'Thứ Ba',
+            'wednesday' => 'Thứ Tư',
+            'thursday' => 'Thứ Năm',
+            'friday' => 'Thứ Sáu',
+            'saturday' => 'Thứ Bảy',
+            'sunday' => 'Chủ Nhật',
+        ];
+
+        return view('public.doctors.show', compact('doctor', 'days'));
+    }
+}
