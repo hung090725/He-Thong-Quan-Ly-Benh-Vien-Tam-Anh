@@ -4,9 +4,15 @@ namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\DoctorSchedule;
+use App\Models\PatientProfile;
+use App\Models\Specialty;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ReceptionAppointmentController extends Controller
@@ -18,6 +24,8 @@ class ReceptionAppointmentController extends Controller
     {
         $date = $request->query('date', Carbon::today()->toDateString());
         $status = $request->query('status');
+        $shift = $request->query('shift');
+        $specialtyId = $request->query('specialty_id');
         $search = $request->query('search');
 
         $query = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
@@ -28,20 +36,169 @@ class ReceptionAppointmentController extends Controller
             $query->where('status', $status);
         }
 
+        if ($shift) {
+            $query->where('shift', $shift);
+        }
+
+        if ($specialtyId) {
+            $query->where('specialty_id', $specialtyId);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('appointment_code', 'LIKE', "%{$search}%")
                   ->orWhereHas('patientProfile', function ($pq) use ($search) {
                       $pq->where('full_name', 'LIKE', "%{$search}%")
                          ->orWhere('phone', 'LIKE', "%{$search}%")
-                         ->orWhere('patient_code', 'LIKE', "%{$search}%");
+                         ->orWhere('patient_code', 'LIKE', "%{$search}%")
+                         ->orWhere('identity_card', 'LIKE', "%{$search}%");
                   });
             });
         }
 
         $appointments = $query->paginate(15)->withQueryString();
 
-        return view('receptionist.appointments.index', compact('appointments', 'date', 'status', 'search'));
+        // Statistics for quick status tabs
+        $stats = [
+            'total' => Appointment::whereDate('appointment_date', $date)->count(),
+            'pending' => Appointment::whereDate('appointment_date', $date)->where('status', Appointment::STATUS_PENDING)->count(),
+            'confirmed' => Appointment::whereDate('appointment_date', $date)->where('status', Appointment::STATUS_CONFIRMED)->count(),
+            'completed' => Appointment::whereDate('appointment_date', $date)->where('status', Appointment::STATUS_COMPLETED)->count(),
+            'cancelled' => Appointment::whereDate('appointment_date', $date)->where('status', Appointment::STATUS_CANCELLED)->count(),
+        ];
+
+        $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
+        $doctors = Doctor::with(['user', 'specialty'])->where('is_available', true)->get();
+
+        return view('receptionist.appointments.index', compact(
+            'appointments',
+            'date',
+            'status',
+            'shift',
+            'specialtyId',
+            'search',
+            'stats',
+            'specialties',
+            'doctors'
+        ));
+    }
+
+    /**
+     * Show form to receive a walk-in patient at the desk.
+     */
+    public function createWalkin(Request $request): View
+    {
+        $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
+        $doctors = Doctor::with(['user', 'specialty'])->where('is_available', true)->get();
+
+        $selectedPatient = null;
+        if ($request->filled('patient_id')) {
+            $selectedPatient = PatientProfile::find($request->query('patient_id'));
+        }
+
+        return view('receptionist.appointments.walkin', compact('specialties', 'doctors', 'selectedPatient'));
+    }
+
+    /**
+     * Store walk-in appointment and automatically confirm it.
+     */
+    public function storeWalkin(Request $request): RedirectResponse
+    {
+        $isExisting = $request->boolean('is_existing_patient');
+
+        $rules = [
+            'specialty_id' => ['required', 'exists:specialties,id'],
+            'doctor_id' => ['required', 'exists:doctors,id'],
+            'appointment_date' => ['required', 'date', 'after_or_equal:today'],
+            'shift' => ['required', 'in:morning,afternoon'],
+            'appointment_time' => ['nullable', 'date_format:H:i'],
+            'symptom_description' => ['required', 'string', 'max:1000'],
+        ];
+
+        if ($isExisting) {
+            $rules['patient_profile_id'] = ['required', 'exists:patient_profiles,id'];
+        } else {
+            $rules['full_name'] = ['required', 'string', 'max:100'];
+            $rules['dob'] = ['required', 'date', 'before_or_equal:today'];
+            $rules['gender'] = ['required', 'in:male,female,other'];
+            $rules['phone'] = ['required', 'string', 'regex:/^(0|\+84)[0-9]{9,10}$/', 'max:20'];
+            $rules['email'] = ['nullable', 'email', 'max:150'];
+            $rules['address'] = ['nullable', 'string', 'max:255'];
+            $rules['identity_card'] = ['nullable', 'string', 'max:20'];
+            $rules['insurance_code'] = ['nullable', 'string', 'max:30'];
+        }
+
+        $validated = $request->validate($rules, [
+            'specialty_id.required' => 'Vui lòng chọn chuyên khoa khám.',
+            'doctor_id.required' => 'Vui lòng chọn bác sĩ phụ trách.',
+            'appointment_date.required' => 'Vui lòng chọn ngày khám.',
+            'shift.required' => 'Vui lòng chọn ca khám.',
+            'symptom_description.required' => 'Vui lòng nhập mô tả triệu chứng hoặc lý do khám.',
+            'patient_profile_id.required' => 'Vui lòng chọn hồ sơ bệnh nhân.',
+            'full_name.required' => 'Họ và tên bệnh nhân không được để trống.',
+            'dob.required' => 'Ngày sinh không được để trống.',
+            'gender.required' => 'Vui lòng chọn giới tính.',
+            'phone.required' => 'Số điện thoại không được để trống.',
+            'phone.regex' => 'Số điện thoại không đúng định dạng Việt Nam.',
+        ]);
+
+        // Overbooking slot capacity check
+        $dayOfWeek = strtolower(Carbon::parse($validated['appointment_date'])->englishDayOfWeek);
+        $schedule = DoctorSchedule::where('doctor_id', $validated['doctor_id'])
+            ->where('day_of_week', $dayOfWeek)
+            ->where('shift', $validated['shift'])
+            ->where('is_active', true)
+            ->first();
+
+        $maxPatients = $schedule ? $schedule->max_patients : 20;
+        $currentBookings = Appointment::where('doctor_id', $validated['doctor_id'])
+            ->whereDate('appointment_date', $validated['appointment_date'])
+            ->where('shift', $validated['shift'])
+            ->where('status', '!=', Appointment::STATUS_CANCELLED)
+            ->count();
+
+        if ($currentBookings >= $maxPatients) {
+            return back()->withInput()->with('error', "Bác sĩ đã kín lịch trong ca này (Đã tiếp nhận {$currentBookings}/{$maxPatients} ca). Vui lòng chọn ca hoặc bác sĩ khác.");
+        }
+
+        $appointment = DB::transaction(function () use ($isExisting, $validated) {
+            if ($isExisting) {
+                $patientProfile = PatientProfile::findOrFail($validated['patient_profile_id']);
+            } else {
+                $patientProfile = PatientProfile::where('phone', $validated['phone'])->first();
+
+                if (!$patientProfile) {
+                    $patientProfile = PatientProfile::create([
+                        'patient_code' => PatientProfile::generatePatientCode(),
+                        'full_name' => $validated['full_name'],
+                        'dob' => $validated['dob'],
+                        'gender' => $validated['gender'],
+                        'phone' => $validated['phone'],
+                        'email' => $validated['email'] ?? null,
+                        'address' => $validated['address'] ?? null,
+                        'identity_card' => $validated['identity_card'] ?? null,
+                        'insurance_code' => $validated['insurance_code'] ?? null,
+                    ]);
+                }
+            }
+
+            return Appointment::create([
+                'appointment_code' => Appointment::generateAppointmentCode(),
+                'patient_profile_id' => $patientProfile->id,
+                'doctor_id' => $validated['doctor_id'],
+                'specialty_id' => $validated['specialty_id'],
+                'appointment_date' => $validated['appointment_date'],
+                'shift' => $validated['shift'],
+                'appointment_time' => $validated['appointment_time'] ?? Carbon::now()->format('H:i'),
+                'symptom_description' => $validated['symptom_description'],
+                'status' => Appointment::STATUS_CONFIRMED, // Walk-in is auto check-in
+                'created_by_user_id' => Auth::id(),
+            ]);
+        });
+
+        return redirect()
+            ->route('reception.appointments.index', ['date' => $appointment->appointment_date->toDateString()])
+            ->with('success', "Tiếp nhận trực tiếp thành công cho bệnh nhân {$appointment->patientProfile->full_name} (Mã hẹn: {$appointment->appointment_code}). Đã tự động Check-in vào hàng đợi bác sĩ.");
     }
 
     /**
@@ -77,5 +234,38 @@ class ReceptionAppointmentController extends Controller
         ]);
 
         return back()->with('success', "Đã hủy lịch hẹn {$appointment->appointment_code}.");
+    }
+
+    /**
+     * Reassign an appointment to a new doctor, shift, or date.
+     */
+    public function reassign(Request $request, Appointment $appointment): RedirectResponse
+    {
+        $validated = $request->validate([
+            'doctor_id' => ['required', 'exists:doctors,id'],
+            'appointment_date' => ['required', 'date'],
+            'shift' => ['required', 'in:morning,afternoon'],
+            'reassign_reason' => ['nullable', 'string', 'max:255'],
+        ], [
+            'doctor_id.required' => 'Vui lòng chọn bác sĩ điều phối mới.',
+            'appointment_date.required' => 'Vui lòng chọn ngày khám.',
+            'shift.required' => 'Vui lòng chọn ca khám.',
+        ]);
+
+        $newDoctor = Doctor::findOrFail($validated['doctor_id']);
+
+        $reason = $validated['reassign_reason'] ? " (Lý do: {$validated['reassign_reason']})" : '';
+
+        $appointment->update([
+            'doctor_id' => $newDoctor->id,
+            'specialty_id' => $newDoctor->specialty_id,
+            'appointment_date' => $validated['appointment_date'],
+            'shift' => $validated['shift'],
+            'cancellation_reason' => $appointment->cancellation_reason
+                ? $appointment->cancellation_reason . " | Điều phối lại sang BS {$newDoctor->full_name_with_title}{$reason}"
+                : "Điều phối lại sang BS {$newDoctor->full_name_with_title}{$reason}",
+        ]);
+
+        return back()->with('success', "Đã điều phối lịch hẹn {$appointment->appointment_code} sang Bác sĩ {$newDoctor->full_name_with_title} thành công.");
     }
 }

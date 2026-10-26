@@ -11,6 +11,7 @@ use App\Http\Controllers\Patient\PatientPortalController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -92,11 +93,17 @@ Route::prefix('doctors')->name('public.doctors.')->group(function () {
 // =========================================================================
 // ====== MODULE 3: RECEPTION & PATIENTS (Phụ trách: NGUYỄN VĂN HƯNG) ======
 // =========================================================================
-// Bàn tiếp nhận & Check-in tại quầy
 Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->name('reception.')->group(function () {
+    // 3.1. Bàn tiếp nhận, Check-in & Tiếp nhận vãng lai tại quầy
     Route::get('/appointments', [ReceptionAppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/walk-in', [ReceptionAppointmentController::class, 'createWalkin'])->name('appointments.walkin');
+    Route::post('/appointments/walk-in', [ReceptionAppointmentController::class, 'storeWalkin'])->name('appointments.store-walkin');
     Route::put('/appointments/{appointment}/checkin', [ReceptionAppointmentController::class, 'checkin'])->name('appointments.checkin');
     Route::put('/appointments/{appointment}/cancel', [ReceptionAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::put('/appointments/{appointment}/reassign', [ReceptionAppointmentController::class, 'reassign'])->name('appointments.reassign');
+
+    // 3.2. Quản lý Hồ sơ Bệnh nhân (CRUD)
+    Route::resource('patients', PatientController::class);
 });
 
 
