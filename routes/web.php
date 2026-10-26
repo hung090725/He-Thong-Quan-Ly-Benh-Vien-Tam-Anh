@@ -96,8 +96,11 @@ Route::prefix('doctors')->name('public.doctors.')->group(function () {
 Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->name('reception.')->group(function () {
     // 3.1. Bàn tiếp nhận, Check-in & Tiếp nhận vãng lai tại quầy
     Route::get('/appointments', [ReceptionAppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/export', [ReceptionAppointmentController::class, 'export'])->name('appointments.export');
+    Route::get('/appointments/queue-display', [ReceptionAppointmentController::class, 'queueDisplay'])->name('appointments.queue-display');
     Route::get('/appointments/walk-in', [ReceptionAppointmentController::class, 'createWalkin'])->name('appointments.walkin');
     Route::post('/appointments/walk-in', [ReceptionAppointmentController::class, 'storeWalkin'])->name('appointments.store-walkin');
+    Route::get('/appointments/{appointment}/print', [ReceptionAppointmentController::class, 'printTicket'])->name('appointments.print');
     Route::put('/appointments/{appointment}/checkin', [ReceptionAppointmentController::class, 'checkin'])->name('appointments.checkin');
     Route::put('/appointments/{appointment}/cancel', [ReceptionAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::put('/appointments/{appointment}/reassign', [ReceptionAppointmentController::class, 'reassign'])->name('appointments.reassign');

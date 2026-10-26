@@ -292,4 +292,37 @@ class ReceptionPatientTest extends TestCase
 
         $response->assertRedirect(route('reception.appointments.index', ['date' => Carbon::today()->toDateString()]));
     }
+
+    public function test_receptionist_can_view_and_print_appointment_ticket(): void
+    {
+        $receptionist = $this->getReceptionist();
+        $appointment = Appointment::first();
+
+        $response = $this->actingAs($receptionist)->get('/reception/appointments/' . $appointment->id . '/print');
+
+        $response->assertStatus(200);
+        $response->assertSee('PHIẾU TIẾP NHẬN NGOẠI TRÚ');
+        $response->assertSee($appointment->appointment_code);
+    }
+
+    public function test_receptionist_can_export_daily_appointments_csv(): void
+    {
+        $receptionist = $this->getReceptionist();
+
+        $response = $this->actingAs($receptionist)->get('/reception/appointments/export?date=' . Carbon::today()->toDateString());
+
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+    }
+
+    public function test_receptionist_can_view_live_queue_display(): void
+    {
+        $receptionist = $this->getReceptionist();
+
+        $response = $this->actingAs($receptionist)->get('/reception/appointments/queue-display');
+
+        $response->assertStatus(200);
+        $response->assertSee('BỆNH VIỆN ĐA KHOA TÂM ANH');
+        $response->assertSee('DANH SÁCH MỜI VÀO PHÒNG KHÁM');
+    }
 }

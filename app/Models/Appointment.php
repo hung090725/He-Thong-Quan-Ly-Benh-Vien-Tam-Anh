@@ -123,6 +123,15 @@ class Appointment extends Model
         };
     }
 
+    public function getQueueNumberAttribute(): int
+    {
+        return self::where('doctor_id', $this->doctor_id)
+            ->whereDate('appointment_date', $this->appointment_date)
+            ->where('shift', $this->shift)
+            ->where('id', '<=', $this->id)
+            ->count();
+    }
+
     public static function generateAppointmentCode(): string
     {
         $today = Carbon::now()->format('Ymd');

@@ -5,6 +5,12 @@
 @section('content')
 <x-page-header title="Bàn Tiếp Nhận & Check-in Ngoại Trú" subtitle="Quản lý và tiếp đón bệnh nhân đến viện theo lịch hẹn hoặc đăng ký trực tiếp tại quầy">
     <x-slot:actions>
+        <a href="{{ route('reception.appointments.queue-display') }}" target="_blank" class="btn btn-outline-info d-inline-flex align-items-center gap-1">
+            <i class="bi bi-tv"></i> Bảng điện tử phòng chờ
+        </a>
+        <a href="{{ route('reception.appointments.export', request()->query()) }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+            <i class="bi bi-file-earmark-excel"></i> Xuất Excel (CSV)
+        </a>
         <a href="{{ route('reception.appointments.walkin') }}" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm">
             <i class="bi bi-box-arrow-in-down-right"></i> Tiếp nhận tại quầy (Walk-in)
         </a>
@@ -133,20 +139,26 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3" style="width: 130px;">Mã hẹn</th>
+                        <th class="ps-3" style="width: 70px;">STT</th>
+                        <th style="width: 130px;">Mã hẹn</th>
                         <th>Bệnh nhân</th>
                         <th>Chuyên khoa</th>
                         <th>Bác sĩ phụ trách</th>
                         <th>Ca & Giờ hẹn</th>
                         <th>Triệu chứng / Ghi chú</th>
                         <th>Trạng thái</th>
-                        <th class="text-end pe-3" style="width: 190px;">Thao tác Tiếp nhận</th>
+                        <th class="text-end pe-3" style="width: 220px;">Thao tác Tiếp nhận</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($appointments as $app)
                         <tr>
-                            <td class="ps-3 fw-bold font-monospace text-primary">
+                            <td class="ps-3">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace fs-6">
+                                    #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
+                                </span>
+                            </td>
+                            <td class="fw-bold font-monospace text-primary">
                                 {{ $app->appointment_code }}
                             </td>
                             <td>
@@ -186,6 +198,9 @@
                             </td>
                             <td class="text-end pe-3">
                                 <div class="btn-group btn-group-sm">
+                                    <a href="{{ route('reception.appointments.print', $app) }}" target="_blank" class="btn btn-outline-dark" title="In phiếu tiếp nhận / khám bệnh">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
                                     @if($app->status === 'pending')
                                         <form method="POST" action="{{ route('reception.appointments.checkin', $app) }}" class="d-inline">
                                             @csrf

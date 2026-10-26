@@ -268,4 +268,117 @@ class ReceptionAppointmentController extends Controller
 
         return back()->with('success', "Đã điều phối lịch hẹn {$appointment->appointment_code} sang Bác sĩ {$newDoctor->full_name_with_title} thành công.");
     }
+
+    /**
+     * Print OPD consultation ticket for patient at reception.
+     */
+    public function printTicket(Appointment $appointment): View
+    {
+        $appointment->load(['patientProfile', 'doctor.user', 'specialty']);
+
+        return view('receptionist.appointments.print', compact('appointment'));
+    }
+
+    /**
+     * Export daily appointments to CSV/Excel format.
+     */
+    public function export(Request $request)
+    {
+        $date = $request->query('date', Carbon::today()->toDateString());
+        $status = $request->query('status');
+
+        $query = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
+            ->whereDate('appointment_date', $date)
+            ->latest('id');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $appointments = $query->get();
+
+        $fileName = "BaoCao_TiepNhan_TamAnh_{$date}.csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($appointments) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($file, [
+                'STT Khám',
+                'Mã Lịch Hẹn',
+                'Mã Bệnh Nhân',
+                'Họ và Tên',
+                'Ngày Sinh',
+                'Giới Tính',
+                'Số Điện Thoại',
+                'Số CCCD',
+                'Mã Thẻ BHYT',
+                'Chuyên Khoa',
+                'Bác Sĩ Khám',
+                'Phòng Khám',
+                'Ca Khám',
+                'Giờ Hẹn',
+                'Triệu Chứng',
+                'Trạng Thái',
+                'Ghi Chú / Lý Do Hủy',
+            ]);
+
+            foreach ($appointments as $app) {
+                fputcsv($file, [
+                    $app->queue_number,
+                    $app->appointment_code,
+                    $app->patientProfile ? $app->patientProfile->patient_code : '',
+                    $app->patientProfile ? $app->patientProfile->full_name : '',
+                    $app->patientProfile && $app->patientProfile->dob ? $app->patientProfile->dob->format('d/m/Y') : '',
+                    $app->patientProfile ? $app->patientProfile->gender_name : '',
+                    $app->patientProfile ? $app->patientProfile->phone : '',
+                    $app->patientProfile ? $app->patientProfile->identity_card : '',
+                    $app->patientProfile ? $app->patientProfile->insurance_code : '',
+                    $app->specialty ? $app->specialty->name : '',
+                    $app->doctor ? $app->doctor->full_name_with_title : '',
+                    $app->doctor ? $app->doctor->room_number : '',
+                    $app->shift_name,
+                    $app->appointment_time ? substr($app->appointment_time, 0, 5) : 'Trong ca',
+                    $app->symptom_description,
+                    $app->status_name,
+                    $app->cancellation_reason ?: '',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Live display board for waiting room / reception kiosk.
+     */
+    public function queueDisplay(Request $request): View
+    {
+        $date = $request->query('date', Carbon::today()->toDateString());
+
+        $waitingAppointments = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
+            ->whereDate('appointment_date', $date)
+            ->where('status', Appointment::STATUS_CONFIRMED)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $recentCompleted = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
+            ->whereDate('appointment_date', $date)
+            ->where('status', Appointment::STATUS_COMPLETED)
+            ->latest('updated_at')
+            ->limit(10)
+            ->get();
+
+        return view('receptionist.appointments.queue_display', compact('waitingAppointments', 'recentCompleted', 'date'));
+    }
 }
