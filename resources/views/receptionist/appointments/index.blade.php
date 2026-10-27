@@ -336,7 +336,7 @@
     </div>
     @if($appointments->hasPages())
         <div class="card-footer bg-white border-0 py-3">
-            {{ $appointments->links() }}
+            {{ $appointments->links('pagination::bootstrap-5') }}
         </div>
     @endif
 </div>

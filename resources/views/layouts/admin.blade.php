@@ -34,6 +34,13 @@
             min-height: 100vh;
         }
 
+        /* Fix pagination SVG icon sizes */
+        .pagination svg, svg.w-5 {
+            width: 1rem !important;
+            height: 1rem !important;
+            display: inline-block !important;
+        }
+
         .sidebar {
             width: 260px;
             background-color: var(--tam-sidebar-bg);
