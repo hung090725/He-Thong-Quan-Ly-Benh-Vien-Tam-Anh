@@ -267,6 +267,7 @@ class ReceptionPatientTest extends TestCase
         $specialty = Specialty::where('is_active', true)->first();
         $doctor = Doctor::where('specialty_id', $specialty->id)->first();
         $uniquePhone = '097' . rand(1000000, 9999999);
+        $testDate = Carbon::tomorrow()->addDays(5)->toDateString();
 
         $response = $this->actingAs($receptionist)->post('/reception/appointments/walk-in', [
             'is_existing_patient' => 0,
@@ -276,7 +277,7 @@ class ReceptionPatientTest extends TestCase
             'phone' => $uniquePhone,
             'specialty_id' => $specialty->id,
             'doctor_id' => $doctor->id,
-            'appointment_date' => Carbon::today()->toDateString(),
+            'appointment_date' => $testDate,
             'shift' => 'morning',
             'symptom_description' => 'Đến khám trực tiếp tại quầy vì sốt',
         ]);
@@ -290,7 +291,7 @@ class ReceptionPatientTest extends TestCase
         $this->assertEquals(Appointment::STATUS_CONFIRMED, $appointment->status);
         $this->assertEquals($doctor->id, $appointment->doctor_id);
 
-        $response->assertRedirect(route('reception.appointments.index', ['date' => Carbon::today()->toDateString()]));
+        $response->assertRedirect(route('reception.appointments.index', ['date' => $testDate]));
     }
 
     public function test_receptionist_can_view_and_print_appointment_ticket(): void
@@ -344,6 +345,7 @@ class ReceptionPatientTest extends TestCase
         $doctor = Doctor::where('is_available', true)->first();
         $specialty = $doctor->specialty;
         $uniquePhone = '096' . rand(1000000, 9999999);
+        $testDate = Carbon::tomorrow()->addDays(6)->toDateString();
 
         $response = $this->actingAs($receptionist)->post('/reception/appointments/walk-in', [
             'is_existing_patient' => '0',
@@ -353,7 +355,7 @@ class ReceptionPatientTest extends TestCase
             'phone' => $uniquePhone,
             'specialty_id' => $specialty->id,
             'doctor_id' => $doctor->id,
-            'appointment_date' => Carbon::today()->toDateString(),
+            'appointment_date' => $testDate,
             'shift' => 'morning',
             'is_priority' => '1',
             'symptom_description' => '[Sinh hiệu: HA: 140/90 mmHg, Thân nhiệt: 38.5°C] Sốt cao khó thở',
