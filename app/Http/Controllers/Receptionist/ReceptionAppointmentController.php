@@ -143,6 +143,15 @@ class ReceptionAppointmentController extends Controller
         ]);
 
         // Overbooking slot capacity check
+        $doctor = Doctor::where('id', $validated['doctor_id'])
+            ->where('specialty_id', $validated['specialty_id'])
+            ->where('is_available', true)
+            ->first();
+
+        if (!$doctor) {
+            return back()->withInput()->with('error', 'Bác sĩ được chọn không trực thuộc chuyên khoa này hoặc hiện đang tạm ngưng nhận khám.');
+        }
+
         $dayOfWeek = strtolower(Carbon::parse($validated['appointment_date'])->englishDayOfWeek);
         $schedule = DoctorSchedule::where('doctor_id', $validated['doctor_id'])
             ->where('day_of_week', $dayOfWeek)
@@ -158,7 +167,7 @@ class ReceptionAppointmentController extends Controller
             ->count();
 
         if ($currentBookings >= $maxPatients) {
-            return back()->withInput()->with('error', "Bác sĩ đã kín lịch trong ca này (Đã tiếp nhận {$currentBookings}/{$maxPatients} ca). Vui lòng chọn ca hoặc bác sĩ khác.");
+            return back()->withInput()->with('error', "Bác sĩ {$doctor->full_name_with_title} đã kín lịch trong ca này (Đã tiếp nhận {$currentBookings}/{$maxPatients} ca). Vui lòng chọn ca hoặc bác sĩ khác.");
         }
 
         $appointment = DB::transaction(function () use ($isExisting, $validated) {
@@ -241,6 +250,10 @@ class ReceptionAppointmentController extends Controller
      */
     public function reassign(Request $request, Appointment $appointment): RedirectResponse
     {
+        if (in_array($appointment->status, [Appointment::STATUS_COMPLETED, Appointment::STATUS_CANCELLED])) {
+            return back()->with('error', 'Không thể điều phối ca khám đã hoàn tất hoặc đã bị hủy.');
+        }
+
         $validated = $request->validate([
             'doctor_id' => ['required', 'exists:doctors,id'],
             'appointment_date' => ['required', 'date'],
@@ -253,6 +266,10 @@ class ReceptionAppointmentController extends Controller
         ]);
 
         $newDoctor = Doctor::findOrFail($validated['doctor_id']);
+
+        if (!$newDoctor->is_available) {
+            return back()->with('error', "Bác sĩ {$newDoctor->full_name_with_title} hiện đang tạm ngưng nhận lịch khám.");
+        }
 
         $reason = $validated['reassign_reason'] ? " (Lý do: {$validated['reassign_reason']})" : '';
 

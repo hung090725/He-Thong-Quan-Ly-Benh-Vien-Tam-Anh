@@ -5,7 +5,10 @@
 @section('content')
 <x-page-header title="{{ $patient->full_name }}" subtitle="Mã hồ sơ: {{ $patient->patient_code }} | Quản lý thông tin định danh và lịch sử khám chữa bệnh">
     <x-slot:actions>
-        <a href="{{ route('reception.appointments.walkin', ['patient_id' => $patient->id]) }}" class="btn btn-success d-inline-flex align-items-center gap-1">
+        <a href="{{ route('reception.patients.print-card', $patient) }}" target="_blank" class="btn btn-outline-info d-inline-flex align-items-center gap-1">
+            <i class="bi bi-credit-card-2-front"></i> In thẻ bệnh nhân
+        </a>
+        <a href="{{ route('reception.appointments.walkin', ['patient_id' => $patient->id]) }}" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm">
             <i class="bi bi-calendar-plus"></i> Đăng ký tiếp nhận tại quầy
         </a>
         <a href="{{ route('reception.patients.edit', $patient) }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-1">

@@ -106,6 +106,7 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::put('/appointments/{appointment}/reassign', [ReceptionAppointmentController::class, 'reassign'])->name('appointments.reassign');
 
     // 3.2. Quản lý Hồ sơ Bệnh nhân (CRUD)
+    Route::get('/patients/{patient}/print-card', [PatientController::class, 'printCard'])->name('patients.print-card');
     Route::resource('patients', PatientController::class);
 });
 

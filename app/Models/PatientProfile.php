@@ -57,6 +57,35 @@ class PatientProfile extends Model
         };
     }
 
+    public function getGenderBadgeClassAttribute(): string
+    {
+        return match ($this->gender) {
+            'male' => 'bg-primary-subtle text-primary border border-primary-subtle',
+            'female' => 'bg-danger-subtle text-danger border border-danger-subtle',
+            default => 'bg-secondary-subtle text-secondary border border-secondary-subtle',
+        };
+    }
+
+    public function getAgeTextAttribute(): string
+    {
+        if (!$this->dob) {
+            return 'N/A';
+        }
+
+        $years = $this->dob->age;
+        if ($years < 1) {
+            $months = $this->dob->diffInMonths(Carbon::now());
+            return $months > 0 ? "{$months} tháng" : "Dưới 1 tháng";
+        }
+
+        return "{$years} tuổi";
+    }
+
+    public function getFormattedDobAttribute(): string
+    {
+        return $this->dob ? $this->dob->format('d/m/Y') : 'Chưa cập nhật';
+    }
+
     public static function generatePatientCode(): string
     {
         $today = Carbon::now()->format('Ymd');

@@ -325,4 +325,16 @@ class ReceptionPatientTest extends TestCase
         $response->assertSee('BỆNH VIỆN ĐA KHOA TÂM ANH');
         $response->assertSee('DANH SÁCH MỜI VÀO PHÒNG KHÁM');
     }
+
+    public function test_receptionist_can_print_patient_id_card(): void
+    {
+        $receptionist = $this->getReceptionist();
+        $patient = PatientProfile::first();
+
+        $response = $this->actingAs($receptionist)->get('/reception/patients/' . $patient->id . '/print-card');
+
+        $response->assertStatus(200);
+        $response->assertSee('THẺ BỆNH NHÂN NGOẠI TRÚ');
+        $response->assertSee($patient->patient_code);
+    }
 }
