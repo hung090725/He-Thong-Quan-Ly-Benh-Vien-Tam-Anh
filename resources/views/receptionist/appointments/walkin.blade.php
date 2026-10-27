@@ -264,7 +264,7 @@
                             </div>
 
                             <label class="form-label fw-semibold small">Mô tả lý do khám / Triệu chứng ban đầu: <span class="text-danger">*</span></label>
-                            <textarea name="symptom_description" id="symptomTextarea" class="form-control @error('symptom_description') is-invalid @enderror" rows="3" placeholder="VD: Sốt cao, đau họng 2 ngày nay, ho có đờm..." required>{{ old('symptom_description') }}</textarea>
+                            <textarea name="symptom_description" id="symptomTextarea" class="form-control @error('symptom_description') is-invalid @enderror" rows="3" placeholder="VD: Sốt cao, đau họng 2 ngày nay, ho có đờm..." required>{{ old('symptom_description', ($isFollowUp ?? false) ? '[TÁI KHÁM] Tái khám theo lịch hẹn của bác sĩ điều trị' : '') }}</textarea>
                             @error('symptom_description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

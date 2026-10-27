@@ -110,7 +110,9 @@ class ReceptionAppointmentController extends Controller
             $selectedPatient = PatientProfile::find($request->query('patient_id'));
         }
 
-        return view('receptionist.appointments.walkin', compact('specialties', 'doctors', 'selectedPatient'));
+        $isFollowUp = $request->boolean('follow_up');
+
+        return view('receptionist.appointments.walkin', compact('specialties', 'doctors', 'selectedPatient', 'isFollowUp'));
     }
 
     /**

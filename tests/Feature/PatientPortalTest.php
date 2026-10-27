@@ -65,4 +65,37 @@ class PatientPortalTest extends TestCase
         $pendingApp->refresh();
         $this->assertEquals(Appointment::STATUS_CANCELLED, $pendingApp->status);
     }
+
+    public function test_patient_can_print_their_own_prescription(): void
+    {
+        $patientUser = User::where('email', 'patient@gmail.com')->first();
+        $profile = PatientProfile::where('user_id', $patientUser->id)->first();
+
+        $completedApp = Appointment::where('patient_profile_id', $profile->id)
+            ->whereHas('medicalRecord')
+            ->first();
+
+        if ($completedApp) {
+            $response = $this->actingAs($patientUser)->get('/patient/appointments/' . $completedApp->id . '/prescription/print');
+
+            $response->assertStatus(200);
+            $response->assertSee('ĐƠN THUỐC NGOẠI TRÚ');
+            $response->assertSee('BỆNH VIỆN ĐA KHOA TÂM ANH');
+        }
+    }
+
+    public function test_patient_cannot_print_another_patients_prescription(): void
+    {
+        $patientUserMai = User::where('email', 'patient.mai@gmail.com')->first();
+
+        // Appointment belongs to patient@gmail.com
+        $appPatientAn = Appointment::whereHas('patientProfile', function ($q) {
+            $q->where('phone', '0987654321');
+        })->whereHas('medicalRecord')->first();
+
+        if ($appPatientAn) {
+            $response = $this->actingAs($patientUserMai)->get('/patient/appointments/' . $appPatientAn->id . '/prescription/print');
+            $response->assertStatus(403);
+        }
+    }
 }

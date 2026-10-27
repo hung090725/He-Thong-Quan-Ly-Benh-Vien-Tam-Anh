@@ -62,10 +62,15 @@
         <!-- Medical Record & Prescription Section -->
         @if($appointment->medicalRecord)
             <div class="card shadow-sm border-0 mb-4 border-top border-3 border-success">
-                <div class="card-header bg-white py-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-file-medical-fill text-success fs-5"></i>
-                    <h5 class="fw-bold mb-0 text-success">Kết quả Chẩn đoán Y khoa</h5>
-                    <span class="badge bg-light text-muted border ms-auto">Mã BA: {{ $appointment->medicalRecord->record_code }}</span>
+                <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-medical-fill text-success fs-5"></i>
+                        <h5 class="fw-bold mb-0 text-success">Kết quả Chẩn đoán Y khoa</h5>
+                        <span class="badge bg-light text-muted border">Mã BA: {{ $appointment->medicalRecord->record_code }}</span>
+                    </div>
+                    <a href="{{ route('patient.appointments.prescription.print', $appointment) }}" target="_blank" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-printer-fill"></i> In đơn thuốc ngoại trú (A4/A5)
+                    </a>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3 mb-4">
