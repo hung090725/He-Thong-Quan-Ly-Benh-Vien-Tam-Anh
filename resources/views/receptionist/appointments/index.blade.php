@@ -258,6 +258,9 @@
                                     <a href="{{ route('reception.appointments.print', $app) }}" target="_blank" class="btn btn-outline-dark" title="In phiếu tiếp nhận / khám bệnh">
                                         <i class="bi bi-printer"></i>
                                     </a>
+                                    <a href="{{ route('reception.appointments.receipt', $app) }}" target="_blank" class="btn btn-outline-success" title="Thu viện phí & In biên lai (VietQR)">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
                                     @if($app->status === 'pending')
                                         <form method="POST" action="{{ route('reception.appointments.checkin', $app) }}" class="d-inline">
                                             @csrf

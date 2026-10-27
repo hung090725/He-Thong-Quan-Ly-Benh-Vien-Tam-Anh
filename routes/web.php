@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ProfileController;
+use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Doctor\DoctorQueueController;
 use App\Http\Controllers\Patient\PatientPortalController;
 use App\Http\Controllers\Public\BookingController;
@@ -101,6 +102,7 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::get('/appointments/walk-in', [ReceptionAppointmentController::class, 'createWalkin'])->name('appointments.walkin');
     Route::post('/appointments/walk-in', [ReceptionAppointmentController::class, 'storeWalkin'])->name('appointments.store-walkin');
     Route::get('/appointments/{appointment}/print', [ReceptionAppointmentController::class, 'printTicket'])->name('appointments.print');
+    Route::get('/appointments/{appointment}/receipt', [ReceptionAppointmentController::class, 'printReceipt'])->name('appointments.receipt');
     Route::put('/appointments/{appointment}/checkin', [ReceptionAppointmentController::class, 'checkin'])->name('appointments.checkin');
     Route::put('/appointments/{appointment}/cancel', [ReceptionAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::put('/appointments/{appointment}/reassign', [ReceptionAppointmentController::class, 'reassign'])->name('appointments.reassign');
@@ -114,7 +116,11 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
 // =========================================================================
 // ====== MODULE 4: EXAMINATION & RECORDS (Phụ trách: VÕ LÊ GIA BẢO) =======
 // =========================================================================
-// Hàng đợi phòng khám của Bác sĩ
+// Hàng đợi phòng khám của Bác sĩ & Khám bệnh
 Route::middleware(['auth', 'role:doctor,admin'])->prefix('doctor')->name('doctor.')->group(function () {
     Route::get('/queue', [DoctorQueueController::class, 'index'])->name('queue');
+    Route::get('/examine/{appointment}', [DoctorConsultationController::class, 'examine'])->name('examine');
+    Route::post('/examine/{appointment}', [DoctorConsultationController::class, 'store'])->name('examine.store');
+    Route::get('/records/{record}', [DoctorConsultationController::class, 'showRecord'])->name('records.show');
+    Route::get('/records/{record}/print', [DoctorConsultationController::class, 'printPrescription'])->name('records.print');
 });

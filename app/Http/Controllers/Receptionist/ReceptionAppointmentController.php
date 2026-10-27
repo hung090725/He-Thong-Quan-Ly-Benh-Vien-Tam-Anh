@@ -417,4 +417,48 @@ class ReceptionAppointmentController extends Controller
 
         return view('receptionist.appointments.queue_display', compact('waitingAppointments', 'recentCompleted', 'date'));
     }
+
+    /**
+     * Print patient fee receipt / invoice with VietQR payment.
+     */
+    public function printReceipt(Appointment $appointment): View
+    {
+        $appointment->load(['patientProfile', 'doctor.user', 'specialty']);
+        $fee = (float) ($appointment->doctor ? $appointment->doctor->consultation_fee : 350000);
+
+        $feeWords = $this->convertNumberToVietnameseWords((int) $fee) . ' đồng chẵn';
+        $vietQrUrl = "https://img.vietqr.io/image/vietinbank-113366668888-compact2.png?amount={$fee}&addInfo=TAMANH%20" . urlencode($appointment->appointment_code) . "&accountName=BV%20DA%20KHOA%20TAM%20ANH";
+
+        return view('receptionist.appointments.receipt', compact('appointment', 'fee', 'feeWords', 'vietQrUrl'));
+    }
+
+    private function convertNumberToVietnameseWords(int $number): string
+    {
+        if ($number === 0) return 'Không';
+        $digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+
+        $thousands = (int) floor($number / 1000);
+        $remainder = $number % 1000;
+
+        if ($thousands > 0 && $remainder === 0) {
+            $hundreds = (int) floor($thousands / 100);
+            $tens = (int) floor(($thousands % 100) / 10);
+            $ones = $thousands % 10;
+
+            $text = '';
+            if ($hundreds > 0) $text .= $digits[$hundreds] . ' trăm ';
+            if ($tens > 1) $text .= $digits[$tens] . ' mươi ';
+            elseif ($tens === 1) $text .= 'mười ';
+            elseif ($tens === 0 && $hundreds > 0 && $ones > 0) $text .= 'lẻ ';
+
+            if ($ones === 5 && $tens > 0) $text .= 'lăm ';
+            elseif ($ones === 1 && $tens > 1) $text .= 'mốt ';
+            elseif ($ones > 0) $text .= $digits[$ones] . ' ';
+
+            $text .= 'nghìn';
+            return ucfirst(trim($text));
+        }
+
+        return number_format($number, 0, ',', '.') . ' VNĐ';
+    }
 }

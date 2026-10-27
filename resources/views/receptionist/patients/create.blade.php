@@ -14,10 +14,13 @@
 <div class="row justify-content-center">
     <div class="col-lg-9">
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-white py-3 border-bottom">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
                 <h6 class="card-title fw-bold text-primary mb-0">
                     <i class="bi bi-person-vcard-fill me-1"></i> Thông Tin Hành Chính Bệnh Nhân
                 </h6>
+                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#qrCccdModal">
+                    <i class="bi bi-qr-code-scan"></i> Quét mã QR CCCD / BHYT
+                </button>
             </div>
             <div class="card-body p-4">
                 <form method="POST" action="{{ route('reception.patients.store') }}" novalidate>
@@ -120,4 +123,134 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Quét / Trích xuất QR CCCD & BHYT -->
+<div class="modal fade" id="qrCccdModal" tabindex="-1" aria-labelledby="qrCccdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold fs-6" id="qrCccdModalLabel">
+                    <i class="bi bi-qr-code-scan me-1"></i> Bóc Tách Dữ Liệu QR CCCD / BHYT
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="small text-muted mb-3">
+                    Hỗ trợ quét trực tiếp bằng máy đọc mã vạch 2D hoặc dán chuỗi QR chuẩn Bộ Công An / Bảo hiểm xã hội Việt Nam.
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Chuỗi dữ liệu quét từ mã QR:</label>
+                    <textarea id="rawQrInput" class="form-control font-monospace small" rows="3" placeholder="Dán hoặc bắn mã QR vào đây..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillSampleCccd()">
+                        <i class="bi bi-magic me-1"></i> Dùng thử CCCD mẫu
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-info" onclick="fillSampleBhyt()">
+                        <i class="bi bi-shield-check me-1"></i> Dùng thử BHYT mẫu
+                    </button>
+                </div>
+
+                <div id="qrAlertBox" class="alert alert-danger py-2 px-3 small d-none mt-3"></div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary btn-sm fw-semibold" onclick="parseAndFillQrData()">
+                    <i class="bi bi-arrow-down-square-fill me-1"></i> Trích xuất & Điền vào form
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function fillSampleCccd() {
+        document.getElementById('rawQrInput').value = '001092019999||Nguyễn Văn Hưng|15081992|Nam|108 Hoàng Như Tiếp, Bồ Đề, Long Biên, Hà Nội|10102021';
+    }
+
+    function fillSampleBhyt() {
+        document.getElementById('rawQrInput').value = 'DN4010123456789|Nguyễn Bệnh Nhân BHYT|20/05/1990|1|108 Hoàng Như Tiếp, Long Biên, Hà Nội|01001|01/01/2026-31/12/2026';
+    }
+
+    function parseAndFillQrData() {
+        const raw = document.getElementById('rawQrInput').value.trim();
+        const alertBox = document.getElementById('qrAlertBox');
+        alertBox.classList.add('d-none');
+
+        if (!raw) {
+            alertBox.textContent = 'Vui lòng nhập hoặc quét chuỗi QR trước khi trích xuất.';
+            alertBox.classList.remove('d-none');
+            return;
+        }
+
+        const parts = raw.split('|');
+
+        // Case 1: Thẻ CCCD gắn chip (7 trường: Số_CCCD | Số_CMND_cũ | Họ_Tên | NgàySinh_ddMMyyyy | GiớiTính | ĐịaChỉ | NgàyCấp)
+        if (parts.length >= 6 && /^\d{12}$/.test(parts[0])) {
+            const cccd = parts[0];
+            const fullName = parts[2];
+            const rawDob = parts[3]; // ddmmyyyy
+            const genderStr = parts[4]; // Nam / Nữ
+            const address = parts[5];
+
+            if (fullName) document.querySelector('input[name="full_name"]').value = fullName;
+            if (cccd) document.querySelector('input[name="identity_card"]').value = cccd;
+            if (address) document.querySelector('textarea[name="address"]').value = address;
+
+            // Format ddmmyyyy -> yyyy-mm-dd
+            if (rawDob && rawDob.length === 8) {
+                const day = rawDob.substring(0, 2);
+                const month = rawDob.substring(2, 4);
+                const year = rawDob.substring(4, 8);
+                document.querySelector('input[name="dob"]').value = `${year}-${month}-${day}`;
+            }
+
+            // Gender
+            const genderSelect = document.querySelector('select[name="gender"]');
+            if (genderSelect) {
+                if (genderStr.toLowerCase().includes('nam')) genderSelect.value = 'male';
+                else if (genderStr.toLowerCase().includes('nữ')) genderSelect.value = 'female';
+            }
+
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('qrCccdModal')).hide();
+            alert('Đã trích xuất thành công thông tin công dân từ thẻ CCCD gắn chip!');
+            return;
+        }
+
+        // Case 2: Thẻ BHYT (Mã_thẻ | Họ_Tên | dd/mm/yyyy | Giới_tính (1=Nam, 2=Nữ) | Địa_chỉ | ...)
+        if (parts.length >= 5 && /^[A-Z]{2}\d/.test(parts[0])) {
+            const insuranceCode = parts[0];
+            const fullName = parts[1];
+            const rawDob = parts[2]; // dd/mm/yyyy
+            const genderCode = parts[3]; // 1: Nam, 2: Nữ
+            const address = parts[4];
+
+            if (insuranceCode) document.querySelector('input[name="insurance_code"]').value = insuranceCode;
+            if (fullName) document.querySelector('input[name="full_name"]').value = fullName;
+            if (address) document.querySelector('textarea[name="address"]').value = address;
+
+            if (rawDob && rawDob.includes('/')) {
+                const [d, m, y] = rawDob.split('/');
+                document.querySelector('input[name="dob"]').value = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+            }
+
+            const genderSelect = document.querySelector('select[name="gender"]');
+            if (genderSelect) {
+                genderSelect.value = (genderCode === '1') ? 'male' : 'female';
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('qrCccdModal')).hide();
+            alert('Đã trích xuất thành công thông tin thẻ Bảo hiểm Y tế (BHYT)!');
+            return;
+        }
+
+        alertBox.textContent = 'Định dạng mã QR không hợp lệ hoặc chưa được hỗ trợ. Vui lòng kiểm tra lại dữ liệu.';
+        alertBox.classList.remove('d-none');
+    }
+</script>
+@endpush
 @endsection

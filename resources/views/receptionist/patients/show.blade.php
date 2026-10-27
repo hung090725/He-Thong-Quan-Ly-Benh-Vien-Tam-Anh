@@ -79,9 +79,12 @@
                     </li>
                 </ul>
             </div>
-            <div class="card-footer bg-white border-top p-3 text-center">
-                <a href="{{ route('reception.appointments.walkin', ['patient_id' => $patient->id]) }}" class="btn btn-primary btn-sm w-100">
-                    <i class="bi bi-box-arrow-in-down-right"></i> Tiếp nhận ca khám mới
+            <div class="card-footer bg-white border-top p-3 d-flex flex-column gap-2">
+                <a href="{{ route('reception.appointments.walkin', ['patient_id' => $patient->id]) }}" class="btn btn-primary btn-sm w-100 shadow-sm">
+                    <i class="bi bi-box-arrow-in-down-right me-1"></i> Tiếp nhận ca khám ngay
+                </a>
+                <a href="{{ route('reception.appointments.walkin', ['patient_id' => $patient->id, 'follow_up' => 1]) }}" class="btn btn-outline-warning btn-sm w-100 text-dark">
+                    <i class="bi bi-calendar-plus me-1"></i> Lên lịch hẹn tái khám
                 </a>
             </div>
         </div>

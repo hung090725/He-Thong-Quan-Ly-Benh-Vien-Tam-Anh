@@ -74,13 +74,24 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     @if($app->status === 'confirmed')
-                                        <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" onclick="alert('Module Bác sĩ Khám bệnh & Kê đơn do Thành viên Võ Lê Gia Bảo phụ trách!');">
-                                            <i class="bi bi-stethoscope"></i> Khám bệnh
-                                        </button>
+                                        <a href="{{ route('doctor.examine', $app) }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
+                                            <i class="bi bi-stethoscope"></i> Vào khám bệnh
+                                        </a>
                                     @elseif($app->status === 'completed')
-                                        <span class="badge bg-success text-white">Đã khám xong</span>
+                                        <div class="btn-group btn-group-sm">
+                                            @if($app->medicalRecord)
+                                                <a href="{{ route('doctor.records.show', $app->medicalRecord) }}" class="btn btn-outline-info" title="Xem hồ sơ bệnh án">
+                                                    <i class="bi bi-file-earmark-medical"></i> Xem bệnh án
+                                                </a>
+                                                <a href="{{ route('doctor.records.print', $app->medicalRecord) }}" target="_blank" class="btn btn-outline-dark" title="In đơn thuốc">
+                                                    <i class="bi bi-printer"></i>
+                                                </a>
+                                            @else
+                                                <span class="badge bg-success text-white py-2 px-2">Đã khám xong</span>
+                                            @endif
+                                        </div>
                                     @else
-                                        <span class="badge bg-warning text-dark">Chờ check-in</span>
+                                        <span class="badge bg-warning text-dark py-2 px-2">Chờ tiếp nhận</span>
                                     @endif
                                 </td>
                             </tr>

@@ -384,4 +384,17 @@ class ReceptionPatientTest extends TestCase
         ]);
         $this->assertEquals('30 tuổi', $adult->age_text);
     }
+
+    public function test_receptionist_can_print_receipt_with_vietqr(): void
+    {
+        $receptionist = $this->getReceptionist();
+        $appointment = Appointment::first();
+
+        $response = $this->actingAs($receptionist)->get(route('reception.appointments.receipt', $appointment));
+
+        $response->assertStatus(200);
+        $response->assertSee('BIÊN LAI THU TIỀN KHÁM BỆNH');
+        $response->assertSee('BỆNH VIỆN ĐA KHOA TÂM ANH');
+        $response->assertSee('vietqr.io');
+    }
 }
