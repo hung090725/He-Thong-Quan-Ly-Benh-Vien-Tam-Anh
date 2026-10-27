@@ -168,6 +168,11 @@
                             <i class="bi bi-person-vcard"></i> Quản lý Bệnh nhân
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/pharmacy*') ? 'active' : '' }}" href="{{ route('reception.pharmacy.index') }}">
+                            <i class="bi bi-capsule-pill"></i> Quầy Dược Phát Thuốc
+                        </a>
+                    </li>
                 @endif
 
                 @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDoctor()))

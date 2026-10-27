@@ -156,6 +156,148 @@
                 </div>
             </div>
         </div>
+
+        <!-- Medical Attachments Card (X-Quang, MRI, Siêu Âm, Kết Quả Xét Nghiệm) -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h6 class="fw-bold text-info-emphasis mb-0">
+                        <i class="bi bi-images me-1"></i> Hồ Sơ Cận Lâm Sàng & Tệp Đính Kèm ({{ $record->attachments->count() }} tệp)
+                    </h6>
+                    <small class="text-muted">Phim X-Quang, CT, MRI, Siêu âm và Phiếu xét nghiệm y khoa</small>
+                </div>
+                <button class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="collapse" data-bs-target="#uploadMoreCollapse">
+                    <i class="bi bi-cloud-arrow-up"></i> Tải thêm tệp cận lâm sàng
+                </button>
+            </div>
+
+            <!-- Upload More Collapse Form -->
+            <div class="collapse border-bottom bg-light p-3" id="uploadMoreCollapse">
+                <form action="{{ route('doctor.records.attachments.upload', $record) }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
+                    @csrf
+                    <div class="col-md-5">
+                        <label class="form-label small fw-semibold">Chọn tệp bổ sung (JPG, PNG, WEBP, PDF tối đa 10MB):</label>
+                        <input type="file" name="attachment" class="form-control form-control-sm" required accept="image/jpeg,image/png,image/webp,application/pdf">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Phân loại tài liệu:</label>
+                        <select name="file_type" class="form-select form-select-sm">
+                            <option value="x_ray">Phim X-Quang / CT / MRI / Siêu âm</option>
+                            <option value="lab_result">Kết quả Xét nghiệm Máu / Sinh hóa</option>
+                            <option value="prescription_scan">Scan đơn thuốc / Tài liệu cũ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1">
+                            <i class="bi bi-upload"></i> Lưu tệp mới
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-body p-4">
+                @if($record->attachments->isEmpty())
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-folder2-open fs-2 d-block text-secondary opacity-50 mb-1"></i>
+                        <span>Chưa có tệp phim X-quang hoặc kết quả xét nghiệm nào được đính kèm.</span>
+                    </div>
+                @else
+                    <div class="row g-3">
+                        @foreach($record->attachments as $att)
+                            <div class="col-sm-6 col-md-4">
+                                <div class="card h-100 border shadow-none bg-white">
+                                    <div class="position-relative text-center bg-light rounded-top p-2" style="height: 160px; overflow: hidden;">
+                                        @if($att->is_image)
+                                            <img src="{{ $att->url }}" alt="{{ $att->original_name }}" class="w-100 h-100 object-fit-cover rounded cursor-pointer" onclick="openLightbox('{{ $att->url }}', '{{ addslashes($att->original_name) }}')" style="cursor: zoom-in;" title="Bấm để xem ảnh lớn">
+                                            <span class="position-absolute top-0 end-0 m-2 badge bg-dark bg-opacity-75">
+                                                <i class="bi bi-zoom-in"></i> Phóng to
+                                            </span>
+                                        @else
+                                            <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-danger">
+                                                <i class="bi bi-file-earmark-pdf-fill fs-1"></i>
+                                                <span class="small fw-semibold mt-1">Tài liệu PDF</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                @if($att->file_type === 'x_ray')
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">X-Quang / CĐHA</span>
+                                                @elseif($att->file_type === 'lab_result')
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle small">Xét nghiệm</span>
+                                                @else
+                                                    <span class="badge bg-secondary-subtle text-secondary border small">Scan / Tài liệu</span>
+                                                @endif
+                                                <small class="text-muted font-monospace">{{ $att->formatted_size }}</small>
+                                            </div>
+                                            <div class="small fw-bold text-dark text-truncate" title="{{ $att->original_name }}">
+                                                {{ $att->original_name }}
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.72rem;">
+                                                Tải lên: {{ $att->created_at->format('d/m/Y H:i') }}
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-2 mt-2 border-top d-flex justify-content-between align-items-center">
+                                            <a href="{{ $att->url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Mở tệp">
+                                                <i class="bi bi-box-arrow-up-right"></i> Mở
+                                            </a>
+                                            <form action="{{ route('doctor.records.attachments.destroy', [$record, $att]) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tệp cận lâm sàng này khỏi bệnh án?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Xóa tệp">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Modal Lightbox Preview -->
+<div class="modal fade" id="imageLightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark border-0">
+            <div class="modal-header border-bottom border-secondary py-2">
+                <h6 class="modal-title text-white small text-truncate" id="lightboxTitle">Xem Hình Ảnh Cận Lâm Sàng</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="lightboxDownloadBtn" target="_blank" download class="btn btn-sm btn-outline-light py-1 px-2">
+                        <i class="bi bi-download"></i> Tải về
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-2 text-center bg-black">
+                <img src="" id="lightboxImage" class="img-fluid rounded" style="max-height: 80vh; object-fit: contain;" alt="Xem hình ảnh">
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openLightbox(url, title) {
+        const modalEl = document.getElementById('imageLightboxModal');
+        const imgEl = document.getElementById('lightboxImage');
+        const titleEl = document.getElementById('lightboxTitle');
+        const downloadBtn = document.getElementById('lightboxDownloadBtn');
+
+        imgEl.src = url;
+        titleEl.textContent = title;
+        downloadBtn.href = url;
+
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+</script>
+@endpush
 @endsection

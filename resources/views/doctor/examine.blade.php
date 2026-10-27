@@ -132,7 +132,7 @@
 
     <!-- Right Column: Medical Record Examination Form & Prescriptions -->
     <div class="col-lg-8">
-        <form method="POST" action="{{ route('doctor.examine.store', $appointment) }}" id="examinationForm">
+        <form method="POST" action="{{ route('doctor.examine.store', $appointment) }}" id="examinationForm" enctype="multipart/form-data">
             @csrf
 
             <!-- 1. Clinical Diagnosis Section -->
@@ -228,6 +228,71 @@
                 </div>
             </div>
 
+            <!-- 3. Medical Attachments Section (X-Quang, CT/MRI, Siêu Âm, Kết Quả Xét Nghiệm) -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold text-info-emphasis mb-0">
+                            <i class="bi bi-paperclip me-1"></i> 3. Cận Lâm Sàng & Tệp Đính Kèm (X-Quang, MRI, Siêu Âm, Xét Nghiệm)
+                        </h6>
+                        <small class="text-muted">Tải lên phim X-Quang, ảnh siêu âm, phiếu xét nghiệm (Định dạng JPG, PNG, WEBP, PDF &bull; Tối đa 10MB/tệp)</small>
+                    </div>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle small">PACS / Cloud Storage</span>
+                </div>
+
+                <div class="card-body p-4">
+                    @if(isset($appointment->medicalRecord) && $appointment->medicalRecord->attachments->isNotEmpty())
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-muted text-uppercase">Tệp cận lâm sàng đã có trong bệnh án:</label>
+                            <div class="row g-2">
+                                @foreach($appointment->medicalRecord->attachments as $att)
+                                    <div class="col-sm-6 col-md-4">
+                                        <div class="p-2 border rounded bg-light d-flex align-items-center gap-2">
+                                            @if($att->is_image)
+                                                <img src="{{ $att->url }}" alt="{{ $att->original_name }}" class="rounded border object-fit-cover" style="width: 44px; height: 44px;">
+                                            @else
+                                                <div class="rounded bg-danger-subtle text-danger d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                                                    <i class="bi bi-file-earmark-pdf fs-4"></i>
+                                                </div>
+                                            @endif
+                                            <div class="flex-grow-1 text-truncate">
+                                                <a href="{{ $att->url }}" target="_blank" class="small fw-semibold text-truncate d-block text-decoration-none">
+                                                    {{ $att->original_name }}
+                                                </a>
+                                                <div class="text-muted" style="font-size: 0.72rem;">
+                                                    {{ $att->formatted_size }} &bull; {{ $att->file_type }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="border border-dashed rounded p-3 bg-light bg-opacity-25">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-semibold">Chọn tệp tải lên bổ sung:</label>
+                                <input type="file" name="attachments[]" id="attachmentInput" class="form-control form-control-sm" multiple accept="image/jpeg,image/png,image/webp,application/pdf" onchange="previewSelectedAttachments(this)">
+                                <div class="form-text small">Có thể giữ phím Ctrl để chọn cùng lúc nhiều tệp X-quang/kết quả xét nghiệm.</div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold">Phân loại tệp:</label>
+                                <select name="attachment_types[]" class="form-select form-select-sm">
+                                    <option value="x_ray">Phim X-Quang / CT / MRI / Siêu âm</option>
+                                    <option value="lab_result">Kết quả Xét nghiệm Máu / Sinh hóa</option>
+                                    <option value="prescription_scan">Scan đơn thuốc cũ / Hồ sơ tuyến dưới</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Client-side Preview of selected files -->
+                        <div id="attachmentsPreviewList" class="row g-2 mt-2" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Submit Action Card -->
             <div class="d-flex justify-content-end gap-2 mb-5">
                 <a href="{{ route('doctor.queue') }}" class="btn btn-light px-4">Hủy / Quay lại</a>
@@ -290,6 +355,54 @@
 
     function addQuickMedication(name, dosage, frequency, duration, instructions) {
         addPrescriptionRow(name, dosage, frequency, duration, instructions);
+    }
+
+    function previewSelectedAttachments(input) {
+        const previewList = document.getElementById('attachmentsPreviewList');
+        previewList.innerHTML = '';
+        if (!input.files || input.files.length === 0) {
+            previewList.style.display = 'none';
+            return;
+        }
+
+        previewList.style.display = 'flex';
+        Array.from(input.files).forEach((file, index) => {
+            const isImage = file.type.startsWith('image/');
+            const sizeKb = (file.size / 1024).toFixed(0);
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-4';
+
+            const card = document.createElement('div');
+            card.className = 'p-2 border rounded bg-white shadow-sm d-flex align-items-center gap-2';
+
+            if (isImage) {
+                const img = document.createElement('img');
+                img.className = 'rounded border object-fit-cover';
+                img.style.width = '48px';
+                img.style.height = '48px';
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+                card.appendChild(img);
+            } else {
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'rounded bg-danger-subtle text-danger d-flex align-items-center justify-content-center';
+                iconDiv.style.width = '48px';
+                iconDiv.style.height = '48px';
+                iconDiv.innerHTML = '<i class="bi bi-file-earmark-pdf fs-4"></i>';
+                card.appendChild(iconDiv);
+            }
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'flex-grow-1 text-truncate';
+            infoDiv.innerHTML = `
+                <div class="small fw-semibold text-truncate text-dark" title="${file.name}">${file.name}</div>
+                <div class="text-muted" style="font-size: 0.72rem;">${sizeKb} KB &bull; Sẵn sàng tải lên</div>
+            `;
+            card.appendChild(infoDiv);
+            col.appendChild(card);
+            previewList.appendChild(col);
+        });
     }
 
     // Populate initial existing prescriptions or 1 empty default row

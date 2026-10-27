@@ -113,7 +113,7 @@
                     @if($appointment->medicalRecord->prescriptions->isEmpty())
                         <p class="text-muted small">Không có đơn thuốc nào được kê cho ca khám này.</p>
                     @else
-                        <div class="table-responsive">
+                        <div class="table-responsive mb-4">
                             <table class="table table-bordered align-middle mb-0">
                                 <thead class="table-light small">
                                     <tr>
@@ -140,6 +140,58 @@
                             </table>
                         </div>
                     @endif
+
+                    <!-- Patient Medical Attachments (X-Quang, Xét nghiệm) -->
+                    @if($appointment->medicalRecord->attachments->isNotEmpty())
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-images text-info me-1"></i> Kết Quả Cận Lâm Sàng & Phim Chụp ({{ $appointment->medicalRecord->attachments->count() }} tệp)
+                        </h6>
+                        <div class="row g-3">
+                            @foreach($appointment->medicalRecord->attachments as $att)
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="card h-100 border shadow-none bg-light">
+                                        <div class="position-relative text-center bg-white rounded-top p-2" style="height: 140px; overflow: hidden;">
+                                            @if($att->is_image)
+                                                <img src="{{ $att->url }}" alt="{{ $att->original_name }}" class="w-100 h-100 object-fit-cover rounded" onclick="openPatientLightbox('{{ $att->url }}', '{{ addslashes($att->original_name) }}')" style="cursor: zoom-in;" title="Bấm để xem ảnh lớn">
+                                            @else
+                                                <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-danger">
+                                                    <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
+                                                    <span class="small fw-semibold mt-1">Kết Quả Xét Nghiệm (PDF)</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    @if($att->file_type === 'x_ray')
+                                                        <span class="badge bg-primary small">X-Quang / Siêu Âm</span>
+                                                    @elseif($att->file_type === 'lab_result')
+                                                        <span class="badge bg-success small">Xét Nghiệm</span>
+                                                    @else
+                                                        <span class="badge bg-secondary small">Tài liệu</span>
+                                                    @endif
+                                                    <span class="text-muted font-monospace" style="font-size: 0.72rem;">{{ $att->formatted_size }}</span>
+                                                </div>
+                                                <div class="small fw-semibold text-truncate text-dark" title="{{ $att->original_name }}">
+                                                    {{ $att->original_name }}
+                                                </div>
+                                            </div>
+                                            <div class="pt-2 mt-2 border-top d-flex justify-content-between align-items-center">
+                                                @if($att->is_image)
+                                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick="openPatientLightbox('{{ $att->url }}', '{{ addslashes($att->original_name) }}')">
+                                                        <i class="bi bi-zoom-in"></i> Xem
+                                                    </button>
+                                                @endif
+                                                <a href="{{ $att->url }}" target="_blank" download class="btn btn-sm btn-outline-secondary py-0 px-2">
+                                                    <i class="bi bi-download"></i> Tải về
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         @else
@@ -153,4 +205,42 @@
         @endif
     </div>
 </div>
+
+<!-- Modal Lightbox Preview for Patient -->
+<div class="modal fade" id="patientImageLightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark border-0">
+            <div class="modal-header border-bottom border-secondary py-2">
+                <h6 class="modal-title text-white small text-truncate" id="patientLightboxTitle">Xem Phim Cận Lâm Sàng</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="patientLightboxDownloadBtn" target="_blank" download class="btn btn-sm btn-outline-light py-1 px-2">
+                        <i class="bi bi-download"></i> Tải về
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-2 text-center bg-black">
+                <img src="" id="patientLightboxImage" class="img-fluid rounded" style="max-height: 80vh; object-fit: contain;" alt="Xem hình ảnh cận lâm sàng">
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openPatientLightbox(url, title) {
+        const modalEl = document.getElementById('patientImageLightboxModal');
+        const imgEl = document.getElementById('patientLightboxImage');
+        const titleEl = document.getElementById('patientLightboxTitle');
+        const downloadBtn = document.getElementById('patientLightboxDownloadBtn');
+
+        imgEl.src = url;
+        titleEl.textContent = title;
+        downloadBtn.href = url;
+
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+</script>
+@endpush
 @endsection

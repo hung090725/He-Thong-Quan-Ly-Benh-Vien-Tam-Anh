@@ -36,4 +36,27 @@ class Attachment extends Model
     {
         return $this->belongsTo(User::class, 'uploaded_by_user_id');
     }
+
+    public function getIsImageAttribute(): bool
+    {
+        return str_starts_with($this->file_mime, 'image/');
+    }
+
+    public function getIsPdfAttribute(): bool
+    {
+        return $this->file_mime === 'application/pdf';
+    }
+
+    public function getFormattedSizeAttribute(): string
+    {
+        if ($this->file_size >= 1048576) {
+            return number_format($this->file_size / 1048576, 1) . ' MB';
+        }
+        return number_format($this->file_size / 1024, 0) . ' KB';
+    }
+
+    public function getUrlAttribute(): string
+    {
+        return asset('storage/' . $this->file_path);
+    }
 }

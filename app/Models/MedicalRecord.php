@@ -22,12 +22,16 @@ class MedicalRecord extends Model
         'clinical_notes',
         'treatment_plan',
         'follow_up_date',
+        'dispensed_at',
+        'dispensed_by_user_id',
+        'dispense_notes',
     ];
 
     protected function casts(): array
     {
         return [
             'follow_up_date' => 'date',
+            'dispensed_at' => 'datetime',
         ];
     }
 
@@ -46,6 +50,11 @@ class MedicalRecord extends Model
         return $this->belongsTo(Doctor::class);
     }
 
+    public function dispensedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dispensed_by_user_id');
+    }
+
     public function prescriptions(): HasMany
     {
         return $this->hasMany(Prescription::class);
@@ -54,6 +63,11 @@ class MedicalRecord extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
+    }
+
+    public function isDispensed(): bool
+    {
+        return !is_null($this->dispensed_at);
     }
 
     public static function generateRecordCode(): string

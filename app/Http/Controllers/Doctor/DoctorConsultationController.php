@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Attachment;
 use App\Models\Doctor;
 use App\Models\MedicalRecord;
 use App\Models\Prescription;
@@ -12,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DoctorConsultationController extends Controller
@@ -43,10 +45,10 @@ class DoctorConsultationController extends Controller
         $user = Auth::user();
         $doctor = Doctor::with('specialty')->where('user_id', $user->id)->first();
 
-        $appointment->load(['patientProfile', 'doctor.user', 'specialty', 'medicalRecord.prescriptions']);
+        $appointment->load(['patientProfile', 'doctor.user', 'specialty', 'medicalRecord.prescriptions', 'medicalRecord.attachments']);
 
         // Historical records of this patient
-        $pastRecords = MedicalRecord::with(['doctor.user', 'prescriptions'])
+        $pastRecords = MedicalRecord::with(['doctor.user', 'prescriptions', 'attachments'])
             ->where('patient_profile_id', $appointment->patient_profile_id)
             ->where('id', '!=', $appointment->medicalRecord?->id ?? 0)
             ->latest()
@@ -59,7 +61,7 @@ class DoctorConsultationController extends Controller
     }
 
     /**
-     * Save medical record, prescriptions, and complete appointment.
+     * Save medical record, prescriptions, attachments, and complete appointment.
      */
     public function store(Request $request, Appointment $appointment): RedirectResponse
     {
@@ -75,6 +77,9 @@ class DoctorConsultationController extends Controller
             'prescriptions.*.frequency' => ['required_with:prescriptions', 'string', 'max:100'],
             'prescriptions.*.duration_days' => ['required_with:prescriptions', 'integer', 'min:1', 'max:90'],
             'prescriptions.*.instructions' => ['nullable', 'string', 'max:255'],
+            'attachments' => ['nullable', 'array'],
+            'attachments.*' => ['file', 'mimes:jpeg,jpg,png,webp,pdf', 'max:10240'],
+            'attachment_types' => ['nullable', 'array'],
         ], [
             'symptoms.required' => 'Vui lòng ghi nhận triệu chứng lâm sàng.',
             'diagnosis.required' => 'Vui lòng nhập chẩn đoán kết luận của bác sĩ.',
@@ -82,9 +87,11 @@ class DoctorConsultationController extends Controller
             'prescriptions.*.dosage.required_with' => 'Vui lòng nhập liều dùng.',
             'prescriptions.*.frequency.required_with' => 'Vui lòng nhập tần suất uống.',
             'prescriptions.*.duration_days.required_with' => 'Vui lòng nhập số ngày dùng thuốc.',
+            'attachments.*.mimes' => 'Tệp đính kèm phải là định dạng JPG, PNG, WEBP hoặc PDF.',
+            'attachments.*.max' => 'Dung lượng mỗi tệp tối đa 10MB.',
         ]);
 
-        $record = DB::transaction(function () use ($validated, $appointment) {
+        $record = DB::transaction(function () use ($validated, $request, $appointment) {
             $user = Auth::user();
             $doctor = Doctor::where('user_id', $user->id)->first();
             $doctorId = $doctor ? $doctor->id : $appointment->doctor_id;
@@ -132,7 +139,38 @@ class DoctorConsultationController extends Controller
                 }
             }
 
-            // 3. Mark appointment as COMPLETED
+            // 3. Handle Medical Attachments (X-Quang, MRI, Siêu âm, Kết quả XN, v.v.)
+            if ($request->hasFile('attachments')) {
+                $types = $request->input('attachment_types', []);
+                $validTypes = ['x_ray', 'lab_result', 'prescription_scan', 'avatar'];
+
+                foreach ($request->file('attachments') as $idx => $file) {
+                    if ($file && $file->isValid()) {
+                        $originalName = $file->getClientOriginalName();
+                        $mime = $file->getClientMimeType();
+                        $size = $file->getSize();
+
+                        $assignedType = $types[$idx] ?? null;
+                        if (!in_array($assignedType, $validTypes, true)) {
+                            $assignedType = str_starts_with($mime, 'image/') ? 'x_ray' : 'lab_result';
+                        }
+
+                        $storedPath = $file->store('medical_attachments/' . date('Y/m'), 'public');
+
+                        Attachment::create([
+                            'medical_record_id' => $record->id,
+                            'uploaded_by_user_id' => $user->id,
+                            'original_name' => $originalName,
+                            'file_path' => $storedPath,
+                            'file_size' => $size,
+                            'file_mime' => $mime,
+                            'file_type' => $assignedType,
+                        ]);
+                    }
+                }
+            }
+
+            // 4. Mark appointment as COMPLETED
             $appointment->update([
                 'status' => Appointment::STATUS_COMPLETED,
             ]);
@@ -150,9 +188,59 @@ class DoctorConsultationController extends Controller
      */
     public function showRecord(MedicalRecord $record): View
     {
-        $record->load(['appointment.specialty', 'patientProfile', 'doctor.user', 'prescriptions']);
+        $record->load(['appointment.specialty', 'patientProfile', 'doctor.user', 'prescriptions', 'attachments.uploader']);
 
         return view('doctor.records.show', compact('record'));
+    }
+
+    /**
+     * Upload additional medical attachment (X-Quang, lab result) to an existing record.
+     */
+    public function uploadAttachment(Request $request, MedicalRecord $record): RedirectResponse
+    {
+        $request->validate([
+            'attachment' => ['required', 'file', 'mimes:jpeg,jpg,png,webp,pdf', 'max:10240'],
+            'file_type' => ['nullable', 'in:x_ray,lab_result,prescription_scan'],
+        ], [
+            'attachment.required' => 'Vui lòng chọn tệp cận lâm sàng cần tải lên.',
+            'attachment.mimes' => 'Định dạng hỗ trợ: JPG, PNG, WEBP, PDF.',
+            'attachment.max' => 'Dung lượng tệp tối đa 10MB.',
+        ]);
+
+        $file = $request->file('attachment');
+        $mime = $file->getClientMimeType();
+        $type = $request->input('file_type') ?: (str_starts_with($mime, 'image/') ? 'x_ray' : 'lab_result');
+        $storedPath = $file->store('medical_attachments/' . date('Y/m'), 'public');
+
+        Attachment::create([
+            'medical_record_id' => $record->id,
+            'uploaded_by_user_id' => Auth::id(),
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $storedPath,
+            'file_size' => $file->getSize(),
+            'file_mime' => $mime,
+            'file_type' => $type,
+        ]);
+
+        return back()->with('success', 'Đã tải lên tệp đính kèm kết quả cận lâm sàng thành công.');
+    }
+
+    /**
+     * Delete an attachment.
+     */
+    public function destroyAttachment(MedicalRecord $record, Attachment $attachment): RedirectResponse
+    {
+        if ($attachment->medical_record_id !== $record->id) {
+            abort(404, 'Tệp đính kèm không thuộc hồ sơ bệnh án này.');
+        }
+
+        if (Storage::disk('public')->exists($attachment->file_path)) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+
+        $attachment->delete();
+
+        return back()->with('success', 'Đã xóa tệp đính kèm cận lâm sàng.');
     }
 
     /**
