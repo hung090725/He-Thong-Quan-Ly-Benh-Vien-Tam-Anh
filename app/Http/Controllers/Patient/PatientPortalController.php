@@ -59,6 +59,7 @@ class PatientPortalController extends Controller
             'doctor.user',
             'medicalRecord.prescriptions',
             'medicalRecord.attachments',
+            'medicalRecord.sickLeaveCertificate',
         ]);
 
         return view('patient.appointment-detail', compact('appointment', 'patientProfile'));

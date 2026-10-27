@@ -65,6 +65,11 @@ class MedicalRecord extends Model
         return $this->hasMany(Attachment::class);
     }
 
+    public function sickLeaveCertificate(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SickLeaveCertificate::class);
+    }
+
     public function isDispensed(): bool
     {
         return !is_null($this->dispensed_at);

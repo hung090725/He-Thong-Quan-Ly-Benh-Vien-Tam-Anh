@@ -68,9 +68,16 @@
                         <h5 class="fw-bold mb-0 text-success">Kết quả Chẩn đoán Y khoa</h5>
                         <span class="badge bg-light text-muted border">Mã BA: {{ $appointment->medicalRecord->record_code }}</span>
                     </div>
-                    <a href="{{ route('patient.appointments.prescription.print', $appointment) }}" target="_blank" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1 shadow-sm">
-                        <i class="bi bi-printer-fill"></i> In đơn thuốc ngoại trú (A4/A5)
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        @if($appointment->medicalRecord->sickLeaveCertificate)
+                            <a href="{{ route('patient.certificates.print', $appointment->medicalRecord->sickLeaveCertificate) }}" target="_blank" class="btn btn-outline-info btn-sm d-inline-flex align-items-center gap-1 shadow-sm">
+                                <i class="bi bi-file-earmark-medical-fill"></i> In Giấy nghỉ việc BHXH (C65-HD)
+                            </a>
+                        @endif
+                        <a href="{{ route('patient.appointments.prescription.print', $appointment) }}" target="_blank" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1 shadow-sm">
+                            <i class="bi bi-printer-fill"></i> In đơn thuốc ngoại trú (A4/A5)
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3 mb-4">

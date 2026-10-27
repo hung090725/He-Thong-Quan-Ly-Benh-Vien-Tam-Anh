@@ -110,6 +110,54 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <!-- Clinical Safety & Patient Demographics (Blood Group, Allergies, History) -->
+                        <div class="col-12 mt-4 pt-3 border-top">
+                            <h6 class="fw-bold text-danger d-flex align-items-center gap-1 mb-2">
+                                <i class="bi bi-shield-exclamation"></i> An Toàn Lâm Sàng & Tiền Sử Y Khoa
+                            </h6>
+                            <p class="text-muted small mb-3">Dữ liệu hỗ trợ Bác sĩ cảnh báo tương tác thuốc và sốc phản vệ khi khám chữa bệnh.</p>
+                        </div>
+
+                        <!-- Blood Group -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Nhóm máu:</label>
+                            <select name="blood_group" class="form-select @error('blood_group') is-invalid @enderror">
+                                <option value="">-- Chưa rõ --</option>
+                                @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
+                                    <option value="{{ $bg }}" {{ old('blood_group') === $bg ? 'selected' : '' }}>Nhóm {{ $bg }}</option>
+                                @endforeach
+                            </select>
+                            @error('blood_group')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Allergies -->
+                        <div class="col-md-9">
+                            <label class="form-label fw-semibold small">Tiền sử Dị ứng (Thuốc, Thức ăn, Hóa chất):</label>
+                            <input type="text" name="allergies" id="allergies_input" value="{{ old('allergies') }}" class="form-control @error('allergies') is-invalid @enderror" placeholder="VD: Dị ứng Penicillin, Aspirin, hải sản (Nếu không có, ghi 'Không')">
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span class="text-muted small me-1">Gợi ý nhanh:</span>
+                                <button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="appendAllergy('Dị ứng Penicillin / Amoxicillin')">+ Penicillin</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="appendAllergy('Dị ứng Aspirin / NSAID')">+ Aspirin/NSAID</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="appendAllergy('Dị ứng Paracetamol')">+ Paracetamol</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="appendAllergy('Dị ứng Cephalosporin')">+ Cephalosporin</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="document.getElementById('allergies_input').value='Không ghi nhận dị ứng'">Chưa ghi nhận</button>
+                            </div>
+                            @error('allergies')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Medical History -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Tiền sử bệnh nền / Phẫu thuật / Bệnh mãn tính:</label>
+                            <input type="text" name="medical_history" value="{{ old('medical_history') }}" class="form-control @error('medical_history') is-invalid @enderror" placeholder="VD: Tăng huyết áp độ 1, Đái tháo đường Type 2, Tiền sử mổ ruột thừa 2020...">
+                            @error('medical_history')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
@@ -167,6 +215,17 @@
 
 @push('scripts')
 <script>
+    function appendAllergy(text) {
+        const input = document.getElementById('allergies_input');
+        if (!input.value || input.value === 'Không' || input.value === 'Không ghi nhận dị ứng') {
+            input.value = text;
+        } else {
+            if (!input.value.includes(text)) {
+                input.value += ', ' + text;
+            }
+        }
+    }
+
     function fillSampleCccd() {
         document.getElementById('rawQrInput').value = '001092019999||Nguyễn Văn Hưng|15081992|Nam|108 Hoàng Như Tiếp, Bồ Đề, Long Biên, Hà Nội|10102021';
     }

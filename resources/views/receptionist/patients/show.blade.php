@@ -46,6 +46,24 @@
                 </div>
             </div>
             <div class="card-body p-4">
+                @if($patient->hasAllergies())
+                    <div class="alert alert-danger border-danger shadow-sm mb-3 p-3">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-exclamation-octagon-fill fs-5 text-danger"></i>
+                            <strong class="text-danger text-uppercase small">Cảnh Báo Dị Ứng Thuốc:</strong>
+                        </div>
+                        <div class="fw-bold text-dark fs-6">{{ $patient->allergies }}</div>
+                        <small class="text-danger d-block mt-1">* Thận trọng khi kê đơn nhóm kháng sinh, giảm đau hoặc NSAID.</small>
+                    </div>
+                @endif
+
+                @if($patient->hasMedicalHistory())
+                    <div class="alert alert-warning border-warning shadow-sm mb-3 p-2 small">
+                        <strong class="text-warning-emphasis d-block"><i class="bi bi-activity me-1"></i> Tiền sử bệnh nền / Phẫu thuật:</strong>
+                        <span class="text-dark">{{ $patient->medical_history }}</span>
+                    </div>
+                @endif
+
                 <h6 class="text-uppercase text-muted fw-bold small mb-3">Thông Tin Hành Chính</h6>
                 
                 <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
@@ -68,6 +86,12 @@
                     <li class="d-flex justify-content-between py-1 border-bottom">
                         <span class="text-muted"><i class="bi bi-shield-check me-1"></i> Mã BHYT:</span>
                         <span class="font-monospace fw-semibold text-dark">{{ $patient->insurance_code ?: '--' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted"><i class="bi bi-droplet-half text-danger me-1"></i> Nhóm máu:</span>
+                        <span class="fw-bold font-monospace {{ $patient->blood_group ? 'badge bg-danger text-white' : 'text-muted' }}">
+                            {{ $patient->blood_group ?: 'Chưa xác định' }}
+                        </span>
                     </li>
                     <li class="py-1 border-bottom">
                         <span class="text-muted d-block mb-1"><i class="bi bi-geo-alt me-1"></i> Địa chỉ thường trú:</span>

@@ -173,6 +173,11 @@
                             <i class="bi bi-capsule-pill"></i> Quầy Dược Phát Thuốc
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/certificates*') ? 'active' : '' }}" href="{{ route('reception.certificates.index') }}">
+                            <i class="bi bi-journal-medical"></i> Sổ Giấy Nghỉ BHXH
+                        </a>
+                    </li>
                 @endif
 
                 @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDoctor()))

@@ -129,6 +129,9 @@ class ReceptionAppointmentController extends Controller
             'shift' => ['required', 'in:morning,afternoon'],
             'appointment_time' => ['nullable', 'date_format:H:i'],
             'symptom_description' => ['required', 'string', 'max:1000'],
+            'blood_group' => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
+            'allergies' => ['nullable', 'string', 'max:255'],
+            'medical_history' => ['nullable', 'string', 'max:1000'],
         ];
 
         if ($isExisting) {
@@ -203,8 +206,29 @@ class ReceptionAppointmentController extends Controller
                         'address' => $validated['address'] ?? null,
                         'identity_card' => $validated['identity_card'] ?? null,
                         'insurance_code' => $validated['insurance_code'] ?? null,
+                        'blood_group' => $validated['blood_group'] ?? null,
+                        'allergies' => $validated['allergies'] ?? null,
+                        'medical_history' => $validated['medical_history'] ?? null,
                     ]);
                 }
+            }
+
+            // Update clinical safety fields if provided
+            $dirtyProfile = false;
+            if (!empty($validated['blood_group']) && $patientProfile->blood_group !== $validated['blood_group']) {
+                $patientProfile->blood_group = $validated['blood_group'];
+                $dirtyProfile = true;
+            }
+            if (isset($validated['allergies']) && $patientProfile->allergies !== $validated['allergies']) {
+                $patientProfile->allergies = $validated['allergies'];
+                $dirtyProfile = true;
+            }
+            if (isset($validated['medical_history']) && $patientProfile->medical_history !== $validated['medical_history']) {
+                $patientProfile->medical_history = $validated['medical_history'];
+                $dirtyProfile = true;
+            }
+            if ($dirtyProfile) {
+                $patientProfile->save();
             }
 
             $symptom = $validated['symptom_description'];

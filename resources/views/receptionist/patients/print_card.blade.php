@@ -149,7 +149,17 @@
                         <span class="text-white-50 d-block" style="font-size: 0.7rem;">MÃ BHYT:</span>
                         <strong class="text-white font-monospace">{{ $patient->insurance_code ?: '--' }}</strong>
                     </div>
+                    <div class="col-6">
+                        <span class="text-white-50 d-block" style="font-size: 0.7rem;">NHÓM MÁU:</span>
+                        <strong class="badge bg-danger text-white font-monospace px-2 py-0">{{ $patient->blood_group ?: 'Chưa rõ' }}</strong>
+                    </div>
                 </div>
+
+                @if($patient->hasAllergies())
+                    <div class="mt-2 p-1 bg-danger text-white rounded text-truncate fw-bold shadow-sm" style="font-size: 0.68rem;" title="{{ $patient->allergies }}">
+                        <i class="bi bi-exclamation-triangle-fill"></i> DỊ ỨNG: {{ $patient->allergies }}
+                    </div>
+                @endif
             </div>
 
             <div class="col-4 text-center">

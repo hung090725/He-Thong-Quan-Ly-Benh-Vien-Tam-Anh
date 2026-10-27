@@ -8,6 +8,9 @@
         <a href="{{ route('doctor.records.print', $record) }}" target="_blank" class="btn btn-outline-dark d-inline-flex align-items-center gap-1 shadow-sm">
             <i class="bi bi-printer-fill"></i> In đơn thuốc (A4/A5)
         </a>
+        <a href="{{ route('reception.certificates.create', $record) }}" class="btn btn-outline-info d-inline-flex align-items-center gap-1 shadow-sm">
+            <i class="bi bi-file-earmark-medical"></i> Cấp giấy nghỉ BHXH (C65-HD)
+        </a>
         <a href="{{ route('doctor.examine', $record->appointment) }}" class="btn btn-outline-warning d-inline-flex align-items-center gap-1">
             <i class="bi bi-pencil-square"></i> Chỉnh sửa bệnh án
         </a>

@@ -23,10 +23,11 @@ class BookingTest extends TestCase
     public function test_can_book_an_appointment_successfully(): void
     {
         $doctor = Doctor::first();
-        $date = Carbon::tomorrow()->toDateString();
-        $dayOfWeek = strtolower(Carbon::tomorrow()->englishDayOfWeek);
+        $targetDate = Carbon::tomorrow()->addDays(20);
+        $date = $targetDate->toDateString();
+        $dayOfWeek = strtolower($targetDate->englishDayOfWeek);
 
-        // Ensure schedule exists for tomorrow morning
+        // Ensure schedule exists for target morning
         DoctorSchedule::updateOrCreate([
             'doctor_id' => $doctor->id,
             'day_of_week' => $dayOfWeek,

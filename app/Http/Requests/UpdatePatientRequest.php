@@ -22,6 +22,9 @@ class UpdatePatientRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'identity_card' => ['nullable', 'string', 'max:20'],
             'insurance_code' => ['nullable', 'string', 'max:30'],
+            'blood_group' => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
+            'allergies' => ['nullable', 'string', 'max:255'],
+            'medical_history' => ['nullable', 'string', 'max:1000'],
         ];
     }
 

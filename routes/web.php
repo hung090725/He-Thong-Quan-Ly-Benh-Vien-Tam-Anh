@@ -15,6 +15,7 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\PharmacyController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
+use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')
     Route::get('/history', [PatientPortalController::class, 'history'])->name('history');
     Route::get('/appointments/{appointment}', [PatientPortalController::class, 'showAppointment'])->name('appointments.show');
     Route::get('/appointments/{appointment}/prescription/print', [PatientPortalController::class, 'printPrescription'])->name('appointments.prescription.print');
+    Route::get('/certificates/{certificate}/print', [SickLeaveCertificateController::class, 'print'])->name('certificates.print');
     Route::put('/appointments/{appointment}/cancel', [PatientPortalController::class, 'cancelAppointment'])->name('appointments.cancel');
 });
 
@@ -118,6 +120,13 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/pharmacy/{record}/dispense', [PharmacyController::class, 'dispense'])->name('pharmacy.dispense');
     Route::post('/pharmacy/{record}/undo', [PharmacyController::class, 'undoDispense'])->name('pharmacy.undo');
     Route::get('/pharmacy/{record}/label', [PharmacyController::class, 'printLabel'])->name('pharmacy.label');
+
+    // 3.4. Giấy Chứng Nhận Nghỉ Việc Hưởng BHXH (Mẫu C65-HD Bộ Y Tế)
+    Route::get('/certificates', [SickLeaveCertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/records/{record}/certificate', [SickLeaveCertificateController::class, 'create'])->name('certificates.create');
+    Route::post('/records/{record}/certificate', [SickLeaveCertificateController::class, 'store'])->name('certificates.store');
+    Route::get('/certificates/{certificate}/print', [SickLeaveCertificateController::class, 'print'])->name('certificates.print');
+    Route::delete('/certificates/{certificate}', [SickLeaveCertificateController::class, 'destroy'])->name('certificates.destroy');
 });
 
 
@@ -130,6 +139,8 @@ Route::middleware(['auth', 'role:doctor,admin'])->prefix('doctor')->name('doctor
     Route::get('/examine/{appointment}', [DoctorConsultationController::class, 'examine'])->name('examine');
     Route::post('/examine/{appointment}', [DoctorConsultationController::class, 'store'])->name('examine.store');
     Route::get('/records/{record}', [DoctorConsultationController::class, 'showRecord'])->name('records.show');
+    Route::get('/records/{record}/certificate', [SickLeaveCertificateController::class, 'create'])->name('records.certificate.create');
+    Route::post('/records/{record}/certificate', [SickLeaveCertificateController::class, 'store'])->name('records.certificate.store');
     Route::post('/records/{record}/attachments', [DoctorConsultationController::class, 'uploadAttachment'])->name('records.attachments.upload');
     Route::delete('/records/{record}/attachments/{attachment}', [DoctorConsultationController::class, 'destroyAttachment'])->name('records.attachments.destroy');
     Route::get('/records/{record}/print', [DoctorConsultationController::class, 'printPrescription'])->name('records.print');

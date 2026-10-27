@@ -23,6 +23,9 @@ class PatientProfile extends Model
         'address',
         'identity_card',
         'insurance_code',
+        'blood_group',
+        'allergies',
+        'medical_history',
     ];
 
     protected function casts(): array
@@ -45,6 +48,23 @@ class PatientProfile extends Model
     public function medicalRecords(): HasMany
     {
         return $this->hasMany(MedicalRecord::class);
+    }
+
+    public function sickLeaveCertificates(): HasMany
+    {
+        return $this->hasMany(SickLeaveCertificate::class);
+    }
+
+    public function hasAllergies(): bool
+    {
+        $al = trim($this->allergies ?? '');
+        return !empty($al) && !in_array(mb_strtolower($al), ['không', 'không có', 'chưa ghi nhận', 'none', 'k', 'ko', 'k có']);
+    }
+
+    public function hasMedicalHistory(): bool
+    {
+        $mh = trim($this->medical_history ?? '');
+        return !empty($mh) && !in_array(mb_strtolower($mh), ['không', 'không có', 'khỏe mạnh', 'bình thường', 'none']);
     }
 
     public function getGenderNameAttribute(): string

@@ -112,6 +112,12 @@
             <div class="col-6 text-end">
                 Số điện thoại: <strong class="font-monospace">{{ $record->patientProfile->phone }}</strong>
             </div>
+            <div class="col-6">
+                Nhóm máu: <strong class="badge bg-danger text-white font-monospace">{{ $record->patientProfile->blood_group ?: 'Chưa xác định' }}</strong>
+            </div>
+            <div class="col-6 text-end">
+                Tiền sử dị ứng: <strong class="{{ $record->patientProfile->hasAllergies() ? 'text-danger' : 'text-muted' }}">{{ $record->patientProfile->allergies ?: 'Chưa ghi nhận' }}</strong>
+            </div>
             @if($record->patientProfile->insurance_code)
                 <div class="col-12">
                     Mã số thẻ BHYT: <strong class="font-monospace text-primary">{{ $record->patientProfile->insurance_code }}</strong>

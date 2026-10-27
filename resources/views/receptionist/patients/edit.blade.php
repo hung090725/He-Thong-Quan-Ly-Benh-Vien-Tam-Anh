@@ -101,6 +101,46 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <!-- Clinical Safety & Patient Demographics (Blood Group, Allergies, History) -->
+                        <div class="col-12 mt-4 pt-3 border-top">
+                            <h6 class="fw-bold text-danger d-flex align-items-center gap-1 mb-2">
+                                <i class="bi bi-shield-exclamation"></i> An Toàn Lâm Sàng & Tiền Sử Y Khoa
+                            </h6>
+                            <p class="text-muted small mb-3">Dữ liệu hỗ trợ Bác sĩ cảnh báo tương tác thuốc và sốc phản vệ khi khám chữa bệnh.</p>
+                        </div>
+
+                        <!-- Blood Group -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Nhóm máu:</label>
+                            <select name="blood_group" class="form-select @error('blood_group') is-invalid @enderror">
+                                <option value="">-- Chưa rõ --</option>
+                                @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
+                                    <option value="{{ $bg }}" {{ old('blood_group', $patient->blood_group) === $bg ? 'selected' : '' }}>Nhóm {{ $bg }}</option>
+                                @endforeach
+                            </select>
+                            @error('blood_group')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Allergies -->
+                        <div class="col-md-9">
+                            <label class="form-label fw-semibold small">Tiền sử Dị ứng (Thuốc, Thức ăn, Hóa chất):</label>
+                            <input type="text" name="allergies" value="{{ old('allergies', $patient->allergies) }}" class="form-control @error('allergies') is-invalid @enderror" placeholder="VD: Dị ứng Penicillin, Aspirin, hải sản (Nếu không có, ghi 'Không')">
+                            @error('allergies')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Medical History -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Tiền sử bệnh nền / Phẫu thuật / Bệnh mãn tính:</label>
+                            <input type="text" name="medical_history" value="{{ old('medical_history', $patient->medical_history) }}" class="form-control @error('medical_history') is-invalid @enderror" placeholder="VD: Tăng huyết áp độ 1, Đái tháo đường Type 2, Tiền sử mổ ruột thừa 2020...">
+                            @error('medical_history')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">

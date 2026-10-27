@@ -140,6 +140,21 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Nhóm máu:</label>
+                                <select name="blood_group" class="form-select">
+                                    <option value="">-- Chưa rõ --</option>
+                                    @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
+                                        <option value="{{ $bg }}" {{ old('blood_group') === $bg ? 'selected' : '' }}>Nhóm {{ $bg }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold small">Tiền sử Dị ứng (nếu có):</label>
+                                <input type="text" name="allergies" value="{{ old('allergies') }}" class="form-control" placeholder="VD: Dị ứng Penicillin, Aspirin...">
+                            </div>
                         </div>
                     </div>
                 </div>

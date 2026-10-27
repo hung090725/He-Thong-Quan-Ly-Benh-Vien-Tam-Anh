@@ -11,6 +11,29 @@
     </x-slot:actions>
 </x-page-header>
 
+<!-- Emergency Clinical Safety Alert Banner (CDSS) -->
+@if($appointment->patientProfile->hasAllergies())
+    <div class="alert alert-danger border-2 border-danger shadow-sm mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <i class="bi bi-shield-exclamation fs-3"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold text-danger mb-0 text-uppercase">
+                    Cảnh Báo An Toàn Người Bệnh: Tiền Sử Dị Ứng Thuốc / Thức Ăn!
+                </h6>
+                <div class="fs-6 fw-bold text-dark mt-1">
+                    {{ $appointment->patientProfile->allergies }}
+                </div>
+                <small class="text-danger">* Bác sĩ thận trọng khi kê đơn, tuyệt đối tránh các nhóm hoạt chất gây nguy cơ sốc phản vệ.</small>
+            </div>
+        </div>
+        <span class="badge bg-danger text-white px-3 py-2 fs-6">
+            <i class="bi bi-exclamation-octagon me-1"></i> BÁO ĐỘNG DỊ ỨNG
+        </span>
+    </div>
+@endif
+
 <div class="row g-4 mb-5">
     <!-- Left Column: Patient Profile & Initial Vitals -->
     <div class="col-lg-4">
@@ -51,10 +74,21 @@
                         <span class="font-monospace fw-bold text-primary">{{ $appointment->appointment_code }}</span>
                     </li>
                     <li class="d-flex justify-content-between">
+                        <span class="text-muted">Nhóm máu:</span>
+                        <span class="badge bg-danger text-white font-monospace">{{ $appointment->patientProfile->blood_group ?: 'Chưa xác định' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between">
                         <span class="text-muted">Số thứ tự khám:</span>
                         <span class="badge bg-primary text-white font-monospace fs-6">#{{ str_pad($appointment->queue_number, 2, '0', STR_PAD_LEFT) }}</span>
                     </li>
                 </ul>
+
+                @if($appointment->patientProfile->hasMedicalHistory())
+                    <div class="p-2 mt-2 bg-warning bg-opacity-10 rounded border border-warning small">
+                        <strong class="text-warning-emphasis d-block"><i class="bi bi-activity me-1"></i> Bệnh nền / Tiền sử:</strong>
+                        <span class="text-dark">{{ $appointment->patientProfile->medical_history }}</span>
+                    </div>
+                @endif
 
                 <!-- Initial Vitals Intake from Reception Desk -->
                 <div class="pt-3">
@@ -308,6 +342,61 @@
 <script>
     let prescriptionIndex = 0;
 
+    const patientAllergies = "{{ addslashes(mb_strtolower($appointment->patientProfile->allergies ?? '')) }}";
+
+    function checkAllergyConflict(inputEl, idx) {
+        if (!patientAllergies || patientAllergies.includes('không') || patientAllergies.includes('none')) return;
+
+        const val = inputEl.value.trim().toLowerCase();
+        const alertContainer = document.getElementById(`allergy-alert-${idx}`);
+        if (!alertContainer) return;
+
+        // Common cross-reactivity mapping for clinical decision support
+        const rules = [
+            { trigger: ['penicillin', 'amox', 'augmentin', 'clavam'], match: ['penicillin', 'amoxicillin', 'ampicillin', 'augmentin'] },
+            { trigger: ['aspirin', 'nsaid', 'ibuprofen', 'meloxicam', 'diclofenac'], match: ['aspirin', 'nsaid', 'ibuprofen'] },
+            { trigger: ['paracetamol', 'panadol', 'efferalgan', 'acetaminophen'], match: ['paracetamol', 'panadol', 'acetaminophen'] },
+            { trigger: ['cephalo', 'cefixim', 'ceftriaxon', 'cefaclor'], match: ['cephalo', 'cefixim', 'cefaclor'] },
+        ];
+
+        let hasConflict = false;
+        if (val.length >= 3) {
+            // Check direct match with patient's allergy string
+            const allergyWords = patientAllergies.split(/[,;\/\s]+/).filter(w => w.length >= 3);
+            for (const word of allergyWords) {
+                if (val.includes(word)) {
+                    hasConflict = true;
+                    break;
+                }
+            }
+
+            // Check clinical cross-reactivity rules
+            if (!hasConflict) {
+                for (const rule of rules) {
+                    const matchAllergy = rule.match.some(m => patientAllergies.includes(m));
+                    const matchDrug = rule.trigger.some(t => val.includes(t));
+                    if (matchAllergy && matchDrug) {
+                        hasConflict = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (hasConflict) {
+            alertContainer.innerHTML = `
+                <div class="alert alert-danger py-1 px-2 mt-2 mb-0 small text-danger fw-bold border border-danger d-flex align-items-center gap-1 shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill fs-6"></i>
+                    <span>CẢNH BÁO DƯỢC LÂM SÀNG: Thuốc này có thể gây dị ứng/sốc phản vệ cho bệnh nhân (Tiền sử: "${patientAllergies}")!</span>
+                </div>
+            `;
+            inputEl.classList.add('is-invalid');
+        } else {
+            alertContainer.innerHTML = '';
+            inputEl.classList.remove('is-invalid');
+        }
+    }
+
     function addPrescriptionRow(medName = '', dosage = '', frequency = '', duration = 5, instructions = '') {
         const container = document.getElementById('prescriptionItemsContainer');
         const idx = prescriptionIndex++;
@@ -323,7 +412,8 @@
                 <div class="row g-2">
                     <div class="col-md-5">
                         <label class="form-label small fw-semibold mb-1">Tên thuốc & Hàm lượng: <span class="text-danger">*</span></label>
-                        <input type="text" name="prescriptions[${idx}][medication_name]" value="${medName}" class="form-control form-control-sm fw-semibold" placeholder="VD: Augmentin 1g" required>
+                        <input type="text" name="prescriptions[${idx}][medication_name]" value="${medName}" class="form-control form-control-sm fw-semibold" placeholder="VD: Augmentin 1g" required oninput="checkAllergyConflict(this, ${idx})">
+                        <div id="allergy-alert-${idx}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-semibold mb-1">Liều lượng:</label>
@@ -346,6 +436,11 @@
         `;
 
         container.insertAdjacentHTML('beforeend', rowHtml);
+
+        const insertedInput = document.querySelector(`input[name="prescriptions[${idx}][medication_name]"]`);
+        if (insertedInput && medName) {
+            checkAllergyConflict(insertedInput, idx);
+        }
     }
 
     function removePrescriptionRow(idx) {
