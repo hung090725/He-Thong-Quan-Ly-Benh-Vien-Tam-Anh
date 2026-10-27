@@ -169,8 +169,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('reception/pharmacy*') ? 'active' : '' }}" href="{{ route('reception.pharmacy.index') }}">
+                        <a class="nav-link {{ request()->is('reception/pharmacy') || (request()->is('reception/pharmacy*') && !request()->is('reception/pharmacy/inventory*')) ? 'active' : '' }}" href="{{ route('reception.pharmacy.index') }}">
                             <i class="bi bi-capsule-pill"></i> Quầy Dược Phát Thuốc
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/pharmacy/inventory*') ? 'active' : '' }}" href="{{ route('reception.pharmacy.inventory.index') }}">
+                            <i class="bi bi-box-seam"></i> Kho Dược & Tồn Kho
                         </a>
                     </li>
                     <li class="nav-item">

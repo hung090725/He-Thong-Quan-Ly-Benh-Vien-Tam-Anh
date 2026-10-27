@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Models\PatientProfile;
+use App\Models\PatientVital;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -125,12 +126,85 @@ class PatientController extends Controller
             'medicalRecords' => function ($q) {
                 $q->with(['doctor.user', 'prescriptions', 'attachments'])->latest('created_at');
             },
+            'vitals.recordedBy',
         ]);
+
+        // Auto-extract vitals from past records if no structured vitals exist yet
+        if ($patient->vitals->isEmpty() && $patient->medicalRecords->isNotEmpty()) {
+            foreach ($patient->medicalRecords as $record) {
+                $text = ($record->symptoms ?? '') . ' ' . ($record->clinical_notes ?? '');
+                $extracted = self::extractVitalsFromText($text);
+                if (!empty($extracted['systolic_bp']) || !empty($extracted['heart_rate'])) {
+                    PatientVital::create([
+                        'patient_profile_id' => $patient->id,
+                        'appointment_id' => $record->appointment_id,
+                        'recorded_by_user_id' => $record->doctor?->user_id,
+                        'recorded_at' => $record->created_at,
+                        'systolic_bp' => $extracted['systolic_bp'] ?? null,
+                        'diastolic_bp' => $extracted['diastolic_bp'] ?? null,
+                        'heart_rate' => $extracted['heart_rate'] ?? null,
+                        'temperature' => $extracted['temperature'] ?? null,
+                        'spo2' => $extracted['spo2'] ?? null,
+                        'notes' => 'Trích xuất tự động từ bệnh án ' . $record->record_code,
+                    ]);
+                }
+            }
+            $patient->load('vitals.recordedBy');
+        }
 
         $completedVisits = $patient->appointments->where('status', 'completed')->count();
         $latestAppointment = $patient->appointments->first();
 
-        return view('receptionist.patients.show', compact('patient', 'completedVisits', 'latestAppointment'));
+        // Prepare EHR Vitals Timeline & Chart datasets (ordered chronologically for line charts)
+        $chronologicalVitals = $patient->vitals->sortBy('recorded_at')->values();
+        $vitalsChartData = [
+            'labels' => $chronologicalVitals->map(fn($v) => $v->recorded_at->format('d/m/Y H:i'))->toArray(),
+            'systolic' => $chronologicalVitals->map(fn($v) => $v->systolic_bp)->toArray(),
+            'diastolic' => $chronologicalVitals->map(fn($v) => $v->diastolic_bp)->toArray(),
+            'heartRate' => $chronologicalVitals->map(fn($v) => $v->heart_rate)->toArray(),
+            'temperature' => $chronologicalVitals->map(fn($v) => $v->temperature)->toArray(),
+            'spo2' => $chronologicalVitals->map(fn($v) => $v->spo2)->toArray(),
+        ];
+
+        $latestVital = $patient->vitals->first(); // latest by recorded_at desc
+
+        return view('receptionist.patients.show', compact(
+            'patient',
+            'completedVisits',
+            'latestAppointment',
+            'vitalsChartData',
+            'latestVital'
+        ));
+    }
+
+    /**
+     * Regex helper to parse clinical vitals from unstructured doctor/nurse notes.
+     */
+    public static function extractVitalsFromText(string $text): array
+    {
+        $res = [];
+        // BP: Huyết áp 140/90 mmHg hoặc HA: 120/80
+        if (preg_match('/(?:Huyết\s*áp|HA|BP)[:\s]*([0-9]{2,3})\s*[\/\-]\s*([0-9]{2,3})/iu', $text, $m)) {
+            $res['systolic_bp'] = (int)$m[1];
+            $res['diastolic_bp'] = (int)$m[2];
+        }
+        // Pulse / Heart rate: nhịp tim 88 ck/phút hoặc Mạch: 78
+        if (preg_match('/(?:Mạch|Nhịp\s*tim|HR|Pulse)[:\s]*([0-9]{2,3})/iu', $text, $m)) {
+            $res['heart_rate'] = (int)$m[1];
+        } elseif (preg_match('/([0-9]{2,3})\s*(?:ck|nhịp|lần)\/phút/iu', $text, $m)) {
+            $res['heart_rate'] = (int)$m[1];
+        }
+        // Temperature: Thân nhiệt 36.8°C hoặc 37.5°C
+        if (preg_match('/(?:Thân\s*nhiệt|Nhiệt\s*độ|Nhiệt)[:\s]*([0-9]{2}(?:\.[0-9])?)/iu', $text, $m)) {
+            $res['temperature'] = (float)$m[1];
+        } elseif (preg_match('/([0-9]{2}(?:\.[0-9])?)\s*°?C/iu', $text, $m)) {
+            $res['temperature'] = (float)$m[1];
+        }
+        // SpO2: SpO2 98%
+        if (preg_match('/(?:SpO2|Oxy)[:\s]*([0-9]{2,3})/iu', $text, $m)) {
+            $res['spo2'] = (int)$m[1];
+        }
+        return $res;
     }
 
     /**

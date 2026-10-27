@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
 use App\Models\MedicalRecord;
+use App\Models\Medication;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -95,7 +96,21 @@ class PharmacyController extends Controller
             'dispense_notes' => $validated['dispense_notes'] ?? 'Đã kiểm tra đủ số lượng và hướng dẫn sử dụng cho bệnh nhân.',
         ]);
 
-        return back()->with('success', "Đã xác nhận cấp phát thuốc thành công cho bệnh nhân {$record->patientProfile->full_name} (Mã đơn: {$record->record_code}).");
+        // Real-time automated medication inventory deduction
+        $record->load('prescriptions');
+        foreach ($record->prescriptions as $p) {
+            $firstWord = explode(' ', trim($p->medication_name))[0] ?? '';
+            if (mb_strlen($firstWord) >= 3) {
+                $med = Medication::where('name', 'like', "%{$firstWord}%")->first();
+                if ($med && $med->stock_quantity > 0) {
+                    $deductQty = max(1, (int)$p->duration_days * 2);
+                    $actualDeduct = min($med->stock_quantity, $deductQty);
+                    $med->decrement('stock_quantity', $actualDeduct);
+                }
+            }
+        }
+
+        return back()->with('success', "Đã xác nhận cấp phát thuốc thành công cho bệnh nhân {$record->patientProfile->full_name} (Mã đơn: {$record->record_code}). Đã cập nhật tồn kho dược ngoại trú.");
     }
 
     /**
@@ -103,13 +118,25 @@ class PharmacyController extends Controller
      */
     public function undoDispense(MedicalRecord $record): RedirectResponse
     {
+        $record->load('prescriptions');
+        foreach ($record->prescriptions as $p) {
+            $firstWord = explode(' ', trim($p->medication_name))[0] ?? '';
+            if (mb_strlen($firstWord) >= 3) {
+                $med = Medication::where('name', 'like', "%{$firstWord}%")->first();
+                if ($med) {
+                    $restoreQty = max(1, (int)$p->duration_days * 2);
+                    $med->increment('stock_quantity', $restoreQty);
+                }
+            }
+        }
+
         $record->update([
             'dispensed_at' => null,
             'dispensed_by_user_id' => null,
             'dispense_notes' => null,
         ]);
 
-        return back()->with('success', "Đã hoàn tác trạng thái cấp phát thuốc về 'Chờ phát thuốc' cho mã {$record->record_code}.");
+        return back()->with('success', "Đã hoàn tác trạng thái cấp phát thuốc về 'Chờ phát thuốc' cho mã {$record->record_code} và hoàn lại tồn kho dược.");
     }
 
     /**

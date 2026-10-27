@@ -13,7 +13,9 @@ use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Receptionist\PatientController;
+use App\Http\Controllers\Receptionist\PatientVitalController;
 use App\Http\Controllers\Receptionist\PharmacyController;
+use App\Http\Controllers\Receptionist\PharmacyInventoryController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
 use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
 use Illuminate\Support\Facades\Route;
@@ -113,6 +115,8 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
 
     // 3.2. Quản lý Hồ sơ Bệnh nhân (CRUD)
     Route::get('/patients/{patient}/print-card', [PatientController::class, 'printCard'])->name('patients.print-card');
+    Route::post('/patients/{patient}/vitals', [PatientVitalController::class, 'store'])->name('patients.vitals.store');
+    Route::delete('/vitals/{vital}', [PatientVitalController::class, 'destroy'])->name('vitals.destroy');
     Route::resource('patients', PatientController::class);
 
     // 3.3. Quầy Dược Ngoại Trú & Cấp Phát Thuốc (Outpatient Pharmacy Dispensing)
@@ -120,6 +124,13 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/pharmacy/{record}/dispense', [PharmacyController::class, 'dispense'])->name('pharmacy.dispense');
     Route::post('/pharmacy/{record}/undo', [PharmacyController::class, 'undoDispense'])->name('pharmacy.undo');
     Route::get('/pharmacy/{record}/label', [PharmacyController::class, 'printLabel'])->name('pharmacy.label');
+
+    // 3.3b. Quản lý Kho Dược & Danh Mục Thuốc Ngoại Trú (Pharmacy Formulary & Inventory)
+    Route::get('/pharmacy/inventory', [PharmacyInventoryController::class, 'index'])->name('pharmacy.inventory.index');
+    Route::post('/pharmacy/inventory', [PharmacyInventoryController::class, 'store'])->name('pharmacy.inventory.store');
+    Route::put('/pharmacy/inventory/{medication}', [PharmacyInventoryController::class, 'update'])->name('pharmacy.inventory.update');
+    Route::post('/pharmacy/inventory/{medication}/restock', [PharmacyInventoryController::class, 'restock'])->name('pharmacy.inventory.restock');
+    Route::delete('/pharmacy/inventory/{medication}', [PharmacyInventoryController::class, 'destroy'])->name('pharmacy.inventory.destroy');
 
     // 3.4. Giấy Chứng Nhận Nghỉ Việc Hưởng BHXH (Mẫu C65-HD Bộ Y Tế)
     Route::get('/certificates', [SickLeaveCertificateController::class, 'index'])->name('certificates.index');

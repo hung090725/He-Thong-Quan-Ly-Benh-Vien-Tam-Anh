@@ -5,6 +5,9 @@
 @section('content')
 <x-page-header title="Quầy Dược & Cấp Phát Thuốc Ngoại Trú" subtitle="Quản lý hàng đợi phát thuốc, kiểm tra toa thuốc của bác sĩ và in nhãn hướng dẫn sử dụng">
     <x-slot:actions>
+        <a href="{{ route('reception.pharmacy.inventory.index') }}" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
+            <i class="bi bi-box-seam"></i> Quản lý Kho Thuốc & Tồn Kho
+        </a>
         <a href="{{ route('reception.appointments.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
             <i class="bi bi-arrow-left"></i> Về Quầy tiếp nhận
         </a>

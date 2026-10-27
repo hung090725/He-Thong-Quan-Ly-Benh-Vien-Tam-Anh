@@ -55,6 +55,16 @@ class PatientProfile extends Model
         return $this->hasMany(SickLeaveCertificate::class);
     }
 
+    public function vitals(): HasMany
+    {
+        return $this->hasMany(PatientVital::class)->orderBy('recorded_at', 'desc');
+    }
+
+    public function latestVital()
+    {
+        return $this->hasOne(PatientVital::class)->latestOfMany('recorded_at');
+    }
+
     public function hasAllergies(): bool
     {
         $al = trim($this->allergies ?? '');

@@ -298,5 +298,7 @@ class DatabaseSeeder extends Seeder
             'status' => Appointment::STATUS_PENDING,
             'created_by_user_id' => $patientUserMai ? $patientUserMai->id : null,
         ]);
+        // 7. Seed Outpatient Pharmacy Formulary & Inventory
+        $this->call(MedicationSeeder::class);
     }
 }

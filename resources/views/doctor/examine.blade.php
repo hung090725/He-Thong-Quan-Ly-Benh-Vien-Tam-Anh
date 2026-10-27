@@ -236,12 +236,23 @@
                         <button class="btn btn-outline-success btn-sm dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-lightning-charge-fill me-1"></i> Chọn thuốc nhanh mẫu
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" style="max-height: 280px; overflow-y: auto;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow" style="max-height: 320px; overflow-y: auto; min-width: 300px;">
                             @foreach($commonMeds as $m)
                                 <li>
-                                    <a class="dropdown-item small" href="javascript:void(0)" onclick="addQuickMedication('{{ addslashes($m['name']) }}', '{{ addslashes($m['dosage']) }}', '{{ addslashes($m['frequency']) }}', '{{ $m['duration'] }}', '{{ addslashes($m['instructions']) }}')">
-                                        <strong>{{ $m['name'] }}</strong>
-                                        <div class="text-muted" style="font-size: 0.72rem;">{{ $m['dosage'] }} &bull; {{ $m['frequency'] }}</div>
+                                    <a class="dropdown-item small d-flex justify-content-between align-items-center py-2" href="javascript:void(0)" onclick="addQuickMedication('{{ addslashes($m['name']) }}', '{{ addslashes($m['dosage']) }}', '{{ addslashes($m['frequency']) }}', '{{ $m['duration'] }}', '{{ addslashes($m['instructions']) }}')">
+                                        <div>
+                                            <strong>{{ $m['name'] }}</strong>
+                                            <div class="text-muted" style="font-size: 0.72rem;">{{ $m['dosage'] }} &bull; {{ $m['frequency'] }}</div>
+                                        </div>
+                                        @if(isset($m['stock_quantity']))
+                                            @if(!empty($m['is_out_of_stock']))
+                                                <span class="badge bg-danger ms-2">Hết hàng</span>
+                                            @elseif($m['stock_quantity'] <= 50)
+                                                <span class="badge bg-warning text-dark ms-2">Còn {{ $m['stock_quantity'] }}</span>
+                                            @else
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-2">Kho: {{ $m['stock_quantity'] }}</span>
+                                            @endif
+                                        @endif
                                     </a>
                                 </li>
                             @endforeach

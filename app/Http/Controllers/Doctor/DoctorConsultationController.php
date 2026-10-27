@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Attachment;
 use App\Models\Doctor;
 use App\Models\MedicalRecord;
+use App\Models\Medication;
 use App\Models\Prescription;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -55,7 +56,24 @@ class DoctorConsultationController extends Controller
             ->limit(5)
             ->get();
 
-        $commonMeds = self::$commonMedications;
+        $dbMeds = Medication::where('is_active', true)->orderBy('name')->get();
+        if ($dbMeds->isNotEmpty()) {
+            $commonMeds = $dbMeds->map(function ($m) {
+                return [
+                    'name' => $m->name,
+                    'dosage' => $m->dosage_default ?: '1 viên/lần',
+                    'frequency' => $m->frequency_default ?: 'Ngày 2 lần',
+                    'duration' => $m->duration_default ?: 5,
+                    'instructions' => $m->instructions_default ?: 'Uống sau ăn',
+                    'stock' => $m->stock_quantity,
+                    'unit' => $m->unit,
+                    'is_out_of_stock' => $m->isOutOfStock(),
+                    'is_low_stock' => $m->isLowStock(),
+                ];
+            })->toArray();
+        } else {
+            $commonMeds = self::$commonMedications;
+        }
 
         return view('doctor.examine', compact('appointment', 'doctor', 'pastRecords', 'commonMeds'));
     }
