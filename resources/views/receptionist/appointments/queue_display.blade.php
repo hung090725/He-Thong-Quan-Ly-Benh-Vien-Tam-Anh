@@ -91,11 +91,14 @@
             </div>
         </div>
 
-        <div class="d-flex align-items-center gap-4">
+        <div class="d-flex align-items-center gap-3">
             <div class="text-end">
                 <div class="small text-secondary" id="currentDateString">Đang tải ngày...</div>
                 <div class="live-clock" id="liveClock">00:00:00</div>
             </div>
+            <button onclick="callTopPatient()" class="btn btn-warning btn-sm fw-bold shadow-sm" title="Phát loa gọi số tiếp theo">
+                <i class="bi bi-megaphone-fill me-1"></i> Gọi Số Tiếp Theo
+            </button>
             <a href="{{ route('reception.appointments.index') }}" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-box-arrow-left"></i> Bàn lễ tân
             </a>
@@ -123,13 +126,31 @@
                 <div class="row g-3">
                     @forelse($waitingAppointments as $app)
                         <div class="col-md-6">
-                            <div class="queue-card h-100">
+                            <div class="queue-card h-100 {{ $app->is_priority ? 'border-danger' : '' }}">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div class="queue-num-badge">
-                                        #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if($app->is_priority)
+                                            <div class="queue-num-badge" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);">
+                                                <i class="bi bi-star-fill text-warning" style="font-size: 1.2rem;"></i> #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
+                                            </div>
+                                        @else
+                                            <div class="queue-num-badge">
+                                                #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
+                                            </div>
+                                        @endif
+                                        @if($app->is_priority)
+                                            <span class="badge bg-danger text-white border border-danger-subtle small">
+                                                <i class="bi bi-star-fill text-warning me-1"></i> ƯU TIÊN
+                                            </span>
+                                        @endif
                                     </div>
-                                    <div class="room-badge shadow-sm">
-                                        <i class="bi bi-door-open-fill me-1"></i> {{ $app->doctor ? $app->doctor->room_number : 'Phòng khám' }}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="room-badge shadow-sm">
+                                            <i class="bi bi-door-open-fill me-1"></i> {{ $app->doctor ? $app->doctor->room_number : 'Phòng khám' }}
+                                        </div>
+                                        <button onclick="announceQueue('{{ addslashes($app->patientProfile->full_name) }}', '{{ $app->queue_number }}', '{{ addslashes($app->doctor ? $app->doctor->room_number : '1') }}')" class="btn btn-sm btn-outline-info" title="Phát loa gọi vào phòng">
+                                            <i class="bi bi-megaphone-fill"></i>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -222,10 +243,10 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Auto reload page every 15 seconds to fetch new check-in queue
+        // Auto reload page every 20 seconds to fetch new check-in queue
         setTimeout(() => {
             window.location.reload();
-        }, 15000);
+        }, 20000);
 
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
@@ -235,6 +256,81 @@
                     document.exitFullscreen();
                 }
             }
+        }
+
+        // Web Audio API Hospital Chime
+        function playHospitalChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+                gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(ctx.currentTime);
+                osc1.stop(ctx.currentTime + 0.5);
+
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.22);
+                gain2.gain.setValueAtTime(0.35, ctx.currentTime + 0.22);
+                gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.85);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(ctx.currentTime + 0.22);
+                osc2.stop(ctx.currentTime + 0.85);
+            } catch (e) {
+                console.warn('Audio chime unavailable', e);
+            }
+        }
+
+        // Announce single patient in queue
+        function announceQueue(patientName, queueNumber, roomNumber) {
+            playHospitalChime();
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                setTimeout(() => {
+                    const speechText = `Kính mời bệnh nhân ${patientName}, số thứ tự ${queueNumber}, xin mời vào phòng khám số ${roomNumber}.`;
+                    const utterance = new SpeechSynthesisUtterance(speechText);
+                    utterance.lang = 'vi-VN';
+                    utterance.rate = 0.92;
+                    utterance.pitch = 1.05;
+
+                    const voices = window.speechSynthesis.getVoices();
+                    const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
+                    if (viVoice) {
+                        utterance.voice = viVoice;
+                    }
+
+                    window.speechSynthesis.speak(utterance);
+                }, 450);
+            }
+        }
+
+        // Live waiting list for "Gọi Số Tiếp Theo" button
+        const waitingPatients = @json($waitingAppointments->values()->map(fn($a) => [
+            'name' => $a->patientProfile->full_name,
+            'stt' => $a->queue_number,
+            'room' => $a->doctor ? ($a->doctor->room_number ?? '1') : '1'
+        ]));
+
+        function callTopPatient() {
+            if (waitingPatients.length === 0) {
+                playHospitalChime();
+                alert('Hiện tại không có bệnh nhân nào trong hàng đợi.');
+                return;
+            }
+            const first = waitingPatients[0];
+            announceQueue(first.name, first.stt, first.room);
         }
     </script>
 </body>

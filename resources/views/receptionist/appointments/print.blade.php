@@ -122,6 +122,12 @@
             <small class="text-muted">Mã hẹn: <strong class="font-monospace text-primary">{{ $appointment->appointment_code }}</strong></small>
         </div>
 
+        @if($appointment->is_priority)
+            <div class="alert alert-danger py-1 px-2 text-center mb-3 fw-bold small border-2 border-danger">
+                <i class="bi bi-star-fill text-warning me-1"></i> ★ ĐỐI TƯỢNG ƯU TIÊN TIẾP ĐÓN & KHÁM ★
+            </div>
+        @endif
+
         <!-- Big Queue Number & Clinic Room -->
         <div class="text-center mb-3">
             <div class="queue-badge w-100 shadow-sm">
@@ -176,10 +182,28 @@
                     <span class="font-monospace fw-semibold">{{ $appointment->patientProfile->insurance_code }}</span>
                 </div>
             @endif
-            <div class="py-1">
-                <span class="text-muted d-block mb-1">Lý do khám / Triệu chứng:</span>
-                <div class="text-dark fw-medium">{{ $appointment->symptom_description }}</div>
-            </div>
+            @if(str_contains($appointment->symptom_description ?? '', '[Sinh hiệu:'))
+                @php
+                    preg_match('/\[Sinh hiệu: (.*?)\]/', $appointment->symptom_description, $vMatch);
+                    $vitalsText = $vMatch[1] ?? '';
+                    $cleanDesc = trim(preg_replace('/\[Sinh hiệu: .*?\]/', '', preg_replace('/\[ƯU TIÊN\]/', '', $appointment->symptom_description)));
+                @endphp
+                @if($vitalsText)
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted"><i class="bi bi-heart-pulse-fill text-danger me-1"></i> Sinh hiệu đo tại quầy:</span>
+                        <strong class="text-dark text-end">{{ $vitalsText }}</strong>
+                    </div>
+                @endif
+                <div class="py-1">
+                    <span class="text-muted d-block mb-1">Lý do khám / Triệu chứng:</span>
+                    <div class="text-dark fw-medium">{{ $cleanDesc ?: 'Khám tổng quát' }}</div>
+                </div>
+            @else
+                <div class="py-1">
+                    <span class="text-muted d-block mb-1">Lý do khám / Triệu chứng:</span>
+                    <div class="text-dark fw-medium">{{ $appointment->symptom_description }}</div>
+                </div>
+            @endif
         </div>
 
         <!-- Barcode Simulation -->

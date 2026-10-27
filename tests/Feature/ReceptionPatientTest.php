@@ -337,4 +337,51 @@ class ReceptionPatientTest extends TestCase
         $response->assertSee('THẺ BỆNH NHÂN NGOẠI TRÚ');
         $response->assertSee($patient->patient_code);
     }
+
+    public function test_walkin_registration_with_priority_and_vitals(): void
+    {
+        $receptionist = $this->getReceptionist();
+        $doctor = Doctor::where('is_available', true)->first();
+        $specialty = $doctor->specialty;
+        $uniquePhone = '096' . rand(1000000, 9999999);
+
+        $response = $this->actingAs($receptionist)->post('/reception/appointments/walk-in', [
+            'is_existing_patient' => '0',
+            'full_name' => 'Bệnh Nhân Cấp Cứu Ưu Tiên',
+            'dob' => '1950-01-01',
+            'gender' => 'male',
+            'phone' => $uniquePhone,
+            'specialty_id' => $specialty->id,
+            'doctor_id' => $doctor->id,
+            'appointment_date' => Carbon::today()->toDateString(),
+            'shift' => 'morning',
+            'is_priority' => '1',
+            'symptom_description' => '[Sinh hiệu: HA: 140/90 mmHg, Thân nhiệt: 38.5°C] Sốt cao khó thở',
+        ]);
+
+        $createdPatient = PatientProfile::where('phone', $uniquePhone)->first();
+        $this->assertNotNull($createdPatient);
+
+        $appointment = Appointment::where('patient_profile_id', $createdPatient->id)->first();
+        $this->assertNotNull($appointment);
+        $this->assertEquals(Appointment::STATUS_CONFIRMED, $appointment->status);
+        $this->assertTrue($appointment->is_priority);
+        $this->assertStringContainsString('[ƯU TIÊN]', $appointment->symptom_description);
+        $this->assertStringContainsString('Sinh hiệu: HA: 140/90 mmHg', $appointment->symptom_description);
+    }
+
+    public function test_patient_age_display_logic_for_infant_and_adult(): void
+    {
+        // 1. Infant (5 months old)
+        $infant = new PatientProfile([
+            'dob' => Carbon::now()->subMonths(5),
+        ]);
+        $this->assertEquals('5 tháng tuổi', $infant->age_text);
+
+        // 2. Adult (30 years old)
+        $adult = new PatientProfile([
+            'dob' => Carbon::now()->subYears(30),
+        ]);
+        $this->assertEquals('30 tuổi', $adult->age_text);
+    }
 }

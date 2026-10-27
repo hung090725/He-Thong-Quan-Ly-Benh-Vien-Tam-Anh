@@ -70,6 +70,18 @@ class ReceptionAppointmentController extends Controller
         $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
         $doctors = Doctor::with(['user', 'specialty'])->where('is_available', true)->get();
 
+        // Chart Analytics for reception dashboard
+        $shiftChartData = [
+            'morning' => Appointment::whereDate('appointment_date', $date)->where('shift', 'morning')->count(),
+            'afternoon' => Appointment::whereDate('appointment_date', $date)->where('shift', 'afternoon')->count(),
+        ];
+
+        $specialtyChartData = Specialty::withCount(['appointments' => function ($q) use ($date) {
+            $q->whereDate('appointment_date', $date);
+        }])->get()->filter(function ($sp) {
+            return $sp->appointments_count > 0;
+        })->values();
+
         return view('receptionist.appointments.index', compact(
             'appointments',
             'date',
@@ -79,7 +91,9 @@ class ReceptionAppointmentController extends Controller
             'search',
             'stats',
             'specialties',
-            'doctors'
+            'doctors',
+            'shiftChartData',
+            'specialtyChartData'
         ));
     }
 
@@ -170,7 +184,7 @@ class ReceptionAppointmentController extends Controller
             return back()->withInput()->with('error', "Bác sĩ {$doctor->full_name_with_title} đã kín lịch trong ca này (Đã tiếp nhận {$currentBookings}/{$maxPatients} ca). Vui lòng chọn ca hoặc bác sĩ khác.");
         }
 
-        $appointment = DB::transaction(function () use ($isExisting, $validated) {
+        $appointment = DB::transaction(function () use ($isExisting, $validated, $request) {
             if ($isExisting) {
                 $patientProfile = PatientProfile::findOrFail($validated['patient_profile_id']);
             } else {
@@ -191,6 +205,11 @@ class ReceptionAppointmentController extends Controller
                 }
             }
 
+            $symptom = $validated['symptom_description'];
+            if ($request->boolean('is_priority') && !str_contains($symptom, '[ƯU TIÊN]')) {
+                $symptom = '[ƯU TIÊN] ' . $symptom;
+            }
+
             return Appointment::create([
                 'appointment_code' => Appointment::generateAppointmentCode(),
                 'patient_profile_id' => $patientProfile->id,
@@ -199,7 +218,7 @@ class ReceptionAppointmentController extends Controller
                 'appointment_date' => $validated['appointment_date'],
                 'shift' => $validated['shift'],
                 'appointment_time' => $validated['appointment_time'] ?? Carbon::now()->format('H:i'),
-                'symptom_description' => $validated['symptom_description'],
+                'symptom_description' => $symptom,
                 'status' => Appointment::STATUS_CONFIRMED, // Walk-in is auto check-in
                 'created_by_user_id' => Auth::id(),
             ]);

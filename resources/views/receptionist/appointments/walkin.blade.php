@@ -212,10 +212,54 @@
                             <input type="text" name="appointment_time" value="{{ old('appointment_time', date('H:i')) }}" class="form-control font-monospace" readonly>
                         </div>
 
-                        <!-- Symptoms -->
+                        <!-- Symptoms & Priority -->
                         <div class="col-12">
+                            <div class="p-3 bg-light rounded border mb-3">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="prioritySwitch" name="is_priority" value="1">
+                                    <label class="form-check-label fw-bold text-danger" for="prioritySwitch">
+                                        <i class="bi bi-star-fill text-warning me-1"></i> Bệnh nhân diện ưu tiên đặc biệt (Khẩn cấp / Người cao tuổi / Trẻ em / Phụ nữ mang thai / Khuyết tật)
+                                    </label>
+                                </div>
+                                <div class="small text-muted">Đánh dấu trường hợp cần hỗ trợ tiếp đón nhanh và phân luồng khám ưu tiên.</div>
+                            </div>
+
+                            <!-- Vital Signs Intake (Chỉ số sinh tồn ban đầu) -->
+                            <div class="card border-info mb-3">
+                                <div class="card-header bg-info-subtle py-2 d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold small text-info-emphasis">
+                                        <i class="bi bi-heart-pulse-fill text-danger me-1"></i> Đo chỉ số sinh tồn ban đầu tại quầy tiếp đón (Tùy chọn)
+                                    </span>
+                                    <span class="badge bg-light text-dark border small" id="bmiBadge">Chưa đo BMI</span>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label small text-muted mb-1">Huyết áp (mmHg):</label>
+                                            <input type="text" id="vital_bp" class="form-control form-control-sm" placeholder="VD: 120/80">
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <label class="form-label small text-muted mb-1">Mạch (lần/phút):</label>
+                                            <input type="number" id="vital_pulse" class="form-control form-control-sm" placeholder="75">
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <label class="form-label small text-muted mb-1">Thân nhiệt (°C):</label>
+                                            <input type="number" step="0.1" id="vital_temp" class="form-control form-control-sm" placeholder="36.8">
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <label class="form-label small text-muted mb-1">Cân nặng (kg):</label>
+                                            <input type="number" step="0.5" id="vital_weight" class="form-control form-control-sm" placeholder="60">
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label small text-muted mb-1">Chiều cao (cm):</label>
+                                            <input type="number" id="vital_height" class="form-control form-control-sm" placeholder="165">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <label class="form-label fw-semibold small">Mô tả lý do khám / Triệu chứng ban đầu: <span class="text-danger">*</span></label>
-                            <textarea name="symptom_description" class="form-control @error('symptom_description') is-invalid @enderror" rows="3" placeholder="VD: Sốt cao, đau họng 2 ngày nay, ho có đờm..." required>{{ old('symptom_description') }}</textarea>
+                            <textarea name="symptom_description" id="symptomTextarea" class="form-control @error('symptom_description') is-invalid @enderror" rows="3" placeholder="VD: Sốt cao, đau họng 2 ngày nay, ho có đờm..." required>{{ old('symptom_description') }}</textarea>
                             @error('symptom_description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -282,6 +326,91 @@
                 if (currentDoc && currentDoc.value && currentDoc.getAttribute('data-specialty') !== selectedSpecialty) {
                     doctorSelect.value = '';
                 }
+            });
+        }
+
+        // --- Live BMI Calculation & Asian Standard Classification ---
+        const weightInput = document.getElementById('vital_weight');
+        const heightInput = document.getElementById('vital_height');
+        const bmiBadge = document.getElementById('bmiBadge');
+
+        function calculateBMI() {
+            const weight = parseFloat(weightInput?.value);
+            const heightCm = parseFloat(heightInput?.value);
+
+            if (weight > 0 && heightCm > 0) {
+                const heightM = heightCm / 100;
+                const bmi = (weight / (heightM * heightM)).toFixed(1);
+                let classification = '';
+                let badgeClass = 'bg-info';
+
+                if (bmi < 18.5) {
+                    classification = 'Thiếu cân / Gầy';
+                    badgeClass = 'bg-info text-dark';
+                } else if (bmi < 23) {
+                    classification = 'Chuẩn bình thường';
+                    badgeClass = 'bg-success text-white';
+                } else if (bmi < 25) {
+                    classification = 'Thừa cân (Tiền béo phì)';
+                    badgeClass = 'bg-warning text-dark';
+                } else {
+                    classification = 'Béo phì';
+                    badgeClass = 'bg-danger text-white';
+                }
+
+                bmiBadge.className = `badge ${badgeClass} border small fw-bold px-2 py-1`;
+                bmiBadge.innerHTML = `<i class="bi bi-activity me-1"></i> BMI: ${bmi} (${classification})`;
+                return { bmi, classification };
+            } else {
+                bmiBadge.className = 'badge bg-light text-dark border small';
+                bmiBadge.textContent = 'Chưa đo BMI';
+                return null;
+            }
+        }
+
+        if (weightInput && heightInput) {
+            weightInput.addEventListener('input', calculateBMI);
+            heightInput.addEventListener('input', calculateBMI);
+        }
+
+        // --- Package Vital Signs into Symptom on Submit ---
+        const form = document.getElementById('walkinForm');
+        const symptomTextarea = document.getElementById('symptomTextarea');
+        const prioritySwitch = document.getElementById('prioritySwitch');
+
+        if (form && symptomTextarea) {
+            form.addEventListener('submit', function () {
+                const bp = document.getElementById('vital_bp')?.value.trim();
+                const pulse = document.getElementById('vital_pulse')?.value.trim();
+                const temp = document.getElementById('vital_temp')?.value.trim();
+                const weight = weightInput?.value.trim();
+                const height = heightInput?.value.trim();
+                const bmiData = calculateBMI();
+
+                const vitalsList = [];
+                if (bp) vitalsList.push(`HA: ${bp} mmHg`);
+                if (pulse) vitalsList.push(`Mạch: ${pulse} l/p`);
+                if (temp) vitalsList.push(`Nhiệt độ: ${temp}°C`);
+                if (weight && height && bmiData) {
+                    vitalsList.push(`Thể trạng: ${weight}kg / ${height}cm (BMI ${bmiData.bmi} - ${bmiData.classification})`);
+                } else if (weight) {
+                    vitalsList.push(`Cân nặng: ${weight}kg`);
+                }
+
+                let currentSymptom = symptomTextarea.value.trim();
+
+                // Append vital signs header if any vitals recorded
+                if (vitalsList.length > 0 && !currentSymptom.includes('[Sinh hiệu:')) {
+                    const vitalsString = `[Sinh hiệu: ${vitalsList.join(', ')}]`;
+                    currentSymptom = `${vitalsString} ${currentSymptom}`;
+                }
+
+                // Append Priority Tag if switched
+                if (prioritySwitch && prioritySwitch.checked && !currentSymptom.includes('[ƯU TIÊN]')) {
+                    currentSymptom = `[ƯU TIÊN] ${currentSymptom}`;
+                }
+
+                symptomTextarea.value = currentSymptom;
             });
         }
     });

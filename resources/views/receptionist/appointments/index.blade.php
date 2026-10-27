@@ -76,6 +76,27 @@
 </div>
 @endif
 
+<!-- Shift & Specialty Distribution Bar -->
+@if(isset($shiftChartData) && ($shiftChartData['morning'] > 0 || $shiftChartData['afternoon'] > 0))
+<div class="card border-0 shadow-sm mb-4 bg-light">
+    <div class="card-body p-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-2 small">
+            <span class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i> Phân bổ theo ca:</span>
+            <span class="badge bg-warning-subtle text-dark border"><i class="bi bi-sun me-1"></i> Ca Sáng: <strong>{{ $shiftChartData['morning'] }}</strong> ca</span>
+            <span class="badge bg-info-subtle text-dark border"><i class="bi bi-moon me-1"></i> Ca Chiều: <strong>{{ $shiftChartData['afternoon'] }}</strong> ca</span>
+        </div>
+        @if(isset($specialtyChartData) && $specialtyChartData->isNotEmpty())
+            <div class="d-flex align-items-center gap-1 flex-wrap small">
+                <span class="fw-bold text-secondary me-1"><i class="bi bi-hospital me-1"></i> Chuyên khoa:</span>
+                @foreach($specialtyChartData as $spItem)
+                    <span class="badge bg-white text-dark border">{{ $spItem->name }}: <strong>{{ $spItem->appointments_count }}</strong></span>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</div>
+@endif
+
 <!-- Filter Card -->
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-3">
@@ -152,20 +173,31 @@
                 </thead>
                 <tbody>
                     @forelse($appointments as $app)
-                        <tr>
+                        <tr class="{{ $app->is_priority ? 'table-warning bg-opacity-25' : '' }}">
                             <td class="ps-3">
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace fs-6">
-                                    #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
-                                </span>
+                                @if($app->is_priority)
+                                    <span class="badge bg-danger text-white border border-danger font-monospace fs-6 shadow-sm" title="Bệnh nhân diện ưu tiên">
+                                        <i class="bi bi-star-fill text-warning"></i> #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
+                                    </span>
+                                @else
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace fs-6">
+                                        #{{ str_pad($app->queue_number, 2, '0', STR_PAD_LEFT) }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="fw-bold font-monospace text-primary">
                                 {{ $app->appointment_code }}
                             </td>
                             <td>
-                                <div class="fw-bold text-dark">
+                                <div class="fw-bold text-dark d-flex align-items-center flex-wrap gap-1">
                                     <a href="{{ route('reception.patients.show', $app->patientProfile) }}" class="text-decoration-none text-dark">
                                         {{ $app->patientProfile->full_name }}
                                     </a>
+                                    @if($app->is_priority)
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle small py-0 px-1" title="Đối tượng khám ưu tiên">
+                                            <i class="bi bi-star-fill text-warning"></i> ƯU TIÊN
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="small text-muted">
                                     <span>Mã: <code>{{ $app->patientProfile->patient_code }}</code></span> &bull; 
@@ -183,10 +215,26 @@
                                 <div>{{ $app->shift_name }}</div>
                                 <small class="text-muted">{{ $app->appointment_time ? substr($app->appointment_time, 0, 5) : 'Trong ca' }}</small>
                             </td>
-                            <td class="small" style="max-width: 190px;">
-                                <div class="text-truncate" title="{{ $app->symptom_description }}">
-                                    {{ $app->symptom_description }}
-                                </div>
+                            <td class="small" style="max-width: 220px;">
+                                @if(str_contains($app->symptom_description ?? '', '[Sinh hiệu:'))
+                                    @php
+                                        preg_match('/\[Sinh hiệu: (.*?)\]/', $app->symptom_description, $vMatch);
+                                        $vitalsText = $vMatch[1] ?? '';
+                                        $cleanSymptom = trim(preg_replace('/\[Sinh hiệu: .*?\]/', '', preg_replace('/\[ƯU TIÊN\]/', '', $app->symptom_description)));
+                                    @endphp
+                                    @if($vitalsText)
+                                        <div class="badge bg-info-subtle text-info-emphasis border small mb-1 text-wrap text-start d-block" title="{{ $vitalsText }}">
+                                            <i class="bi bi-heart-pulse-fill text-danger me-1"></i> {{ $vitalsText }}
+                                        </div>
+                                    @endif
+                                    <div class="text-truncate" title="{{ $cleanSymptom }}">
+                                        {{ $cleanSymptom ?: 'Khám tổng quát' }}
+                                    </div>
+                                @else
+                                    <div class="text-truncate" title="{{ $app->symptom_description }}">
+                                        {{ $app->symptom_description }}
+                                    </div>
+                                @endif
                                 @if($app->cancellation_reason)
                                     <small class="text-danger d-block text-truncate" title="{{ $app->cancellation_reason }}">
                                         <i class="bi bi-info-circle"></i> {{ $app->cancellation_reason }}
@@ -195,9 +243,18 @@
                             </td>
                             <td>
                                 <x-status-badge :status="$app->status" />
+                                @if($app->status === 'confirmed')
+                                    <small class="text-muted d-block mt-1 font-monospace" title="Thời gian chờ từ lúc tiếp nhận">
+                                        <i class="bi bi-clock-history text-primary"></i> Chờ {{ $app->waiting_minutes }}p
+                                    </small>
+                                @endif
                             </td>
                             <td class="text-end pe-3">
                                 <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-info" title="Gọi loa phát thanh mời vào phòng khám"
+                                        onclick="callPatientVoice('{{ addslashes($app->patientProfile->full_name) }}', '{{ $app->queue_number }}', '{{ addslashes($app->doctor ? ($app->doctor->room_number ?? '1') : '1') }}', '{{ addslashes($app->doctor ? $app->doctor->full_name_with_title : '') }}')">
+                                        <i class="bi bi-megaphone-fill text-primary"></i>
+                                    </button>
                                     <a href="{{ route('reception.appointments.print', $app) }}" target="_blank" class="btn btn-outline-dark" title="In phiếu tiếp nhận / khám bệnh">
                                         <i class="bi bi-printer"></i>
                                     </a>
@@ -324,7 +381,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="bi bi-calendar-check fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Không có ca khám nào trong ngày hoặc phù hợp với bộ lọc hiện tại.
                             </td>
@@ -340,4 +397,92 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+    /**
+     * Synthesize standard 2-tone hospital chime using Web Audio API (No external mp3 required)
+     */
+    function playHospitalChime() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+
+            // Tone 1: D5 (587.33 Hz)
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+            gain1.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.start(ctx.currentTime);
+            osc1.stop(ctx.currentTime + 0.5);
+
+            // Tone 2: A5 (880 Hz) after 200ms
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.22);
+            gain2.gain.setValueAtTime(0.25, ctx.currentTime + 0.22);
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start(ctx.currentTime + 0.22);
+            osc2.stop(ctx.currentTime + 0.8);
+        } catch (e) {
+            console.warn('Hospital chime unavailable', e);
+        }
+    }
+
+    /**
+     * Voice Call Patient using Web Speech API (Tiếng Việt)
+     */
+    function callPatientVoice(patientName, queueNumber, roomNumber, doctorName) {
+        // 1. Play dual-tone chime
+        playHospitalChime();
+
+        // 2. Announce via text-to-speech
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+
+            setTimeout(() => {
+                const speechText = `Kính mời bệnh nhân ${patientName}, số thứ tự ${queueNumber}, vào phòng khám ${roomNumber} gặp ${doctorName || 'bác sĩ'}.`;
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 0.92;
+                utterance.pitch = 1.05;
+
+                const voices = window.speechSynthesis.getVoices();
+                const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
+                if (viVoice) {
+                    utterance.voice = viVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            }, 450);
+        }
+
+        // 3. Visual notification banner
+        const toast = document.createElement('div');
+        toast.className = 'position-fixed bottom-0 end-0 p-3';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <div class="toast show align-items-center text-bg-primary border-0 shadow-lg" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-megaphone-fill me-2 fs-5"></i>
+                        <strong>Đang phát loa:</strong> Mời STT <b>#${queueNumber}</b> (${patientName}) &rarr; Phòng <b>${roomNumber}</b>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('.position-fixed').remove()"></button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+</script>
+@endpush
 @endsection

@@ -132,6 +132,25 @@ class Appointment extends Model
             ->count();
     }
 
+    public function getWaitingMinutesAttribute(): int
+    {
+        if ($this->status !== self::STATUS_CONFIRMED) {
+            return 0;
+        }
+        return (int) Carbon::now()->diffInMinutes($this->updated_at);
+    }
+
+    public function getIsPriorityAttribute(): bool
+    {
+        if ($this->patientProfile && $this->patientProfile->dob) {
+            $age = $this->patientProfile->dob->age;
+            if ($age >= 75 || $age <= 1) {
+                return true;
+            }
+        }
+        return str_contains($this->symptom_description ?? '', '[ƯU TIÊN]');
+    }
+
     public static function generateAppointmentCode(): string
     {
         $today = Carbon::now()->format('Ymd');

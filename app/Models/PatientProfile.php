@@ -74,8 +74,8 @@ class PatientProfile extends Model
 
         $years = $this->dob->age;
         if ($years < 1) {
-            $months = $this->dob->diffInMonths(Carbon::now());
-            return $months > 0 ? "{$months} tháng" : "Dưới 1 tháng";
+            $months = (int) $this->dob->diffInMonths(Carbon::now());
+            return $months > 0 ? "{$months} tháng tuổi" : "Dưới 1 tháng tuổi";
         }
 
         return "{$years} tuổi";
