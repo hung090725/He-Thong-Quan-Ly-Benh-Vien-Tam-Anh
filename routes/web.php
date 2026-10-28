@@ -17,26 +17,38 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\KioskController;
 use App\Http\Controllers\Public\PatientJourneyController;
 use App\Http\Controllers\Public\PatientSurveyController;
+use App\Http\Controllers\Receptionist\AmbulanceFleetController;
 use App\Http\Controllers\Receptionist\BloodTransfusionController;
+use App\Http\Controllers\Receptionist\ChronicRecallController;
 use App\Http\Controllers\Receptionist\ClinicalNutritionController;
 use App\Http\Controllers\Receptionist\CodeRedEmergencyController;
+use App\Http\Controllers\Receptionist\CorporateScreeningController;
 use App\Http\Controllers\Receptionist\DayBedController;
+use App\Http\Controllers\Receptionist\DaySurgeryController;
+use App\Http\Controllers\Receptionist\EmergencyCustodyController;
 use App\Http\Controllers\Receptionist\InformedConsentController;
+use App\Http\Controllers\Receptionist\InsuranceTransferController;
 use App\Http\Controllers\Receptionist\LabOrderController;
+use App\Http\Controllers\Receptionist\MedicalIncidentController;
+use App\Http\Controllers\Receptionist\MedicalRecordRequestController;
 use App\Http\Controllers\Receptionist\MedicationDeliveryController;
 use App\Http\Controllers\Receptionist\MedicationScheduleController;
 use App\Http\Controllers\Receptionist\MobilityEquipmentController;
 use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\PatientInvoiceController;
 use App\Http\Controllers\Receptionist\PatientVitalController;
+use App\Http\Controllers\Receptionist\PatientWalletController;
 use App\Http\Controllers\Receptionist\PharmacyController;
 use App\Http\Controllers\Receptionist\PharmacyInventoryController;
+use App\Http\Controllers\Receptionist\PrivateInsuranceController;
 use App\Http\Controllers\Receptionist\ReceptionAnalyticsController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
 use App\Http\Controllers\Receptionist\ReceptionNotificationController;
 use App\Http\Controllers\Receptionist\ReceptionSurveyController;
 use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
+use App\Http\Controllers\Receptionist\SocialWorkController;
 use App\Http\Controllers\Receptionist\VaccinationController;
+use App\Http\Controllers\Receptionist\VisitorPassController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -275,6 +287,86 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/nutrition', [ClinicalNutritionController::class, 'store'])->name('nutrition.store');
     Route::get('/nutrition/{assessment}', [ClinicalNutritionController::class, 'show'])->name('nutrition.show');
     Route::get('/nutrition/{assessment}/print-plan', [ClinicalNutritionController::class, 'printPlan'])->name('nutrition.print-plan');
+
+    // 3.18. Giấy Chuyển Tuyến BHYT Điện Tử (Mẫu 40/BYT)
+    Route::get('/insurance-transfers', [InsuranceTransferController::class, 'index'])->name('insurance-transfers.index');
+    Route::get('/insurance-transfers/create', [InsuranceTransferController::class, 'create'])->name('insurance-transfers.create');
+    Route::post('/insurance-transfers', [InsuranceTransferController::class, 'store'])->name('insurance-transfers.store');
+    Route::get('/insurance-transfers/{insuranceTransfer}', [InsuranceTransferController::class, 'show'])->name('insurance-transfers.show');
+    Route::get('/insurance-transfers/{insuranceTransfer}/print', [InsuranceTransferController::class, 'print'])->name('insurance-transfers.print');
+
+    // 3.19. Ví Ký Quỹ & Tạm Ứng Viện Phí Thông Minh
+    Route::get('/wallets', [PatientWalletController::class, 'index'])->name('wallets.index');
+    Route::get('/wallets/{patientWallet}', [PatientWalletController::class, 'show'])->name('wallets.show');
+    Route::post('/patients/{patient}/wallets/deposit', [PatientWalletController::class, 'deposit'])->name('patients.wallets.deposit');
+    Route::post('/wallets/{patientWallet}/refund', [PatientWalletController::class, 'refund'])->name('wallets.refund');
+
+    // 3.20. Bảo Lãnh Viện Phí Tư Nhân TPA & Tiếp Đón VIP (GOP)
+    Route::get('/private-insurance', [PrivateInsuranceController::class, 'index'])->name('private-insurance.index');
+    Route::get('/private-insurance/create', [PrivateInsuranceController::class, 'create'])->name('private-insurance.create');
+    Route::post('/private-insurance', [PrivateInsuranceController::class, 'store'])->name('private-insurance.store');
+    Route::get('/private-insurance/{privateInsurance}', [PrivateInsuranceController::class, 'show'])->name('private-insurance.show');
+    Route::get('/private-insurance/{privateInsurance}/print', [PrivateInsuranceController::class, 'print'])->name('private-insurance.print');
+
+    // 3.21. Cổng Đề Nghị Sao Lục Bệnh Án Điện Tử (E-Archive Release)
+    Route::get('/record-requests', [MedicalRecordRequestController::class, 'index'])->name('record-requests.index');
+    Route::get('/record-requests/create', [MedicalRecordRequestController::class, 'create'])->name('record-requests.create');
+    Route::post('/record-requests', [MedicalRecordRequestController::class, 'store'])->name('record-requests.store');
+    Route::get('/record-requests/{recordRequest}', [MedicalRecordRequestController::class, 'show'])->name('record-requests.show');
+    Route::patch('/record-requests/{recordRequest}/status', [MedicalRecordRequestController::class, 'updateStatus'])->name('record-requests.status');
+    Route::get('/record-requests/{recordRequest}/print', [MedicalRecordRequestController::class, 'print'])->name('record-requests.print');
+
+    // 3.22. Niêm Phong Tài Sản Cấp Cứu & Đồ Thất Lạc Tại Sảnh
+    Route::get('/emergency-custody', [EmergencyCustodyController::class, 'index'])->name('emergency-custody.index');
+    Route::post('/emergency-custody', [EmergencyCustodyController::class, 'storeCustody'])->name('emergency-custody.store');
+    Route::patch('/emergency-custody/{custody}/return', [EmergencyCustodyController::class, 'returnCustody'])->name('emergency-custody.return');
+    Route::get('/emergency-custody/{custody}/print', [EmergencyCustodyController::class, 'printCustody'])->name('emergency-custody.print');
+    Route::post('/lost-found', [EmergencyCustodyController::class, 'storeLostFound'])->name('lost-found.store');
+    Route::patch('/lost-found/{item}/claim', [EmergencyCustodyController::class, 'claimLostFound'])->name('lost-found.claim');
+
+    // 3.23. Thẻ Thăm Bệnh Điện Tử & Kiểm Soát Nhiễm Khuẩn (Visitor Pass)
+    Route::get('/visitor-passes', [VisitorPassController::class, 'index'])->name('visitor-passes.index');
+    Route::post('/visitor-passes', [VisitorPassController::class, 'store'])->name('visitor-passes.store');
+    Route::patch('/visitor-passes/{visitorPass}/checkout', [VisitorPassController::class, 'checkout'])->name('visitor-passes.checkout');
+    Route::get('/visitor-passes/{visitorPass}/print', [VisitorPassController::class, 'print'])->name('visitor-passes.print');
+
+    // 3.24. Báo Cáo Sự Cố Y Khoa Suýt Xảy Ra (Near-Miss Incident)
+    Route::get('/medical-incidents', [MedicalIncidentController::class, 'index'])->name('medical-incidents.index');
+    Route::get('/medical-incidents/create', [MedicalIncidentController::class, 'create'])->name('medical-incidents.create');
+    Route::post('/medical-incidents', [MedicalIncidentController::class, 'store'])->name('medical-incidents.store');
+    Route::get('/medical-incidents/{medicalIncident}', [MedicalIncidentController::class, 'show'])->name('medical-incidents.show');
+    Route::patch('/medical-incidents/{medicalIncident}/rca', [MedicalIncidentController::class, 'updateRca'])->name('medical-incidents.rca');
+
+    // 3.25. Công Tác Xã Hội, Miễn Giảm Viện Phí & Thông Dịch Viên Y Khoa
+    Route::get('/social-work', [SocialWorkController::class, 'index'])->name('social-work.index');
+    Route::post('/social-work/cases', [SocialWorkController::class, 'storeSocialCase'])->name('social-work.store');
+    Route::patch('/social-work/cases/{case}/approve', [SocialWorkController::class, 'approveSocialCase'])->name('social-work.approve');
+    Route::post('/interpreters', [SocialWorkController::class, 'storeInterpreter'])->name('interpreters.store');
+    Route::patch('/interpreters/{interpreter}/complete', [SocialWorkController::class, 'completeInterpreter'])->name('interpreters.complete');
+
+    // 3.26. Điều Phối Đội Xe Cấp Cứu Ngoại Viện
+    Route::get('/ambulances', [AmbulanceFleetController::class, 'index'])->name('ambulances.index');
+    Route::post('/ambulances/missions', [AmbulanceFleetController::class, 'storeMission'])->name('ambulances.store');
+    Route::patch('/ambulances/missions/{mission}/status', [AmbulanceFleetController::class, 'updateStatus'])->name('ambulances.status');
+
+    // 3.27. Khám Sức Khỏe Doanh Nghiệp (Thông tư 32/2023/TT-BYT)
+    Route::get('/corporate-screening', [CorporateScreeningController::class, 'index'])->name('corporate-screening.index');
+    Route::post('/corporate-screening/contracts', [CorporateScreeningController::class, 'storeContract'])->name('corporate-screening.store');
+    Route::get('/corporate-screening/contracts/{contract}', [CorporateScreeningController::class, 'show'])->name('corporate-screening.show');
+    Route::post('/corporate-screening/contracts/{contract}/employees', [CorporateScreeningController::class, 'addEmployee'])->name('corporate-screening.employees');
+    Route::patch('/corporate-screening/employees/{employee}', [CorporateScreeningController::class, 'updateScreening'])->name('corporate-screening.screening');
+
+    // 3.28. Tiếp Nhận Tiền Phẫu & Phẫu Thuật Trong Ngày (WHO Checklist)
+    Route::get('/day-surgeries', [DaySurgeryController::class, 'index'])->name('day-surgeries.index');
+    Route::post('/day-surgeries', [DaySurgeryController::class, 'store'])->name('day-surgeries.store');
+    Route::patch('/day-surgeries/{surgery}/checklist', [DaySurgeryController::class, 'updateChecklist'])->name('day-surgeries.checklist');
+    Route::patch('/day-surgeries/{surgery}/status', [DaySurgeryController::class, 'updateStatus'])->name('day-surgeries.status');
+
+    // 3.29. Tái Khám Tự Động & Quản Lý Bệnh Mãn Tính (Recall Automation)
+    Route::get('/chronic-recalls', [ChronicRecallController::class, 'index'])->name('chronic-recalls.index');
+    Route::post('/chronic-recalls', [ChronicRecallController::class, 'store'])->name('chronic-recalls.store');
+    Route::post('/chronic-recalls/{recall}/remind', [ChronicRecallController::class, 'sendReminder'])->name('chronic-recalls.remind');
+    Route::patch('/chronic-recalls/{recall}/attended', [ChronicRecallController::class, 'markAttended'])->name('chronic-recalls.attended');
 });
 
 

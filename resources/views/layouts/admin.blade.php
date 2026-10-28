@@ -238,6 +238,74 @@
                             <i class="bi bi-heart-pulse text-success"></i> Dinh Dưỡng & Thực Đơn
                         </a>
                     </li>
+
+                    <li class="sidebar-heading">Hành Chính & Viện Phí Thông Minh</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/insurance-transfers*') ? 'active' : '' }}" href="{{ route('reception.insurance-transfers.index') }}">
+                            <i class="bi bi-file-earmark-medical text-primary"></i> Chuyển Tuyến BHYT (M40)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/wallets*') ? 'active' : '' }}" href="{{ route('reception.wallets.index') }}">
+                            <i class="bi bi-wallet2 text-success"></i> Ví Ký Quỹ & Tạm Ứng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/private-insurance*') ? 'active' : '' }}" href="{{ route('reception.private-insurance.index') }}">
+                            <i class="bi bi-shield-lock-fill text-info"></i> Bảo Lãnh Tư Nhân (GOP)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/record-requests*') ? 'active' : '' }}" href="{{ route('reception.record-requests.index') }}">
+                            <i class="bi bi-file-earmark-lock2-fill text-warning"></i> Cổng Sao Lục Bệnh Án
+                        </a>
+                    </li>
+
+                    <li class="sidebar-heading">An Toàn Người Bệnh & An Ninh</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/emergency-custody*') ? 'active' : '' }}" href="{{ route('reception.emergency-custody.index') }}">
+                            <i class="bi bi-safe2-fill text-danger"></i> Tài Sản Cấp Cứu & Đồ Rơi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/visitor-passes*') ? 'active' : '' }}" href="{{ route('reception.visitor-passes.index') }}">
+                            <i class="bi bi-person-badge-fill text-info"></i> Thẻ Thăm Bệnh Điện Tử
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/medical-incidents*') ? 'active' : '' }}" href="{{ route('reception.medical-incidents.index') }}">
+                            <i class="bi bi-shield-exclamation text-danger"></i> Báo Cáo Sự Cố (Near-Miss)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/social-work*') ? 'active' : '' }}" href="{{ route('reception.social-work.index') }}">
+                            <i class="bi bi-heart-fill text-success"></i> Công Tác Xã Hội & Dịch Thuật
+                        </a>
+                    </li>
+
+                    <li class="sidebar-heading">Quy Trình Ngoại Trú Chuyên Sâu</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/ambulances*') ? 'active' : '' }}" href="{{ route('reception.ambulances.index') }}">
+                            <i class="bi bi-truck-flatbed text-danger"></i> Đội Xe Cấp Cứu Ngoại Viện
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/corporate-screening*') ? 'active' : '' }}" href="{{ route('reception.corporate-screening.index') }}">
+                            <i class="bi bi-buildings-fill text-primary"></i> Khám Sức Khỏe Doanh Nghiệp
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/day-surgeries*') ? 'active' : '' }}" href="{{ route('reception.day-surgeries.index') }}">
+                            <i class="bi bi-hospital-fill text-warning"></i> Phẫu Thuật Trong Ngày (WHO)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/chronic-recalls*') ? 'active' : '' }}" href="{{ route('reception.chronic-recalls.index') }}">
+                            <i class="bi bi-alarm-fill text-info"></i> Tái Khám Tự Động (Recall)
+                        </a>
+                    </li>
+
+                    <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
                             <i class="bi bi-chat-quote"></i> Thông Báo ZNS & SMS

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PatientProfile extends Model
 {
@@ -118,6 +119,51 @@ class PatientProfile extends Model
     public function nutritionAssessments(): HasMany
     {
         return $this->hasMany(NutritionAssessment::class)->orderBy('assessed_at', 'desc');
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(PatientWallet::class);
+    }
+
+    public function insuranceTransfers(): HasMany
+    {
+        return $this->hasMany(InsuranceTransfer::class)->orderBy('created_at', 'desc');
+    }
+
+    public function privateInsuranceGuarantees(): HasMany
+    {
+        return $this->hasMany(PrivateInsuranceGuarantee::class)->orderBy('created_at', 'desc');
+    }
+
+    public function medicalRecordRequests(): HasMany
+    {
+        return $this->hasMany(MedicalRecordRequest::class)->orderBy('created_at', 'desc');
+    }
+
+    public function emergencyCustodies(): HasMany
+    {
+        return $this->hasMany(EmergencyCustody::class)->orderBy('created_at', 'desc');
+    }
+
+    public function visitorPasses(): HasMany
+    {
+        return $this->hasMany(VisitorPass::class)->orderBy('created_at', 'desc');
+    }
+
+    public function socialWorkCases(): HasMany
+    {
+        return $this->hasMany(SocialWorkCase::class)->orderBy('created_at', 'desc');
+    }
+
+    public function daySurgeries(): HasMany
+    {
+        return $this->hasMany(DaySurgery::class)->orderBy('scheduled_at', 'desc');
+    }
+
+    public function chronicDiseaseRecalls(): HasMany
+    {
+        return $this->hasMany(ChronicDiseaseRecall::class)->orderBy('due_recall_date', 'asc');
     }
 
     public function latestVital()
