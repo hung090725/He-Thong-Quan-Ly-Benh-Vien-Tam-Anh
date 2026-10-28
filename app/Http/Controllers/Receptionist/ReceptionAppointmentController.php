@@ -9,6 +9,7 @@ use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use App\Models\PatientProfile;
 use App\Models\Specialty;
+use App\Services\HealthInsuranceService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class ReceptionAppointmentController extends Controller
         $specialtyId = $request->query('specialty_id');
         $search = $request->query('search');
 
-        $query = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
+        $query = Appointment::with(['patientProfile.latestVital', 'doctor.user', 'specialty'])
             ->whereDate('appointment_date', $date)
             ->latest('created_at');
 
@@ -460,17 +461,31 @@ class ReceptionAppointmentController extends Controller
     }
 
     /**
-     * Print patient fee receipt / invoice with VietQR payment.
+     * Print patient fee receipt / invoice with Health Insurance (BHYT) co-payment and VietQR payment.
      */
     public function printReceipt(Appointment $appointment): View
     {
         $appointment->load(['patientProfile', 'doctor.user', 'specialty']);
-        $fee = (float) ($appointment->doctor ? $appointment->doctor->consultation_fee : 350000);
+        $totalFee = (float) ($appointment->doctor ? $appointment->doctor->consultation_fee : 350000);
 
-        $feeWords = $this->convertNumberToVietnameseWords((int) $fee) . ' đồng chẵn';
-        $vietQrUrl = "https://img.vietqr.io/image/vietinbank-113366668888-compact2.png?amount={$fee}&addInfo=TAMANH%20" . urlencode($appointment->appointment_code) . "&accountName=BV%20DA%20KHOA%20TAM%20ANH";
+        $insuranceCode = $appointment->patientProfile->insurance_code ?? null;
+        $routeParam = request()->query('route', 'correct'); // 'correct', 'incorrect', 'none'
+        $useInsurance = $routeParam !== 'none' && !empty($insuranceCode);
+        $isCorrectRoute = $routeParam === 'correct';
 
-        return view('receptionist.appointments.receipt', compact('appointment', 'fee', 'feeWords', 'vietQrUrl'));
+        $insuranceData = null;
+        if ($useInsurance && $insuranceCode) {
+            $insuranceData = HealthInsuranceService::calculate($insuranceCode, $totalFee, $isCorrectRoute);
+            $payableAmount = $insuranceData['patient_copay_amount'];
+        } else {
+            $payableAmount = $totalFee;
+        }
+
+        $fee = $totalFee;
+        $feeWords = $this->convertNumberToVietnameseWords((int) $payableAmount) . ' đồng chẵn';
+        $vietQrUrl = "https://img.vietqr.io/image/vietinbank-113366668888-compact2.png?amount={$payableAmount}&addInfo=TAMANH%20" . urlencode($appointment->appointment_code) . "&accountName=BV%20DA%20KHOA%20TAM%20ANH";
+
+        return view('receptionist.appointments.receipt', compact('appointment', 'fee', 'payableAmount', 'feeWords', 'vietQrUrl', 'insuranceData', 'routeParam'));
     }
 
     private function convertNumberToVietnameseWords(int $number): string

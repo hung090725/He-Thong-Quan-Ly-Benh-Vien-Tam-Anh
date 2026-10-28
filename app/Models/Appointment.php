@@ -67,6 +67,16 @@ class Appointment extends Model
         return $this->hasOne(MedicalRecord::class, 'appointment_id');
     }
 
+    public function vitals(): HasMany
+    {
+        return $this->hasMany(PatientVital::class, 'appointment_id');
+    }
+
+    public function latestVital(): HasOne
+    {
+        return $this->hasOne(PatientVital::class, 'appointment_id')->latestOfMany('recorded_at');
+    }
+
     public function scopeToday(Builder $query): Builder
     {
         return $query->whereDate('appointment_date', Carbon::today());

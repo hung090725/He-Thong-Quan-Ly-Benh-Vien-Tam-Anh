@@ -135,10 +135,13 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="small text-muted fw-bold d-block">Tra cứu nhanh:</label>
+                <label class="small text-muted fw-bold d-block">Tra cứu nhanh / Quét QR:</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" value="{{ $search }}" class="form-control border-start-0" placeholder="Mã hẹn, Mã BN, Họ tên hoặc SĐT...">
+                    <input type="text" name="search" id="receptionSearchInput" value="{{ $search }}" class="form-control border-start-0 border-end-0" placeholder="Mã hẹn, Mã BN, Họ tên hoặc SĐT...">
+                    <button type="button" class="btn btn-outline-primary" onclick="openReceptionQrScanner()" title="Quét Barcode / QR Bằng Camera">
+                        <i class="bi bi-camera-fill"></i>
+                    </button>
                 </div>
             </div>
             <div class="col-md-1 d-flex align-items-end gap-1">
@@ -197,6 +200,18 @@
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle small py-0 px-1" title="Đối tượng khám ưu tiên">
                                             <i class="bi bi-star-fill text-warning"></i> ƯU TIÊN
                                         </span>
+                                    @endif
+                                    @if($app->patientProfile && $app->patientProfile->latestVital)
+                                        @php $appMews = $app->patientProfile->latestVital->mews_classification; @endphp
+                                        @if($appMews['is_emergency'])
+                                            <span class="badge bg-danger text-white border border-danger small py-0 px-1 animate-pulse" title="{{ $appMews['action_text'] }}">
+                                                <i class="bi bi-exclamation-octagon-fill"></i> MEWS: {{ $appMews['score'] }}đ (CẤP CỨU)
+                                            </span>
+                                        @elseif($appMews['score'] >= 3)
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small py-0 px-1" title="{{ $appMews['action_text'] }}">
+                                                MEWS: {{ $appMews['score'] }}đ
+                                            </span>
+                                        @endif
                                     @endif
                                 </div>
                                 <div class="small text-muted">
@@ -497,6 +512,73 @@
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 5000);
     }
+
+    // Camera Scanner at Reception Desk
+    let receptionScanner = null;
+    function openReceptionQrScanner() {
+        const modalEl = document.getElementById('receptionScannerModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        const feedEl = document.getElementById('receptionScannerFeedback');
+        feedEl.textContent = 'Đang khởi động camera...';
+
+        if (receptionScanner) {
+            receptionScanner.clear();
+        }
+
+        receptionScanner = new Html5Qrcode("receptionCameraReader");
+        receptionScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => {
+                feedEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check2-circle"></i> Đã tìm thấy: ${decodedText}</span>`;
+                stopReceptionScanner();
+                const inp = document.getElementById('receptionSearchInput');
+                if (inp) {
+                    inp.value = decodedText;
+                    inp.closest('form').submit();
+                }
+            },
+            () => {}
+        ).catch(err => {
+            feedEl.textContent = 'Không thể mở camera: ' + err;
+        });
+    }
+
+    function stopReceptionScanner() {
+        if (receptionScanner) {
+            receptionScanner.stop().then(() => {
+                receptionScanner.clear();
+                receptionScanner = null;
+            }).catch(() => {
+                receptionScanner = null;
+            });
+        }
+        const modalEl = document.getElementById('receptionScannerModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) modalInstance.hide();
+    }
 </script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<!-- Reception QR Scanner Modal -->
+<div class="modal fade" id="receptionScannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="bi bi-camera me-1"></i> Quét Mã Lịch Hẹn / Thẻ Bệnh Nhân</h6>
+                <button type="button" class="btn-close btn-close-white" onclick="stopReceptionScanner()"></button>
+            </div>
+            <div class="modal-body p-3 text-center">
+                <div id="receptionCameraReader" class="rounded overflow-hidden mx-auto" style="max-width: 380px; background: #000;"></div>
+                <div id="receptionScannerFeedback" class="small text-muted mt-2">Hướng mã QR phiếu hẹn hoặc mã vạch thẻ BN vào camera.</div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="stopReceptionScanner()">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endpush
 @endsection

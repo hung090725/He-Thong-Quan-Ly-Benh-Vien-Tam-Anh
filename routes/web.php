@@ -12,6 +12,7 @@ use App\Http\Controllers\Patient\PatientPortalController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\KioskController;
 use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\PatientVitalController;
 use App\Http\Controllers\Receptionist\PharmacyController;
@@ -56,6 +57,16 @@ Route::prefix('booking')->group(function () {
     // AJAX API routes for dynamic dropdown and overbooking slot checking
     Route::get('/doctors-by-specialty/{specialtyId}', [BookingController::class, 'getDoctorsBySpecialty'])->name('booking.doctors_by_specialty');
     Route::get('/doctor-slots', [BookingController::class, 'getDoctorSlots'])->name('booking.doctor_slots');
+});
+
+// 1.3. Smart Kiosk Tự Phục Vụ Tại Cửa Sảnh (Self-Service Check-in & Queue Ticket)
+Route::prefix('kiosk')->name('kiosk.')->group(function () {
+    Route::get('/', [KioskController::class, 'index'])->name('index');
+    Route::post('/checkin', [KioskController::class, 'checkinAppointment'])->name('checkin');
+    Route::post('/lookup', [KioskController::class, 'lookupPatient'])->name('lookup');
+    Route::post('/register-returning', [KioskController::class, 'registerReturningPatient'])->name('register-returning');
+    Route::post('/register-new', [KioskController::class, 'registerNewPatient'])->name('register-new');
+    Route::get('/ticket/{appointment}', [KioskController::class, 'printTicket'])->name('ticket');
 });
 
 // 1.3. Quản lý Tài khoản Người dùng (Admin)
