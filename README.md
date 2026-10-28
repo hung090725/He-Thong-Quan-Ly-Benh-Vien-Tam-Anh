@@ -26,7 +26,7 @@ Dự án được xây dựng và đóng góp chính thức qua Pull Requests tr
 | **Nguyễn Thành Quý** | [@quy0358](https://github.com/quy0358) | **Project Lead & Core Architect**: Khung nền tảng Laravel 12, Auth & RBAC, Booking Engine, Master Layouts, Quản lý User | [![Merged](https://img.shields.io/badge/Status-Core%20Maintainer-success)]() |
 | **Nguyễn Văn Hưng** | [@hung090725](https://github.com/hung090725) | **Patient Management & Reception Desk**: Hồ sơ bệnh nhân, Nghiệp vụ Check-in, Khám vãng lai, Bảng điện tử phòng chờ, Quầy Dược ngoại trú, Giấy chứng nhận nghỉ việc C65-HD, VietQR, Cảnh báo dị ứng CDSS & Vitals Tracker | [![PR #3 Merged](https://img.shields.io/badge/PR%20%233-Merged-blueviolet)]() |
 | **Nguyễn Văn Đạt** | [@jtadd123](https://github.com/jtadd123) | **Master Data & Public Portal**: Quản lý Chuyên khoa (CRUD), Bác sĩ, Lịch trực ca tuần, Danh bạ bác sĩ công khai & Trang chủ | [![PR #1 Merged](https://img.shields.io/badge/PR%20%231-Merged-blueviolet)]() |
-| **Võ Lê Gia Bảo** | `@vlgbao` | **Consultation, Records & Analytics**: Bàn khám bác sĩ, Bệnh án điện tử, Đơn thuốc lặp, File y tế bảo mật, Dashboard thống kê | [![In Progress](https://img.shields.io/badge/Status-In%20Progress-orange)]() |
+| **Võ Lê Gia Bảo** | [@gbao289](https://github.com/gbao289) | **Consultation, Records & Analytics**: Bàn khám bác sĩ, Bệnh án điện tử, Đơn thuốc lặp, File y tế bảo mật, Dashboard thống kê | [![In Progress](https://img.shields.io/badge/Status-In%20Progress-orange)]() |
 
 ---
 

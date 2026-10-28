@@ -1,10 +1,10 @@
 # KẾ HOẠCH TRIỂN KHAI ĐỒ ÁN: HỆ THỐNG QUẢN LÝ BỆNH VIỆN TÂM ANH
 **Học phần:** Phát triển ứng dụng Web (PHP - Laravel - MySQL)  
 **Nhóm sinh viên thực hiện:**
-1. **Nguyễn Thành Quý** (Technical Lead & System Architect)
-2. **Nguyễn Văn Đạt** (Backend & Frontend Developer: Chuyên khoa & Bác sĩ)
-3. **Nguyễn Văn Hưng** (Backend & Frontend Developer: Bệnh nhân & Tiếp nhận)
-4. **Võ Lê Gia Bảo** (Backend & Frontend Developer: Khám bệnh, Hồ sơ y tế & Báo cáo)
+1. **Nguyễn Thành Quý** ([@quy0358](https://github.com/quy0358)) - Technical Lead & System Architect
+2. **Nguyễn Văn Đạt** ([@jtadd123](https://github.com/jtadd123)) - Backend & Frontend Developer: Chuyên khoa & Bác sĩ
+3. **Nguyễn Văn Hưng** ([@hung090725](https://github.com/hung090725)) - Backend & Frontend Developer: Bệnh nhân & Tiếp nhận
+4. **Võ Lê Gia Bảo** ([@gbao289](https://github.com/gbao289)) - Backend & Frontend Developer: Khám bệnh, Hồ sơ y tế & Báo cáo
 
 ---
 
