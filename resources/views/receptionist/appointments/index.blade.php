@@ -444,6 +444,17 @@
      * Voice Call Patient using Web Speech API (Tiếng Việt)
      */
     function callPatientVoice(patientName, queueNumber, roomNumber, doctorName) {
+        // Broadcast event to connected Waiting Room TV displays (queue-display)
+        try {
+            localStorage.setItem('tam_anh_queue_call', JSON.stringify({
+                name: patientName,
+                stt: queueNumber,
+                room: roomNumber,
+                doctor: doctorName,
+                time: Date.now()
+            }));
+        } catch (e) {}
+
         // 1. Play dual-tone chime
         playHospitalChime();
 

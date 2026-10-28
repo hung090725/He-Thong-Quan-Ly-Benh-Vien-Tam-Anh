@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Receptionist;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
+use App\Models\ClinicalAuditLog;
 use App\Models\PatientProfile;
 use App\Models\PatientVital;
 use Carbon\Carbon;
@@ -108,6 +109,9 @@ class PatientController extends Controller
 
         $patient = PatientProfile::create($data);
 
+        // Audit Trail: Log patient creation
+        ClinicalAuditLog::record($patient, 'create', "Tạo mới hồ sơ bệnh nhân {$patient->full_name} ({$patient->patient_code})", null, $data);
+
         return redirect()
             ->route('reception.patients.show', $patient)
             ->with('success', "Hồ sơ bệnh nhân {$patient->full_name} đã được tạo thành công với mã định danh: {$patient->patient_code}");
@@ -127,7 +131,11 @@ class PatientController extends Controller
                 $q->with(['doctor.user', 'prescriptions', 'attachments'])->latest('created_at');
             },
             'vitals.recordedBy',
+            'auditLogs.user',
         ]);
+
+        // Audit Trail: Record view access log
+        ClinicalAuditLog::record($patient, 'view', "Truy cập tra cứu hồ sơ bệnh nhân {$patient->patient_code}");
 
         // Auto-extract vitals from past records if no structured vitals exist yet
         if ($patient->vitals->isEmpty() && $patient->medicalRecords->isNotEmpty()) {
@@ -232,7 +240,22 @@ class PatientController extends Controller
             }
         }
 
+        $oldValues = $patient->only(array_keys($data));
         $patient->update($data);
+
+        // Audit Trail: Record changes
+        $action = (!empty($data['blood_group']) && ($oldValues['blood_group'] ?? null) !== $data['blood_group'])
+            || (!empty($data['allergies']) && ($oldValues['allergies'] ?? null) !== $data['allergies'])
+            ? 'update_safety'
+            : 'update_profile';
+
+        ClinicalAuditLog::record(
+            $patient,
+            $action,
+            "Cập nhật thông tin hồ sơ bệnh nhân {$patient->full_name} ({$patient->patient_code})",
+            $oldValues,
+            $data
+        );
 
         return redirect()
             ->route('reception.patients.show', $patient)
@@ -264,5 +287,19 @@ class PatientController extends Controller
     public function printCard(PatientProfile $patient): View
     {
         return view('receptionist.patients.print_card', compact('patient'));
+    }
+
+    /**
+     * Print International Standard Patient Medical Wristband (JCI IPSG.1).
+     */
+    public function printWristband(PatientProfile $patient): View
+    {
+        ClinicalAuditLog::record(
+            $patient,
+            'print_wristband',
+            "In vòng tay nhận diện người bệnh (Mã BN: {$patient->patient_code})"
+        );
+
+        return view('receptionist.patients.print_wristband', compact('patient'));
     }
 }

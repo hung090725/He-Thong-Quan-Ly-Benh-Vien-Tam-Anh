@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\ClinicalAuditLog;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use App\Models\PatientProfile;
@@ -236,7 +237,7 @@ class ReceptionAppointmentController extends Controller
                 $symptom = '[ƯU TIÊN] ' . $symptom;
             }
 
-            return Appointment::create([
+            $newAppointment = Appointment::create([
                 'appointment_code' => Appointment::generateAppointmentCode(),
                 'patient_profile_id' => $patientProfile->id,
                 'doctor_id' => $validated['doctor_id'],
@@ -248,6 +249,14 @@ class ReceptionAppointmentController extends Controller
                 'status' => Appointment::STATUS_CONFIRMED, // Walk-in is auto check-in
                 'created_by_user_id' => Auth::id(),
             ]);
+
+            ClinicalAuditLog::record(
+                $patientProfile,
+                'checkin',
+                "Tiếp nhận vãng lai tại quầy (Mã hẹn: {$newAppointment->appointment_code}) vào BS {$newAppointment->doctor->full_name_with_title}"
+            );
+
+            return $newAppointment;
         });
 
         return redirect()
@@ -267,6 +276,12 @@ class ReceptionAppointmentController extends Controller
         $appointment->update([
             'status' => Appointment::STATUS_CONFIRMED,
         ]);
+
+        ClinicalAuditLog::record(
+            $appointment->patient_profile_id,
+            'checkin',
+            "Check-in tiếp nhận lịch hẹn {$appointment->appointment_code} vào hàng đợi Bác sĩ {$appointment->doctor->full_name_with_title}"
+        );
 
         return back()->with('success', "Đã Check-in thành công cho bệnh nhân {$appointment->patientProfile->full_name} (Mã hẹn: {$appointment->appointment_code}). Bệnh nhân đã được chuyển vào danh sách chờ khám của bác sĩ.");
     }

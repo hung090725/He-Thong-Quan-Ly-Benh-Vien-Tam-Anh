@@ -179,6 +179,17 @@
                                     <div class="text-truncate text-dark fw-medium" style="max-width: 260px; font-size: 0.76rem;">
                                         {{ $record->prescriptions->pluck('medication_name')->implode(', ') }}
                                     </div>
+                                    @php
+                                        $medNames = $record->prescriptions->pluck('medication_name')->toArray();
+                                        $ddiAlerts = \App\Services\DrugInteractionService::analyze($medNames);
+                                    @endphp
+                                    @if(!empty($ddiAlerts))
+                                        <div class="mt-1">
+                                            <span class="badge bg-danger text-white border small" title="{{ $ddiAlerts[0]['title'] }}">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Cảnh báo DDI ({{ count($ddiAlerts) }})
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
                             </td>
 

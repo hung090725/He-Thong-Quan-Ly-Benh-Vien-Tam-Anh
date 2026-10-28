@@ -115,6 +115,7 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
 
     // 3.2. Quản lý Hồ sơ Bệnh nhân (CRUD)
     Route::get('/patients/{patient}/print-card', [PatientController::class, 'printCard'])->name('patients.print-card');
+    Route::get('/patients/{patient}/print-wristband', [PatientController::class, 'printWristband'])->name('patients.print-wristband');
     Route::post('/patients/{patient}/vitals', [PatientVitalController::class, 'store'])->name('patients.vitals.store');
     Route::delete('/vitals/{vital}', [PatientVitalController::class, 'destroy'])->name('vitals.destroy');
     Route::resource('patients', PatientController::class);

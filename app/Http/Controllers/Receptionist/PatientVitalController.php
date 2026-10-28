@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClinicalAuditLog;
 use App\Models\PatientProfile;
 use App\Models\PatientVital;
 use Carbon\Carbon;
@@ -59,6 +60,15 @@ class PatientVitalController extends Controller
             'height' => $validated['height'] ?? null,
             'notes' => $validated['notes'] ?? null,
         ]);
+
+        // Audit Trail: Record vitals measurement log
+        ClinicalAuditLog::record(
+            $patient,
+            'record_vitals',
+            "Ghi nhận chỉ số sinh hiệu: HA " . ($vital->systolic_bp ? "{$vital->systolic_bp}/{$vital->diastolic_bp} mmHg" : "chưa đo") . ", Mạch " . ($vital->heart_rate ? "{$vital->heart_rate} l/p" : "chưa đo"),
+            null,
+            $validated
+        );
 
         return back()->with('success', "Đã ghi nhận chỉ số sinh hiệu mới lúc {$vital->recorded_at->format('H:i d/m/Y')} cho bệnh nhân {$patient->full_name}.");
     }

@@ -5,6 +5,9 @@
 @section('content')
 <x-page-header title="{{ $patient->full_name }}" subtitle="Mã hồ sơ: {{ $patient->patient_code }} | Quản lý thông tin định danh và lịch sử khám chữa bệnh">
     <x-slot:actions>
+        <a href="{{ route('reception.patients.print-wristband', $patient) }}" target="_blank" class="btn btn-outline-danger d-inline-flex align-items-center gap-1" title="In vòng tay y tế đeo tay nhận diện người bệnh (Chuẩn JCI)">
+            <i class="bi bi-tag"></i> In vòng tay JCI
+        </a>
         <a href="{{ route('reception.patients.print-card', $patient) }}" target="_blank" class="btn btn-outline-info d-inline-flex align-items-center gap-1">
             <i class="bi bi-credit-card-2-front"></i> In thẻ bệnh nhân
         </a>
@@ -131,6 +134,11 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link px-4" id="vitals-tab" data-bs-toggle="pill" data-bs-target="#vitals" type="button" role="tab">
                     <i class="bi bi-activity text-danger me-1"></i> Diễn Tiến Sinh Hiệu ({{ $patient->vitals->count() }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link px-4" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit" type="button" role="tab">
+                    <i class="bi bi-shield-check text-info me-1"></i> Nhật Ký Truy Vết ({{ $patient->auditLogs->count() }})
                 </button>
             </li>
         </ul>
@@ -510,6 +518,88 @@
                             </button>
                         </div>
                     @endif
+                </div>
+            </div>
+
+            <!-- TAB 4: Clinical & Security Audit Trail -->
+            <div class="tab-pane fade" id="audit" role="tabpanel">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h6 class="card-title fw-bold text-dark mb-0">
+                                <i class="bi bi-shield-lock-fill text-info me-1"></i> Nhật Ký Truy Vết Y Khoa & Giám Sát An Toàn (Audit Trail)
+                            </h6>
+                            <small class="text-muted">Tuân thủ Thông tư 46/2018/TT-BYT & Tiêu chuẩn bảo mật hồ sơ bệnh án điện tử (EMR/EHR)</small>
+                        </div>
+                        <span class="badge bg-light text-dark border font-monospace">
+                            <i class="bi bi-fingerprint text-primary me-1"></i>{{ $patient->auditLogs->count() }} bản ghi truy vết
+                        </span>
+                    </div>
+
+                    <div class="card-body p-0">
+                        @if($patient->auditLogs->isNotEmpty())
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3" style="width: 170px;">Thời Gian</th>
+                                            <th style="width: 160px;">Nhân Sự Thao Tác</th>
+                                            <th style="width: 180px;">Hành Vi / Thao Tác</th>
+                                            <th>Mô Tả Chi Tiết</th>
+                                            <th style="width: 130px;">Địa Chỉ IP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($patient->auditLogs as $log)
+                                            @php $badge = $log->action_badge; @endphp
+                                            <tr>
+                                                <td class="ps-3 font-monospace text-dark">
+                                                    {{ $log->created_at->format('d/m/Y H:i:s') }}
+                                                </td>
+                                                <td>
+                                                    @if($log->user)
+                                                        <div class="fw-bold text-dark">{{ $log->user->name }}</div>
+                                                        <span class="badge bg-secondary-subtle text-secondary border small">{{ $log->user->role_name }}</span>
+                                                    @else
+                                                        <span class="text-muted fst-italic">Hệ thống tự động</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{{ $badge['color'] }}-subtle text-{{ $badge['color'] }} border border-{{ $badge['color'] }}-subtle px-2 py-1">
+                                                        <i class="bi {{ $badge['icon'] }} me-1"></i>{{ $badge['label'] }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="text-dark">{{ $log->description }}</div>
+                                                    @if($log->old_values && $log->new_values)
+                                                        <div class="mt-1">
+                                                            <a class="text-decoration-none small text-primary" data-bs-toggle="collapse" href="#diffLog{{ $log->id }}" role="button">
+                                                                <i class="bi bi-code-slash me-1"></i>Xem dữ liệu thay đổi
+                                                            </a>
+                                                            <div class="collapse mt-2" id="diffLog{{ $log->id }}">
+                                                                <div class="p-2 border rounded bg-light font-monospace small" style="font-size: 0.75rem;">
+                                                                    <div class="text-danger"><strong>- Dữ liệu cũ:</strong> {{ json_encode($log->old_values, JSON_UNESCAPED_UNICODE) }}</div>
+                                                                    <div class="text-success mt-1"><strong>+ Dữ liệu mới:</strong> {{ json_encode($log->new_values, JSON_UNESCAPED_UNICODE) }}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <code class="text-muted">{{ $log->ip_address ?: '127.0.0.1' }}</code>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="p-5 text-center text-muted">
+                                <i class="bi bi-shield-slash fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có nhật ký truy vết nào được ghi nhận cho hồ sơ này.
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

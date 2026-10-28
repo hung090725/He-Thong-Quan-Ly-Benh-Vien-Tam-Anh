@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClinicalAuditLog;
 use App\Models\MedicalRecord;
 use App\Models\Medication;
 use Carbon\Carbon;
@@ -110,6 +111,15 @@ class PharmacyController extends Controller
             }
         }
 
+        // Audit Trail: Record medication dispensing
+        ClinicalAuditLog::record(
+            $record->patient_profile_id,
+            'dispense',
+            "Cấp phát thuốc ngoại trú cho bệnh án {$record->record_code} ({$record->prescriptions->count()} mặt hàng thuốc)",
+            null,
+            ['dispense_notes' => $record->dispense_notes, 'record_code' => $record->record_code]
+        );
+
         return back()->with('success', "Đã xác nhận cấp phát thuốc thành công cho bệnh nhân {$record->patientProfile->full_name} (Mã đơn: {$record->record_code}). Đã cập nhật tồn kho dược ngoại trú.");
     }
 
@@ -135,6 +145,13 @@ class PharmacyController extends Controller
             'dispensed_by_user_id' => null,
             'dispense_notes' => null,
         ]);
+
+        // Audit Trail: Record undo dispensing
+        ClinicalAuditLog::record(
+            $record->patient_profile_id,
+            'undo_dispense',
+            "Hoàn tác trạng thái cấp phát thuốc về chờ xử lý cho bệnh án {$record->record_code}"
+        );
 
         return back()->with('success', "Đã hoàn tác trạng thái cấp phát thuốc về 'Chờ phát thuốc' cho mã {$record->record_code} và hoàn lại tồn kho dược.");
     }

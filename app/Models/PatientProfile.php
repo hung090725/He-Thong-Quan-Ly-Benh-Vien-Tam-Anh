@@ -60,6 +60,11 @@ class PatientProfile extends Model
         return $this->hasMany(PatientVital::class)->orderBy('recorded_at', 'desc');
     }
 
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(ClinicalAuditLog::class)->orderBy('created_at', 'desc');
+    }
+
     public function latestVital()
     {
         return $this->hasOne(PatientVital::class)->latestOfMany('recorded_at');
