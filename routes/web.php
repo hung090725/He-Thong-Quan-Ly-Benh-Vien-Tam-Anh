@@ -68,7 +68,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // 1.1. Xác thực người dùng (Auth)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:10,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -82,7 +82,7 @@ Route::prefix('booking')->group(function () {
     Route::get('/', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/success/{code}', [BookingController::class, 'success'])->name('booking.success');
-    Route::get('/lookup', [BookingController::class, 'lookup'])->name('booking.lookup');
+    Route::get('/lookup', [BookingController::class, 'lookup'])->name('booking.lookup')->middleware('throttle:30,1');
 
     // AJAX API routes for dynamic dropdown and overbooking slot checking
     Route::get('/doctors-by-specialty/{specialtyId}', [BookingController::class, 'getDoctorsBySpecialty'])->name('booking.doctors_by_specialty');

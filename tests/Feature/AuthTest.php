@@ -90,4 +90,23 @@ class AuthTest extends TestCase
         $user->password = Hash::make('123456');
         $user->save();
     }
+
+    public function test_deactivated_user_cannot_login(): void
+    {
+        $user = User::where('email', 'patient@gmail.com')->first();
+        $user->is_active = false;
+        $user->save();
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => 'patient@gmail.com',
+            'password' => '123456',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+
+        // Restore active status
+        $user->is_active = true;
+        $user->save();
+    }
 }

@@ -55,4 +55,35 @@ class UserManagementTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertDatabaseHas('users', ['id' => $admin->id]);
     }
+
+    public function test_admin_cannot_demote_themselves_from_admin_role(): void
+    {
+        $admin = User::where('role', User::ROLE_ADMIN)->first();
+
+        $response = $this->actingAs($admin)->put('/admin/users/' . $admin->id, [
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'phone' => $admin->phone,
+            'role' => User::ROLE_PATIENT,
+        ]);
+
+        $response->assertSessionHas('error');
+        $admin->refresh();
+        $this->assertEquals(User::ROLE_ADMIN, $admin->role);
+    }
+
+    public function test_cannot_delete_doctor_user_with_linked_appointments(): void
+    {
+        $admin = User::where('role', User::ROLE_ADMIN)->first();
+        $doctorUser = User::where('role', User::ROLE_DOCTOR)
+            ->whereHas('doctor.appointments')
+            ->first();
+
+        if ($doctorUser) {
+            $response = $this->actingAs($admin)->delete('/admin/users/' . $doctorUser->id);
+
+            $response->assertSessionHas('error');
+            $this->assertDatabaseHas('users', ['id' => $doctorUser->id]);
+        }
+    }
 }

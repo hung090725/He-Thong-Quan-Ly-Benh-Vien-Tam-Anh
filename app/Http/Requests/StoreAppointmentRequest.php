@@ -100,8 +100,21 @@ class StoreAppointmentRequest extends FormRequest
                 return;
             }
 
-            // 2. Check doctor works on that day of week and shift
+            // 2. Check real-time cutoff if appointment is booked for today
             $carbonDate = Carbon::parse($appointmentDate);
+            if ($carbonDate->isToday()) {
+                $nowTime = Carbon::now()->format('H:i');
+                if ($shift === 'morning' && $nowTime >= '11:00') {
+                    $validator->errors()->add('shift', 'Ca sáng ngày hôm nay đã kết thúc thời gian tiếp nhận đăng ký trực tuyến (sau 11:00). Vui lòng chọn ca chiều hoặc ngày làm việc tiếp theo.');
+                    return;
+                }
+                if ($shift === 'afternoon' && $nowTime >= '16:30') {
+                    $validator->errors()->add('shift', 'Ca chiều ngày hôm nay đã kết thúc thời gian tiếp nhận đăng ký trực tuyến (sau 16:30). Vui lòng chọn ngày làm việc tiếp theo.');
+                    return;
+                }
+            }
+
+            // 3. Check doctor works on that day of week and shift
             $dayOfWeek = strtolower($carbonDate->englishDayOfWeek); // monday, tuesday, etc.
 
             $schedule = DoctorSchedule::where('doctor_id', $doctorId)

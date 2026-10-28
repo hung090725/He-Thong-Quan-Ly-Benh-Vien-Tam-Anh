@@ -278,6 +278,19 @@
 
         doctorSelect.addEventListener('change', checkSlots);
         appointmentDate.addEventListener('change', checkSlots);
+
+        // Anti-Double Submit Protection
+        const bookingForm = document.querySelector('form[action="{{ route('booking.store') }}"]');
+        const submitBtn = document.getElementById('submitBtn');
+        if (bookingForm && submitBtn) {
+            bookingForm.addEventListener('submit', function (e) {
+                // If form is valid according to HTML5 validation, disable button to prevent double clicks
+                if (bookingForm.checkValidity()) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> ĐANG XỬ LÝ ĐĂNG KÝ...';
+                }
+            });
+        }
     });
 </script>
 @endpush
