@@ -244,8 +244,13 @@
                                     @endif
 
                                     <!-- Print Drug Bag Label -->
-                                    <a href="{{ route('reception.pharmacy.label', $record) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm" title="In nhãn hướng dẫn túi thuốc dán bao bì">
-                                        <i class="bi bi-tag-fill"></i> In nhãn túi
+                                    <a href="{{ route('reception.pharmacy.label', $record) }}" target="_blank" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm" title="In nhãn hướng dẫn túi thuốc dán bao bì">
+                                        <i class="bi bi-bag"></i> Nhãn túi
+                                    </a>
+
+                                    <!-- Print Smart Bottle Stickers -->
+                                    <a href="{{ route('reception.pharmacy.bottle-labels', $record) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm" title="In tem dán hộp/lọ thuốc thông minh (Decal 75x50mm)">
+                                        <i class="bi bi-tag-fill"></i> Tem lọ thuốc
                                     </a>
 
                                     <!-- Visual Schedule & iCal -->

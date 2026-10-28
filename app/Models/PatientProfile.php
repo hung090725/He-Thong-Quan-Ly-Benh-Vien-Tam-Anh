@@ -60,6 +60,21 @@ class PatientProfile extends Model
         return $this->hasMany(PatientVital::class)->orderBy('recorded_at', 'desc');
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(PatientNotification::class);
+    }
+
+    public function dayBedAdmissions(): HasMany
+    {
+        return $this->hasMany(DayBedAdmission::class);
+    }
+
+    public function clinicalConsultations(): HasMany
+    {
+        return $this->hasMany(ClinicalConsultation::class);
+    }
+
     public function auditLogs(): HasMany
     {
         return $this->hasMany(ClinicalAuditLog::class)->orderBy('created_at', 'desc');

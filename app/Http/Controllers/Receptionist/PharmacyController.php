@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\ClinicalAuditLog;
 use App\Models\MedicalRecord;
 use App\Models\Medication;
+use App\Models\Prescription;
 use App\Services\AllergyCrossReactionService;
+use App\Services\PrescriptionLabelService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -202,5 +204,30 @@ class PharmacyController extends Controller
             'counter' => $counter,
             'speech_text' => $speechText,
         ]);
+    }
+
+    /**
+     * In toàn bộ tem nhãn dán hộp thuốc thông minh theo chuẩn decal nhiệt 75mm x 50mm.
+     */
+    public function printBottleLabels(MedicalRecord $record, PrescriptionLabelService $labelService): View
+    {
+        $labels = $labelService->generateLabelsForRecord($record);
+        return view('receptionist.pharmacy.bottle_labels', compact('record', 'labels'));
+    }
+
+    /**
+     * In một tem nhãn dán hộp thuốc đơn lẻ.
+     */
+    public function printSingleBottleLabel(Prescription $prescription, PrescriptionLabelService $labelService): View
+    {
+        $record = $prescription->medicalRecord;
+        $record->load(['appointment.patientProfile', 'appointment.doctor.specialty']);
+        $patient = $record->patientProfile ?? $record->appointment->patientProfile;
+        $doctor = $record->doctor ?? $record->appointment->doctor;
+
+        $label = $labelService->buildSingleLabelData($record, $prescription, $patient, $doctor);
+        $labels = [$label];
+
+        return view('receptionist.pharmacy.bottle_labels', compact('record', 'labels'));
     }
 }

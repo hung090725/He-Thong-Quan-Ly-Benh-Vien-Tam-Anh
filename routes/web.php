@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ProfileController;
+use App\Http\Controllers\Doctor\ClinicalConsultationController;
 use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Doctor\DoctorQueueController;
 use App\Http\Controllers\Patient\PatientPortalController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\KioskController;
+use App\Http\Controllers\Public\PatientJourneyController;
+use App\Http\Controllers\Receptionist\DayBedController;
 use App\Http\Controllers\Receptionist\InformedConsentController;
 use App\Http\Controllers\Receptionist\MedicationScheduleController;
 use App\Http\Controllers\Receptionist\PatientController;
@@ -22,6 +25,7 @@ use App\Http\Controllers\Receptionist\PharmacyController;
 use App\Http\Controllers\Receptionist\PharmacyInventoryController;
 use App\Http\Controllers\Receptionist\ReceptionAnalyticsController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
+use App\Http\Controllers\Receptionist\ReceptionNotificationController;
 use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
 use Illuminate\Support\Facades\Route;
 
@@ -75,6 +79,9 @@ Route::prefix('kiosk')->name('kiosk.')->group(function () {
 
 // Cổng Tra Cứu Viện Phí Điện Tử & Thanh Toán VietQR Tự Động (Public Smart Billing Lookup)
 Route::get('/billing/lookup', [PatientInvoiceController::class, 'publicLookup'])->name('public.billing.lookup');
+
+// Cổng Theo Dõi Hành Trình Khám Trực Tuyến Thời Gian Thực (Smart Patient Journey Live Tracker)
+Route::get('/journey/{code}', [PatientJourneyController::class, 'show'])->name('public.journey.show');
 
 // 1.3. Quản lý Tài khoản Người dùng (Admin)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -145,6 +152,8 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/pharmacy/{record}/undo', [PharmacyController::class, 'undoDispense'])->name('pharmacy.undo');
     Route::post('/pharmacy/{record}/call-audio', [PharmacyController::class, 'callAudio'])->name('pharmacy.call-audio');
     Route::get('/pharmacy/{record}/label', [PharmacyController::class, 'printLabel'])->name('pharmacy.label');
+    Route::get('/pharmacy/{record}/bottle-labels', [PharmacyController::class, 'printBottleLabels'])->name('pharmacy.bottle-labels');
+    Route::get('/pharmacy/prescriptions/{prescription}/bottle-label', [PharmacyController::class, 'printSingleBottleLabel'])->name('pharmacy.single-bottle-label');
     Route::get('/pharmacy/{record}/schedule', [MedicationScheduleController::class, 'show'])->name('pharmacy.schedule');
     Route::get('/pharmacy/{record}/schedule/ical', [MedicationScheduleController::class, 'downloadIcal'])->name('pharmacy.schedule.ical');
 
@@ -178,6 +187,20 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
 
     // 3.7. Trung Tâm Giám Sát Hiệu Suất Tiếp Nhận & An Toàn Dược (BI Analytics & Operations)
     Route::get('/analytics', [ReceptionAnalyticsController::class, 'index'])->name('analytics.index');
+
+    // 3.8. Sơ Đồ Giường Ngoại Trú & Khu Lưu Bệnh Ban Ngày (Day-Bed Management)
+    Route::get('/day-beds', [DayBedController::class, 'index'])->name('day-beds.index');
+    Route::post('/day-beds/admit', [DayBedController::class, 'storeAdmission'])->name('day-beds.admit');
+    Route::get('/day-beds/admissions/{admission}', [DayBedController::class, 'showAdmission'])->name('day-beds.show');
+    Route::post('/day-beds/admissions/{admission}/infusion', [DayBedController::class, 'storeInfusion'])->name('day-beds.infusion.store');
+    Route::post('/day-beds/infusions/{infusion}/complete', [DayBedController::class, 'completeInfusion'])->name('day-beds.infusion.complete');
+    Route::post('/day-beds/admissions/{admission}/discharge', [DayBedController::class, 'discharge'])->name('day-beds.discharge');
+    Route::post('/day-beds/{bed}/cleaning-done', [DayBedController::class, 'finishCleaning'])->name('day-beds.cleaning-done');
+
+    // 3.9. Trung Tâm Thông Báo Zalo ZNS / SMS Brandname & Cảnh Báo Sắp Đến Lượt
+    Route::get('/notifications', [ReceptionNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/appointments/{appointment}/alert', [ReceptionNotificationController::class, 'dispatchAlert'])->name('notifications.alert');
+    Route::post('/appointments/{appointment}/prescription-alert', [ReceptionNotificationController::class, 'dispatchPrescriptionAlert'])->name('notifications.prescription-alert');
 });
 
 
@@ -195,4 +218,13 @@ Route::middleware(['auth', 'role:doctor,admin'])->prefix('doctor')->name('doctor
     Route::post('/records/{record}/attachments', [DoctorConsultationController::class, 'uploadAttachment'])->name('records.attachments.upload');
     Route::delete('/records/{record}/attachments/{attachment}', [DoctorConsultationController::class, 'destroyAttachment'])->name('records.attachments.destroy');
     Route::get('/records/{record}/print', [DoctorConsultationController::class, 'printPrescription'])->name('records.print');
+});
+
+// =========================================================================
+// ====== MODULE 5: IN-HOSPITAL CLINICAL CONSULTATION =======================
+// =========================================================================
+Route::middleware(['auth'])->group(function () {
+    Route::post('/consultations/{consultation}/respond', [ClinicalConsultationController::class, 'respond'])->name('consultations.respond');
+    Route::get('/consultations/{consultation}/print', [ClinicalConsultationController::class, 'print'])->name('consultations.print');
+    Route::resource('consultations', ClinicalConsultationController::class);
 });

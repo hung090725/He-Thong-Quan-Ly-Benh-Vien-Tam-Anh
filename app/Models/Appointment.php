@@ -108,6 +108,21 @@ class Appointment extends Model
         return $this->hasMany(PatientVital::class, 'appointment_id');
     }
 
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PatientNotification::class);
+    }
+
+    public function dayBedAdmissions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(DayBedAdmission::class);
+    }
+
+    public function clinicalConsultations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ClinicalConsultation::class);
+    }
+
     public function latestVital(): HasOne
     {
         return $this->hasOne(PatientVital::class, 'appointment_id')->latestOfMany('recorded_at');

@@ -194,8 +194,23 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/day-beds*') ? 'active' : '' }}" href="{{ route('reception.day-beds.index') }}">
+                            <i class="bi bi-hospital"></i> Giường Ngoại Trú & Lưu Ngày
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
+                            <i class="bi bi-chat-quote"></i> Thông Báo ZNS & SMS
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/analytics*') ? 'active' : '' }}" href="{{ route('reception.analytics.index') }}">
                             <i class="bi bi-graph-up-arrow"></i> Giám Sát Hiệu Suất (BI)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('consultations*') ? 'active' : '' }}" href="{{ route('consultations.index') }}">
+                            <i class="bi bi-people-fill"></i> Hội Chẩn Đa Chuyên Khoa
                         </a>
                     </li>
                 @endif
@@ -205,6 +220,11 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('doctor/queue*') ? 'active' : '' }}" href="{{ route('doctor.queue') }}">
                             <i class="bi bi-heart-pulse"></i> Hàng đợi khám hôm nay
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('consultations*') ? 'active' : '' }}" href="{{ route('consultations.index') }}">
+                            <i class="bi bi-people-fill"></i> Hội Chẩn Đa Chuyên Khoa
                         </a>
                     </li>
                 @endif

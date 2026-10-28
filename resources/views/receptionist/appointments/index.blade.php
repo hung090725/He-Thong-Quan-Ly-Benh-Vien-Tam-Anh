@@ -272,6 +272,15 @@
                                         onclick="callPatientVoice('{{ addslashes($app->patientProfile->full_name) }}', '{{ $app->queue_number }}', '{{ addslashes($app->doctor ? ($app->doctor->room_number ?? '1') : '1') }}', '{{ addslashes($app->doctor ? $app->doctor->full_name_with_title : '') }}')">
                                         <i class="bi bi-megaphone-fill text-primary"></i>
                                     </button>
+                                    <form action="{{ route('reception.notifications.alert', $app) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-info" title="Gửi Zalo ZNS / SMS nhắc sắp đến lượt khám">
+                                            <i class="bi bi-chat-dots-fill"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('public.journey.show', $app->appointment_code) }}" target="_blank" class="btn btn-outline-primary" title="Hành trình khám trực tuyến (Live Tracking)">
+                                        <i class="bi bi-compass"></i>
+                                    </a>
                                     <a href="{{ route('reception.appointments.print', $app) }}" target="_blank" class="btn btn-outline-dark" title="In phiếu tiếp nhận / khám bệnh">
                                         <i class="bi bi-printer"></i>
                                     </a>
