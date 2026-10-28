@@ -219,6 +219,26 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/lab-orders*') ? 'active' : '' }}" href="{{ route('reception.lab-orders.index') }}">
+                            <i class="bi bi-moisture text-info"></i> Cận Lâm Sàng & Xét Nghiệm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/blood-transfusions*') ? 'active' : '' }}" href="{{ route('reception.blood-transfusions.index') }}">
+                            <i class="bi bi-droplet-half text-danger"></i> An Toàn Truyền Máu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/mobility*') ? 'active' : '' }}" href="{{ route('reception.mobility.index') }}">
+                            <i class="bi bi-person-wheelchair text-primary"></i> Mượn Trả Xe Lăn Tại Sảnh
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/nutrition*') ? 'active' : '' }}" href="{{ route('reception.nutrition.index') }}">
+                            <i class="bi bi-heart-pulse text-success"></i> Dinh Dưỡng & Thực Đơn
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
                             <i class="bi bi-chat-quote"></i> Thông Báo ZNS & SMS
                         </a>

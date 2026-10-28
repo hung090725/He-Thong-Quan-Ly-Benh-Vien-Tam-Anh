@@ -17,11 +17,15 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\KioskController;
 use App\Http\Controllers\Public\PatientJourneyController;
 use App\Http\Controllers\Public\PatientSurveyController;
+use App\Http\Controllers\Receptionist\BloodTransfusionController;
+use App\Http\Controllers\Receptionist\ClinicalNutritionController;
 use App\Http\Controllers\Receptionist\CodeRedEmergencyController;
 use App\Http\Controllers\Receptionist\DayBedController;
 use App\Http\Controllers\Receptionist\InformedConsentController;
+use App\Http\Controllers\Receptionist\LabOrderController;
 use App\Http\Controllers\Receptionist\MedicationDeliveryController;
 use App\Http\Controllers\Receptionist\MedicationScheduleController;
+use App\Http\Controllers\Receptionist\MobilityEquipmentController;
 use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\PatientInvoiceController;
 use App\Http\Controllers\Receptionist\PatientVitalController;
@@ -240,6 +244,37 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     // 3.13. Khảo Sát Đánh Giá Trải Nghiệm & Hài Lòng Bộ Y Tế (Patient CSAT & NPS)
     Route::get('/surveys', [ReceptionSurveyController::class, 'index'])->name('surveys.index');
     Route::post('/surveys/{survey}/resolve', [ReceptionSurveyController::class, 'resolveFollowup'])->name('surveys.resolve');
+
+    // 3.14. Trung Tâm Cận Lâm Sàng & Xét Nghiệm Y Khoa (Lab & Imaging Orders)
+    Route::get('/lab-orders', [LabOrderController::class, 'index'])->name('lab-orders.index');
+    Route::get('/lab-orders/create', [LabOrderController::class, 'create'])->name('lab-orders.create');
+    Route::post('/lab-orders', [LabOrderController::class, 'store'])->name('lab-orders.store');
+    Route::get('/lab-orders/{labOrder}', [LabOrderController::class, 'show'])->name('lab-orders.show');
+    Route::post('/lab-orders/items/{item}/update', [LabOrderController::class, 'updateItemResult'])->name('lab-orders.items.update');
+    Route::get('/lab-orders/{labOrder}/report', [LabOrderController::class, 'printReport'])->name('lab-orders.report');
+
+    // 3.15. Kiểm Soát An Toàn Truyền Máu Lâm Sàng (Blood Transfusion Safety)
+    Route::get('/blood-transfusions', [BloodTransfusionController::class, 'index'])->name('blood-transfusions.index');
+    Route::get('/blood-transfusions/create', [BloodTransfusionController::class, 'create'])->name('blood-transfusions.create');
+    Route::post('/blood-transfusions', [BloodTransfusionController::class, 'store'])->name('blood-transfusions.store');
+    Route::get('/blood-transfusions/{transfusion}', [BloodTransfusionController::class, 'show'])->name('blood-transfusions.show');
+    Route::post('/blood-transfusions/{transfusion}/start', [BloodTransfusionController::class, 'start'])->name('blood-transfusions.start');
+    Route::post('/blood-transfusions/{transfusion}/vitals', [BloodTransfusionController::class, 'recordVitals'])->name('blood-transfusions.vitals');
+    Route::post('/blood-transfusions/{transfusion}/complete', [BloodTransfusionController::class, 'complete'])->name('blood-transfusions.complete');
+    Route::post('/blood-transfusions/{transfusion}/reaction', [BloodTransfusionController::class, 'reaction'])->name('blood-transfusions.reaction');
+
+    // 3.16. Quản Lý Mượn Trả Xe Lăn & Khử Khuẩn Thiết Bị Di Chuyển (Mobility Equipment)
+    Route::get('/mobility', [MobilityEquipmentController::class, 'index'])->name('mobility.index');
+    Route::post('/mobility/borrow', [MobilityEquipmentController::class, 'borrow'])->name('mobility.borrow');
+    Route::post('/mobility/return/{loan}', [MobilityEquipmentController::class, 'return'])->name('mobility.return');
+    Route::post('/mobility/disinfect/{equipment}', [MobilityEquipmentController::class, 'completeDisinfection'])->name('mobility.disinfect');
+
+    // 3.17. Khoa Dinh Dưỡng Lâm Sàng & Thực Đơn Điều Trị (Clinical Nutrition)
+    Route::get('/nutrition', [ClinicalNutritionController::class, 'index'])->name('nutrition.index');
+    Route::get('/nutrition/create', [ClinicalNutritionController::class, 'create'])->name('nutrition.create');
+    Route::post('/nutrition', [ClinicalNutritionController::class, 'store'])->name('nutrition.store');
+    Route::get('/nutrition/{assessment}', [ClinicalNutritionController::class, 'show'])->name('nutrition.show');
+    Route::get('/nutrition/{assessment}/print-plan', [ClinicalNutritionController::class, 'printPlan'])->name('nutrition.print-plan');
 });
 
 
