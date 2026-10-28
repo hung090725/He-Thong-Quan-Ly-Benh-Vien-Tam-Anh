@@ -2,7 +2,7 @@
 **Học phần:** Phát triển ứng dụng Web (PHP - Laravel - MySQL)  
 **Nhóm sinh viên thực hiện:**
 1. **Nguyễn Thành Quý** (Technical Lead & System Architect)
-2. **Nguyễn Vãn Đạt** (Backend & Frontend Developer: Chuyên khoa & Bác sĩ)
+2. **Nguyễn Văn Đạt** (Backend & Frontend Developer: Chuyên khoa & Bác sĩ)
 3. **Nguyễn Văn Hưng** (Backend & Frontend Developer: Bệnh nhân & Tiếp nhận)
 4. **Võ Lê Gia Bảo** (Backend & Frontend Developer: Khám bệnh, Hồ sơ y tế & Báo cáo)
 
@@ -499,14 +499,14 @@ erDiagram
 | **Auth** | Đăng nhập | `/login` | GET/POST | `AuthController@showLoginForm`, `@login` | `User` | `auth.login` | `guest` | Nguyễn Thành Quý | Validate email/pass, ghi session, hỗ trợ Remember Me |
 | **Auth** | Đăng xuất | `/logout` | POST | `AuthController@logout` | `User` | - | `auth` | Nguyễn Thành Quý | Hủy session, invalidate token, chuyển hướng về Home |
 | **Auth** | Đổi mật khẩu | `/profile/password` | GET/PUT | `ProfileController@editPassword`, `@updatePassword` | `User` | `auth.password` | `auth` | Nguyễn Thành Quý | Hash Bcrypt mật khẩu mới, kiểm tra mật khẩu hiện tại |
-| **Public** | Trang chủ | `/` | GET | `HomeController@index` | `Specialty`, `Doctor` | `public.home` | Không | Nguyễn Vãn Đạt | Render banner, chuyên khoa tiêu biểu, bác sĩ xuất sắc |
-| **Public** | Danh sách Bác sĩ | `/doctors` | GET | `DoctorPublicController@index` | `Doctor`, `Specialty` | `public.doctors.index` | Không | Nguyễn Vãn Đạt | Lọc theo chuyên khoa, tìm kiếm theo tên bác sĩ |
-| **Public** | Chi tiết Bác sĩ | `/doctors/{id}` | GET | `DoctorPublicController@show` | `Doctor`, `DoctorSchedule` | `public.doctors.show` | Không | Nguyễn Vãn Đạt | Hiển thị học vị, tiểu sử, lịch làm việc trong tuần |
+| **Public** | Trang chủ | `/` | GET | `HomeController@index` | `Specialty`, `Doctor` | `public.home` | Không | Nguyễn Văn Đạt | Render banner, chuyên khoa tiêu biểu, bác sĩ xuất sắc |
+| **Public** | Danh sách Bác sĩ | `/doctors` | GET | `DoctorPublicController@index` | `Doctor`, `Specialty` | `public.doctors.index` | Không | Nguyễn Văn Đạt | Lọc theo chuyên khoa, tìm kiếm theo tên bác sĩ |
+| **Public** | Chi tiết Bác sĩ | `/doctors/{id}` | GET | `DoctorPublicController@show` | `Doctor`, `DoctorSchedule` | `public.doctors.show` | Không | Nguyễn Văn Đạt | Hiển thị học vị, tiểu sử, lịch làm việc trong tuần |
 | **Public** | Đặt lịch trực tuyến | `/booking` | GET/POST | `BookingController@create`, `@store` | `Appointment`, `PatientProfile` | `public.booking` | Không | Nguyễn Thành Quý | Form Request validate, sinh mã AP, kiểm tra trùng lịch, gửi mail |
 | **Admin** | Dashboard Quản trị | `/admin/dashboard` | GET | `AdminDashboardController@index` | Toàn bộ Model | `admin.dashboard` | `auth`, `role:admin` | Võ Lê Gia Bảo | Thống kê đếm số BN, BS, lịch hẹn hôm nay; biểu đồ trạng thái |
 | **Admin** | Quản lý Tài khoản | `/admin/users` | GET/POST/PUT/DEL | `UserController@...` (Resource) | `User` | `admin.users.*` | `auth`, `role:admin` | Nguyễn Thành Quý | CRUD user, phân vai trò, khóa tài khoản |
-| **Master** | Quản lý Chuyên khoa | `/admin/specialties` | GET/POST/PUT/DEL | `SpecialtyController@...` (Resource) | `Specialty` | `admin.specialties.*` | `auth`, `role:admin` | Nguyễn Vãn Đạt | CRUD chuyên khoa, tự động tạo slug, upload icon |
-| **Master** | Quản lý Bác sĩ & Lịch | `/admin/doctors` | GET/POST/PUT/DEL | `DoctorManagementController@...` | `Doctor`, `DoctorSchedule` | `admin.doctors.*` | `auth`, `role:admin` | Nguyễn Vãn Đạt | Cập nhật phòng khám, giá khám, gán ca trực cố định |
+| **Master** | Quản lý Chuyên khoa | `/admin/specialties` | GET/POST/PUT/DEL | `SpecialtyController@...` (Resource) | `Specialty` | `admin.specialties.*` | `auth`, `role:admin` | Nguyễn Văn Đạt | CRUD chuyên khoa, tự động tạo slug, upload icon |
+| **Master** | Quản lý Bác sĩ & Lịch | `/admin/doctors` | GET/POST/PUT/DEL | `DoctorManagementController@...` | `Doctor`, `DoctorSchedule` | `admin.doctors.*` | `auth`, `role:admin` | Nguyễn Văn Đạt | Cập nhật phòng khám, giá khám, gán ca trực cố định |
 | **Reception**| Tra cứu Bệnh nhân | `/reception/patients` | GET | `PatientController@index` | `PatientProfile` | `receptionist.patients.index`| `auth`, `role:receptionist,admin` | Nguyễn Văn Hưng | Tìm kiếm theo Mã BN, Số điện thoại, CCCD; phân trang |
 | **Reception**| Tạo hồ sơ Bệnh nhân | `/reception/patients/create`| GET/POST | `PatientController@create`, `@store` | `PatientProfile` | `receptionist.patients.create`| `auth`, `role:receptionist,admin` | Nguyễn Văn Hưng | Tự sinh mã BN chuẩn, kiểm tra trùng SĐT, lưu MySQL |
 | **Reception**| Tiếp nhận & Check-in | `/reception/appointments` | GET/PUT | `ReceptionAppointmentController@index`, `@checkin` | `Appointment` | `receptionist.appointments.*` | `auth`, `role:receptionist,admin` | Nguyễn Văn Hưng | Chuyển trạng thái hẹn sang `confirmed`, cấp số chờ |
@@ -557,7 +557,7 @@ erDiagram
 
 ---
 
-### 8.2. Thành viên 2: NGUYỄN VÃN ĐẠT (Chuyên khoa & Bác sĩ)
+### 8.2. Thành viên 2: NGUYỄN VĂN ĐẠT (Chuyên khoa & Bác sĩ)
 - **Vai trò chính:** Backend & Frontend Developer phụ trách toàn bộ danh mục y tế, đội ngũ y bác sĩ, lịch trực định kỳ và giao diện công chúng.
 - **Module phụ trách trực tiếp:**
   1. *Specialty Management (Quản lý Chuyên khoa):* CRUD chuyên khoa, upload icon, sinh slug tự động, hiển thị trang công khai.
@@ -675,7 +675,7 @@ erDiagram
 | Thành viên | Trách nhiệm trọng tâm | Số bảng DB trực tiếp | Số Controller chính | Độ phức tạp kỹ thuật | Cơ sở phân bổ nhiệm vụ |
 | :--- | :--- | :---: | :---: | :--- | :--- |
 | **Nguyễn Thành Quý** | **Tech Lead & System Foundation** | 2 bảng cốt lõi (`users`, `appointments`) | 4 controllers + 1 middleware + Layouts | Rất cao (Kiến trúc khung, Auth, RBAC, Layout chung, Booking Engine, Mailable, Tích hợp Git) | Giữ vai trò Tech Lead: Dựng nền móng kiến trúc chuẩn, xây dựng module Đặt lịch khám (nhiều ràng buộc nghiệp vụ nhất), tích hợp gửi mail, quản lý phân quyền và điều phối, giải quyết xung đột mã nguồn cho cả nhóm. |
-| **Nguyễn Vãn Đạt** | **Master Data: Chuyên khoa, Bác sĩ & Public Web** | 3 bảng (`specialties`, `doctors`, `doctor_schedules`) | 4 controllers | Trung bình - Cao (Quan hệ phức tạp giữa Bác sĩ & Ca trực, Giao diện công chúng) | Chịu trách nhiệm toàn diện phần Danh mục y tế và Bác sĩ, xây dựng toàn bộ giao diện Landing Page công khai, đảm bảo tính thẩm mỹ y khoa và responsive. |
+| **Nguyễn Văn Đạt** | **Master Data: Chuyên khoa, Bác sĩ & Public Web** | 3 bảng (`specialties`, `doctors`, `doctor_schedules`) | 4 controllers | Trung bình - Cao (Quan hệ phức tạp giữa Bác sĩ & Ca trực, Giao diện công chúng) | Chịu trách nhiệm toàn diện phần Danh mục y tế và Bác sĩ, xây dựng toàn bộ giao diện Landing Page công khai, đảm bảo tính thẩm mỹ y khoa và responsive. |
 | **Nguyễn Văn Hưng** | **Bệnh nhân & Nghiệp vụ Quầy Lễ tân** | 1 bảng lớn (`patient_profiles`) + Tác vụ Lễ tân | 2 controllers lớn | Trung bình - Cao (Nghiệp vụ tiếp đón tại quầy, tra cứu nhanh, kiểm soát luồng check-in) | Phụ trách toàn bộ khâu Hồ sơ bệnh nhân và quy trình tiếp đón của Lễ tân. Đây là mắt xích vận hành thực tế tại bệnh viện, đòi hỏi xử lý tìm kiếm nhanh và xác thực dữ liệu chặt chẽ. |
 | **Võ Lê Gia Bảo** | **Bàn khám Bác sĩ, Bệnh án, File y tế & Thống kê** | 3 bảng (`medical_records`, `prescriptions`, `attachments`) | 4 controllers + Policy | Cao (Xử lý DB Transaction đa bảng, Bảo mật file private, Thống kê Dashboard) | Phụ trách khâu nghiệp vụ chuyên môn sâu nhất: Hồ sơ bệnh án, kê đơn thuốc lặp, cơ chế upload/download tệp đính kèm an toàn tuyệt đối và màn hình Dashboard thống kê cho quản trị viên. |
 
@@ -731,7 +731,7 @@ gantt
 2. **Quy tắc về Routes:** Nhóm tách file route thành các file con nếu cần hoặc phân chia khu vực rõ ràng trong `routes/web.php` kèm comment định danh:
    ```php
    // ====== MODULE 1: AUTH & BOOKING (Nguyễn Thành Quý) ======
-   // ====== MODULE 2: SPECIALTIES & DOCTORS (Nguyễn Vãn Đạt) ======
+   // ====== MODULE 2: SPECIALTIES & DOCTORS (Nguyễn Văn Đạt) ======
    // ====== MODULE 3: RECEPTION & PATIENTS (Nguyễn Văn Hưng) ======
    // ====== MODULE 4: EXAMINATION & RECORDS (Võ Lê Gia Bảo) ======
    ```

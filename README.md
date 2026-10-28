@@ -11,13 +11,26 @@
 | STT | Họ và tên | Vai trò chính | Trách nhiệm trọng tâm |
 | :---: | :--- | :--- | :--- |
 | 1 | **Nguyễn Thành Quý** | **Technical Lead & System Core** | Kiến trúc hệ thống, Khởi tạo dự án, Auth & RBAC Middleware, Master Layouts, Engine Đặt lịch khám, Mail thông báo & Điều phối tích hợp Git |
-| 2 | **Nguyễn Vãn Đạt** | **Master Data & Public Portal** | Quản lý Chuyên khoa (CRUD), Hồ sơ Bác sĩ, Cấu hình Lịch trực ca trong tuần, Giao diện Trang chủ & Danh bạ Bác sĩ Responsive |
+| 2 | **Nguyễn Văn Đạt** | **Master Data & Public Portal** | Quản lý Chuyên khoa (CRUD), Hồ sơ Bác sĩ, Cấu hình Lịch trực ca trong tuần, Giao diện Trang chủ & Danh bạ Bác sĩ Responsive |
 | 3 | **Nguyễn Văn Hưng** | **Patient Management & Reception** | Quản lý Hồ sơ bệnh nhân, Cấp mã bệnh nhân tự động (`BN-YYYYMMDD-XXXX`), Nghiệp vụ bàn tiếp nhận của Lễ tân, Tra cứu nhanh & Check-in |
 | 4 | **Võ Lê Gia Bảo** | **Consultation, Records & Analytics** | Màn hình hàng đợi khám của Bác sĩ, Lập bệnh án & Kê đơn thuốc lặp, Upload/Download tệp y tế bảo mật (Policy), Dashboard Quản trị viên |
 
 ---
 
-## 🛠️ 2. CÔNG NGHỆ VÀ MÔI TRƯỜNG PHÁT TRIỂN
+## 🤝 2. CONTRIBUTORS (DANH SÁCH THÀNH VIÊN ĐÓNG GÓP)
+
+Dự án được xây dựng và đóng góp chính thức qua Pull Requests trên GitHub:
+
+| Thành viên | GitHub Username | Vai trò & Đóng góp chính | Trạng thái tích hợp |
+| :--- | :--- | :--- | :---: |
+| **Nguyễn Thành Quý** | [@quy0358](https://github.com/quy0358) | **Project Lead & Core Architect**: Khung nền tảng Laravel 12, Auth & RBAC, Booking Engine, Master Layouts, Quản lý User | [![Merged](https://img.shields.io/badge/Status-Core%20Maintainer-success)]() |
+| **Nguyễn Văn Hưng** | [@hung090725](https://github.com/hung090725) | **Patient Management & Reception Desk**: Hồ sơ bệnh nhân, Nghiệp vụ Check-in, Khám vãng lai, Bảng điện tử phòng chờ, Quầy Dược ngoại trú, Giấy chứng nhận nghỉ việc C65-HD, VietQR, Cảnh báo dị ứng CDSS & Vitals Tracker | [![PR #3 Merged](https://img.shields.io/badge/PR%20%233-Merged-blueviolet)]() |
+| **Nguyễn Văn Đạt** | [@jtadd123](https://github.com/jtadd123) | **Master Data & Public Portal**: Quản lý Chuyên khoa (CRUD), Bác sĩ, Lịch trực ca tuần, Danh bạ bác sĩ công khai & Trang chủ | [![PR #1 Merged](https://img.shields.io/badge/PR%20%231-Merged-blueviolet)]() |
+| **Võ Lê Gia Bảo** | `@vlgbao` | **Consultation, Records & Analytics**: Bàn khám bác sĩ, Bệnh án điện tử, Đơn thuốc lặp, File y tế bảo mật, Dashboard thống kê | [![In Progress](https://img.shields.io/badge/Status-In%20Progress-orange)]() |
+
+---
+
+## 🛠️ 3. CÔNG NGHỆ VÀ MÔI TRƯỜNG PHÁT TRIỂN
 
 - **Ngôn ngữ & Nền tảng:** PHP 8.2+ (chạy qua XAMPP hoặc standalone)
 - **Framework phía máy chủ:** Laravel 10 LTS / 11
@@ -30,7 +43,7 @@
 
 ---
 
-## 🏛️ 3. SƠ ĐỒ CƠ SỞ DỮ LIỆU (ERD)
+## 🏛️ 4. SƠ ĐỒ CƠ SỞ DỮ LIỆU (ERD)
 
 ```mermaid
 erDiagram
@@ -62,7 +75,7 @@ erDiagram
 
 ---
 
-## 📋 4. BẢNG PHÂN CÔNG NHIỆM VỤ CHI TIẾT TỪNG THÀNH VIÊN
+## 📋 5. BẢNG PHÂN CÔNG NHIỆM VỤ CHI TIẾT TỪNG THÀNH VIÊN
 
 ### 1. NGUYỄN THÀNH QUÝ (Technical Lead)
 - **Phạm vi phụ trách:**
@@ -112,7 +125,7 @@ erDiagram
 
 ---
 
-## 🌿 5. QUY TRÌNH PHỐI HỢP GIT CỦA NHÓM (GIT WORKFLOW)
+## 🌿 6. QUY TRÌNH PHỐI HỢP GIT CỦA NHÓM (GIT WORKFLOW)
 
 ### Mô hình phân nhánh:
 - `main`: Nhánh ổn định cao nhất, dùng để nộp bài và demo trước giảng viên.
@@ -154,7 +167,7 @@ git push origin feature/ten-tinh-nang
 
 ---
 
-## 🚀 6. HƯỚNG DẪN CÀI ĐẶT DỰ ÁN TRÊN MÁY WINDOWS (XAMPP)
+## 🚀 7. HƯỚNG DẪN CÀI ĐẶT DỰ ÁN TRÊN MÁY WINDOWS (XAMPP)
 
 ### Yêu cầu tiên quyết:
 - Đã cài đặt XAMPP (chạy Apache và MySQL).
@@ -198,7 +211,7 @@ Truy cập hệ thống tại: `http://localhost:8000`
 
 ---
 
-## 🔑 7. TÀI KHOẢN MẪU DÙNG ĐỂ KIỂM THỬ VÀ TRÌNH DIỄN (SEED DATA)
+## 🔑 8. TÀI KHOẢN MẪU DÙNG ĐỂ KIỂM THỬ VÀ TRÌNH DIỄN (SEED DATA)
 
 Mật khẩu mặc định cho tất cả các tài khoản thử nghiệm: **`123456`**
 
@@ -211,7 +224,7 @@ Mật khẩu mặc định cho tất cả các tài khoản thử nghiệm: **`1
 
 ---
 
-## 📅 8. TIẾN ĐỘ THỰC HIỆN 4 TUẦN
+## 📅 9. TIẾN ĐỘ THỰC HIỆN 4 TUẦN
 
 - **Tuần 1:** Thống nhất kiến trúc, tạo khung Laravel, chạy thành công 9 migration & seeders, dựng Auth & Master Layouts.
 - **Tuần 2:** Lập trình các module độc lập: Chuyên khoa/Bác sĩ (Đạt), Hồ sơ bệnh nhân/Lễ tân (Hưng), Đặt lịch khám (Quý), Bàn khám/Bệnh án (Bảo).
