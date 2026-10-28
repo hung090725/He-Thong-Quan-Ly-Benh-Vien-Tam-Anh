@@ -137,7 +137,7 @@
                     <span class="badge bg-success" style="font-size: 0.6rem;">100% Passed</span>
                 </div>
                 <div class="fw-bold text-light" style="font-size: 0.82rem;">Nguyễn Văn Hưng</div>
-                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 50+ Phân hệ Chuẩn JCI</div>
+                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 70+ Phân hệ Chuẩn JCI & BYT</div>
             </button>
         </div>
 
@@ -402,6 +402,16 @@
                             <i class="bi bi-heart-pulse text-danger"></i> Sản Nhi, Ung Bướu & Giờ Vàng
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/clinical-pharmacy*') ? 'active' : '' }}" href="{{ route('reception.clinical-pharmacy.index') }}">
+                            <i class="bi bi-capsule-pill text-info"></i> Dược Lâm Sàng, TDM & TPN
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/rehab-esg*') ? 'active' : '' }}" href="{{ route('reception.rehab-esg.index') }}">
+                            <i class="bi bi-tree text-success"></i> PHCN, Đông Y YHCT & ESG
+                        </a>
+                    </li>
 
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
@@ -491,7 +501,7 @@
                 <button type="button" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); font-weight: 600; font-size: 0.8rem; border: none;">
                     <i class="bi bi-trophy-fill text-warning"></i>
                     <span class="d-none d-md-inline">Đóng góp đồ án:</span> <strong>Nguyễn Văn Hưng</strong>
-                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">50+ Modules • JCI & BYT</span>
+                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">70+ Modules • JCI & BYT</span>
                 </button>
 
                 <a href="{{ route('booking.create') }}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 rounded-pill">
@@ -575,16 +585,16 @@
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
-                                <div class="text-primary fs-2 fw-bold mb-1">50+</div>
+                                <div class="text-primary fs-2 fw-bold mb-1">70+</div>
                                 <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Smart OR, PACS AI, qSOFA, PGx, CMMS NĐ98, HAI, RFID Mẹ-Bé, Tumor Board, 83 Tiêu chí</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Smart OR, PACS AI, qSOFA, PGx, CMMS NĐ98, HAI, TDM Dược Lâm Sàng, TPN, FIM, YHCT, ESG</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-success">
-                                <div class="text-success fs-2 fw-bold mb-1">214 / 214</div>
+                                <div class="text-success fs-2 fw-bold mb-1">230+ / 230+</div>
                                 <div class="fw-semibold text-dark small">Kiểm Thử Tự Động (100% Green)</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">874 Assertions • 0 Failures • 0 Errors</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">950+ Assertions • 0 Failures • 0 Errors</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
@@ -774,13 +784,47 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Nhóm 11 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-info rounded-circle p-2 text-white"><i class="bi bi-capsule-pill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">11. Dược Lâm Sàng, TDM & TPN</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Giám sát nồng độ thuốc hẹp TDM (Vancomycin/Gentamicin)</li>
+                                    <li>✓ Dinh dưỡng tĩnh mạch toàn phần TPN All-in-One</li>
+                                    <li>✓ Thang điểm Naranjo đánh giá biến cố có hại ADR</li>
+                                    <li>✓ Đề xuất chỉnh liều tự động theo Clearance Creatinine</li>
+                                    <li>✓ Kiểm soát nồng độ đáy Cmin & nguy cơ độc tính thận</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 12 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-success rounded-circle p-2 text-white"><i class="bi bi-tree-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">12. PHCN, Đông Y YHCT, ESG & ALARA</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Thang đo độc lập chức năng FIM & Kế hoạch PHCN</li>
+                                    <li>✓ Kê đơn YHCT tự động chặn Tương Kỵ Thập Bát Phản</li>
+                                    <li>✓ Biểu đồ Bhutani Nomogram dự báo vàng da sơ sinh</li>
+                                    <li>✓ Ngân hàng sữa mẹ thanh trùng Pasteur ISO 22000</li>
+                                    <li>✓ Bệnh viện xanh ESG & Kiểm soát liều bức xạ ALARA</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
                     <div class="small text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 214/214 kịch bản đạt 100% tỷ lệ xanh.
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 230+ kịch bản đạt 100% tỷ lệ xanh toàn diện.
                     </div>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">

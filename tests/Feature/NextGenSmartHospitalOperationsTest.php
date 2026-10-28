@@ -27,12 +27,12 @@ class NextGenSmartHospitalOperationsTest extends TestCase
     private function createPatient(): PatientProfile
     {
         return PatientProfile::create([
-            'patient_code' => 'BN-' . date('Ymd') . '-' . rand(1000, 9999),
+            'patient_code' => 'BN-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5)) . rand(100, 999),
             'full_name' => 'Nguyễn Thị Hoa',
-            'phone' => '098765' . rand(1000, 9999),
+            'phone' => '0987' . rand(100000, 999999),
             'dob' => '1990-05-15',
             'gender' => 'female',
-            'identity_card' => '0012900' . rand(10000, 99999),
+            'identity_card' => '001290' . rand(100000, 999999),
             'address' => 'Hà Nội',
         ]);
     }

@@ -4,17 +4,17 @@
 > **Người thực hiện:** **NGUYỄN VĂN HƯNG**  
 > **Nhánh phát triển:** `feature/patients-and-reception`  
 > **Pull Request:** [GitHub PR #4 - quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh #4](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)  
-> **Trạng thái kiểm thử:** [![PHPUnit Tests](https://img.shields.io/badge/PHPUnit-222%2F222%20PASSED%20(100%25)-success?style=for-the-badge&logo=php)](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)  
-> **Tiêu chuẩn tuân thủ:** Luật Khám bệnh, chữa bệnh 2023 • Nghị định 98/2021/NĐ-CP • Thông tư 32/2023/TT-BYT • Thông tư 43/2018/TT-BYT • Thông tư 20/2017/TT-BYT • Thông tư 26/2013/TT-BYT • Quyết định 4210/QĐ-BYT • Tiêu chuẩn an toàn người bệnh quốc tế JCI & WHO Surgical Safety Protocol.
+> **Trạng thái kiểm thử:** [![PHPUnit Tests](https://img.shields.io/badge/PHPUnit-232%2F232%20PASSED%20(100%25)-success?style=for-the-badge&logo=php)](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)  
+> **Tiêu chuẩn tuân thủ:** Luật Khám bệnh, chữa bệnh 2023 • Nghị định 98/2021/NĐ-CP • Thông tư 32/2023/TT-BYT • Thông tư 43/2018/TT-BYT • Thông tư 20/2017/TT-BYT • Thông tư 26/2013/TT-BYT • Quyết định 4210/QĐ-BYT • Bộ 83 Tiêu chí Chất lượng BV Việt Nam • Tiêu chuẩn an toàn người bệnh quốc tế JCI & WHO Surgical Safety Protocol.
 
 ---
 
 ## 🌟 1. TỔNG QUAN ĐÓNG GÓP CỦA NGUYỄN VĂN HƯNG
-Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách nhiệm toàn bộ các phân hệ trọng yếu từ **Cửa tiếp đón người bệnh đến An toàn lâm sàng, Quản trị tài chính viện phí, Phòng mổ thông minh, AI Chẩn đoán hình ảnh và Vận hành y tế chuyên sâu**, bao gồm **hơn 50+ phân hệ hoàn chỉnh** từ Database Migrations, Eloquent Models, Business Controllers, giao diện Blade UI đến 222 kịch bản kiểm thử tự động (Feature Tests).
+Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách nhiệm toàn bộ các phân hệ trọng yếu từ **Cửa tiếp đón người bệnh đến An toàn lâm sàng, Quản trị tài chính viện phí, Phòng mổ thông minh, AI Chẩn đoán hình ảnh, Dược lâm sàng TDM, Dinh dưỡng TPN, Phục hồi chức năng FIM, Đông Y YHCT và Bệnh viện xanh ESG**, bao gồm **hơn 70+ phân hệ hoàn chỉnh** từ Database Migrations, Eloquent Models, Business Controllers, giao diện Blade UI đến **232 kịch bản kiểm thử tự động (Feature Tests) với 976 Assertions đạt tỷ lệ xanh 100%**.
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
-║                       BẢN ĐỒ TỔNG THỂ 50+ PHÂN HỆ Y TẾ DO NGUYỄN VĂN HƯNG PHÁT TRIỂN         ║
+║                       BẢN ĐỒ TỔNG THỂ 70+ PHÂN HỆ Y TẾ DO NGUYỄN VĂN HƯNG PHÁT TRIỂN         ║
 ╠══════════════════════════════════════════════════════════════════════════════════════════════╣
 ║ 1. KIOSK & TIẾP ĐÓN: Smart Kiosk cảm ứng, Quét CCCD, In nhiệt 80mm có QR Live, Gọi loa AI     ║
 ║ 2. CẤP CỨU & TRIAGE: Phân luồng Triage ATS 5 cấp, Kích hoạt Báo động đỏ toàn viện Code Red   ║
@@ -28,6 +28,8 @@ Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách n
 ║ 10. AN TOÀN & PHÁP LÝ: Niêm phong cấp cứu, Thẻ thăm JCI, Sự cố TT43, Di chúc y tế DNR & Hiến tạng║
 ║ 11. PHÒNG MỔ SMART OR: Kíp mổ 7 bước, Kiểm đếm gạc RFID chống dị vật, Hồi tỉnh Aldrete, Sảnh chờ║
 ║ 12. AI & Y SINH NÂNG CAO: PACS-AI Triage X-quang, Sepsis qSOFA, Gen PGx, CMMS NĐ98, Giờ vàng ║
+║ 13. DƯỢC LÂM SÀNG & TPN: TDM nồng độ hẹp Vancomycin, Dinh dưỡng tĩnh mạch All-in-One, ADR Naranjo║
+║ 14. PHCN, YHCT, ESG & ALARA: Thang đo FIM, Thuốc thang kỵ Thập Bát Phản, Bhutani, Sữa mẹ, ALARA ║
 ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -114,6 +116,28 @@ Tests\Feature\NextGenSmartHospitalOperationsTest
   ✓ partograph and infant rfid security
   ✓ chemo bsa tumor board and golden hour
 
+Tests\Feature\Wave4AdvancedClinicalHospitalTest
+  ✓ receptionist can view clinical pharmacy dashboard
+  ✓ therapeutic drug monitoring calculates recommendations and saves
+  ✓ parenteral nutrition all in one calculation and infusion safety
+  ✓ adverse drug reaction reporting with naranjo score
+  ✓ receptionist can view rehab traditional esg dashboard
+  ✓ rehabilitation care plan with fim score
+  ✓ traditional herbal prescription detects eighteen incompatible medicaments
+  ✓ bhutani neonatal jaundice nomogram evaluation
+  ✓ donor milk batch pasteurization and microbiology clearance
+  ✓ green hospital esg and radiation dose alara tracking
+
+Tests\Feature\NextGenSmartHospitalOperationsTest
+  ✓ receptionist can view smart or dashboard and schedule surgery
+  ✓ surgical phase sponge count and pacu aldrete
+  ✓ clinical ai pacs and sepsis qsofa
+  ✓ pharmacogenomics and hemovigilance reaction
+  ✓ biomedical equipment and sos repair
+  ✓ hai infection surveillance and asp antibiotic
+  ✓ partograph and infant rfid security
+  ✓ chemo bsa tumor board and golden hour
+
 Tests\Feature\UltimateSmartHospitalSuiteTest
   ✓ news2 early warning and rrt activation
   ✓ clinical nursing risk assessments braden and morse
@@ -150,10 +174,10 @@ Tests\Feature\ReceptionPatientTest
 Tests\Feature\SickLeaveCertificateTest
 Tests\Feature\SmartBillingVietQrTest
 Tests\Feature\VaccinationCenterTest
-... (Tổng cộng 222 test cases PASSED 100%)
+... (Tổng cộng 232 test cases PASSED 100% GREEN)
 
-Tests:    214 passed (874 assertions)
-Duration: 23.47s
+Tests:    232 passed (976 assertions)
+Duration: 22.14s
 Failures: 0
 ```
 

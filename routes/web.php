@@ -65,6 +65,8 @@ use App\Http\Controllers\OperatingRoomSuiteController;
 use App\Http\Controllers\ClinicalAiDiagnosticsController;
 use App\Http\Controllers\BiomedicalAndInfectionController;
 use App\Http\Controllers\MaternityInfantOncologyController;
+use App\Http\Controllers\AdvancedClinicalPharmacyController;
+use App\Http\Controllers\RehabTraditionalEsgController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -464,6 +466,21 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/maternity-oncology/chemo-cycle', [MaternityInfantOncologyController::class, 'recordChemoCycle'])->name('maternity-oncology.chemo-cycle');
     Route::post('/maternity-oncology/tumor-board', [MaternityInfantOncologyController::class, 'storeTumorBoard'])->name('maternity-oncology.tumor-board');
     Route::post('/maternity-oncology/golden-hour', [MaternityInfantOncologyController::class, 'recordGoldenHour'])->name('maternity-oncology.golden-hour');
+
+    // 3.46. Dược Lâm Sàng Chuyên Sâu, Đo Nồng Độ Thuốc TDM & Dinh Dưỡng Tĩnh Mạch TPN
+    Route::get('/clinical-pharmacy', [AdvancedClinicalPharmacyController::class, 'index'])->name('clinical-pharmacy.index');
+    Route::post('/clinical-pharmacy/tdm', [AdvancedClinicalPharmacyController::class, 'storeTdm'])->name('clinical-pharmacy.tdm');
+    Route::post('/clinical-pharmacy/tpn', [AdvancedClinicalPharmacyController::class, 'storeTpn'])->name('clinical-pharmacy.tpn');
+    Route::post('/clinical-pharmacy/adr', [AdvancedClinicalPharmacyController::class, 'storeAdr'])->name('clinical-pharmacy.adr');
+
+    // 3.47. Phục Hồi Chức Năng (FIM), Đông Y Thập Bát Phản & Bệnh Viện Xanh ESG
+    Route::get('/rehab-esg', [RehabTraditionalEsgController::class, 'index'])->name('rehab-esg.index');
+    Route::post('/rehab-esg/rehab-plan', [RehabTraditionalEsgController::class, 'storeRehabPlan'])->name('rehab-esg.rehab-plan');
+    Route::post('/rehab-esg/herbal', [RehabTraditionalEsgController::class, 'storeHerbalPrescription'])->name('rehab-esg.herbal');
+    Route::post('/rehab-esg/acupoint', [RehabTraditionalEsgController::class, 'storeAcupointTherapy'])->name('rehab-esg.acupoint');
+    Route::post('/rehab-esg/jaundice', [RehabTraditionalEsgController::class, 'storeBhutaniEvaluation'])->name('rehab-esg.jaundice');
+    Route::post('/rehab-esg/milk-batch', [RehabTraditionalEsgController::class, 'storeMilkBatch'])->name('rehab-esg.milk-batch');
+    Route::post('/rehab-esg/radiation', [RehabTraditionalEsgController::class, 'storeRadiationLog'])->name('rehab-esg.radiation');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ
