@@ -185,4 +185,22 @@ class PharmacyController extends Controller
 
         return view('receptionist.pharmacy.label', compact('record'));
     }
+
+    /**
+     * Phát lệnh gọi loa nhận thuốc tại quầy Dược ngoại trú.
+     */
+    public function callAudio(MedicalRecord $record, Request $request)
+    {
+        $counter = $request->input('counter_number', 'Quầy Dược 01');
+        $patientName = $record->patientProfile->full_name;
+        $speechText = "Kính mời bệnh nhân {$patientName}, mã đơn {$record->record_code}, vui lòng đến {$counter} nhận thuốc và nghe tư vấn sử dụng!";
+
+        return response()->json([
+            'success' => true,
+            'patient_name' => $patientName,
+            'record_code' => $record->record_code,
+            'counter' => $counter,
+            'speech_text' => $speechText,
+        ]);
+    }
 }

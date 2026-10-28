@@ -16,9 +16,11 @@ use App\Http\Controllers\Public\KioskController;
 use App\Http\Controllers\Receptionist\InformedConsentController;
 use App\Http\Controllers\Receptionist\MedicationScheduleController;
 use App\Http\Controllers\Receptionist\PatientController;
+use App\Http\Controllers\Receptionist\PatientInvoiceController;
 use App\Http\Controllers\Receptionist\PatientVitalController;
 use App\Http\Controllers\Receptionist\PharmacyController;
 use App\Http\Controllers\Receptionist\PharmacyInventoryController;
+use App\Http\Controllers\Receptionist\ReceptionAnalyticsController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
 use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
 use Illuminate\Support\Facades\Route;
@@ -70,6 +72,9 @@ Route::prefix('kiosk')->name('kiosk.')->group(function () {
     Route::post('/register-new', [KioskController::class, 'registerNewPatient'])->name('register-new');
     Route::get('/ticket/{appointment}', [KioskController::class, 'printTicket'])->name('ticket');
 });
+
+// Cổng Tra Cứu Viện Phí Điện Tử & Thanh Toán VietQR Tự Động (Public Smart Billing Lookup)
+Route::get('/billing/lookup', [PatientInvoiceController::class, 'publicLookup'])->name('public.billing.lookup');
 
 // 1.3. Quản lý Tài khoản Người dùng (Admin)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -125,6 +130,7 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::put('/appointments/{appointment}/checkin', [ReceptionAppointmentController::class, 'checkin'])->name('appointments.checkin');
     Route::put('/appointments/{appointment}/cancel', [ReceptionAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::put('/appointments/{appointment}/reassign', [ReceptionAppointmentController::class, 'reassign'])->name('appointments.reassign');
+    Route::post('/appointments/{appointment}/call-audio', [ReceptionAppointmentController::class, 'callAudio'])->name('appointments.call-audio');
 
     // 3.2. Quản lý Hồ sơ Bệnh nhân (CRUD)
     Route::get('/patients/{patient}/print-card', [PatientController::class, 'printCard'])->name('patients.print-card');
@@ -137,6 +143,7 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::get('/pharmacy', [PharmacyController::class, 'index'])->name('pharmacy.index');
     Route::post('/pharmacy/{record}/dispense', [PharmacyController::class, 'dispense'])->name('pharmacy.dispense');
     Route::post('/pharmacy/{record}/undo', [PharmacyController::class, 'undoDispense'])->name('pharmacy.undo');
+    Route::post('/pharmacy/{record}/call-audio', [PharmacyController::class, 'callAudio'])->name('pharmacy.call-audio');
     Route::get('/pharmacy/{record}/label', [PharmacyController::class, 'printLabel'])->name('pharmacy.label');
     Route::get('/pharmacy/{record}/schedule', [MedicationScheduleController::class, 'show'])->name('pharmacy.schedule');
     Route::get('/pharmacy/{record}/schedule/ical', [MedicationScheduleController::class, 'downloadIcal'])->name('pharmacy.schedule.ical');
@@ -161,6 +168,16 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/consents', [InformedConsentController::class, 'store'])->name('consents.store');
     Route::get('/consents/{consent}/print', [InformedConsentController::class, 'print'])->name('consents.print');
     Route::delete('/consents/{consent}', [InformedConsentController::class, 'destroy'])->name('consents.destroy');
+
+    // 3.6. Quản Lý Hóa Đơn Viện Phí & Thanh Toán VietQR Tự Động (Smart Billing)
+    Route::get('/invoices', [PatientInvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}', [PatientInvoiceController::class, 'show'])->name('invoices.show');
+    Route::post('/appointments/{appointment}/create-invoice', [PatientInvoiceController::class, 'createFromAppointment'])->name('invoices.create-from-appointment');
+    Route::post('/invoices/{invoice}/confirm-payment', [PatientInvoiceController::class, 'confirmPayment'])->name('invoices.confirm-payment');
+    Route::get('/invoices/{invoice}/print', [PatientInvoiceController::class, 'print'])->name('invoices.print');
+
+    // 3.7. Trung Tâm Giám Sát Hiệu Suất Tiếp Nhận & An Toàn Dược (BI Analytics & Operations)
+    Route::get('/analytics', [ReceptionAnalyticsController::class, 'index'])->name('analytics.index');
 });
 
 

@@ -196,6 +196,8 @@
                                     <a href="{{ route('reception.patients.show', $app->patientProfile) }}" class="text-decoration-none text-dark">
                                         {{ $app->patientProfile->full_name }}
                                     </a>
+                                    <!-- ESI Triage Badge -->
+                                    {!! $app->esi_badge !!}
                                     @if($app->is_priority)
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle small py-0 px-1" title="Đối tượng khám ưu tiên">
                                             <i class="bi bi-star-fill text-warning"></i> ƯU TIÊN
@@ -273,7 +275,13 @@
                                     <a href="{{ route('reception.appointments.print', $app) }}" target="_blank" class="btn btn-outline-dark" title="In phiếu tiếp nhận / khám bệnh">
                                         <i class="bi bi-printer"></i>
                                     </a>
-                                    <a href="{{ route('reception.appointments.receipt', $app) }}" target="_blank" class="btn btn-outline-success" title="Thu viện phí & In biên lai (VietQR)">
+                                    <form action="{{ route('reception.invoices.create-from-appointment', $app) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-success" title="Lập hóa đơn viện phí & Thu tiền VietQR">
+                                            <i class="bi bi-wallet2"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('reception.appointments.receipt', $app) }}" target="_blank" class="btn btn-outline-secondary" title="Thu viện phí nhanh (Biên lai cũ)">
                                         <i class="bi bi-receipt"></i>
                                     </a>
                                     @if($app->status === 'pending')

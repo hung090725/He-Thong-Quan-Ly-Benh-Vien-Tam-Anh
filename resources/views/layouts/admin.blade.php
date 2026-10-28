@@ -188,6 +188,16 @@
                             <i class="bi bi-file-earmark-check"></i> Bản Cam Đoan Ký Số
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/invoices*') ? 'active' : '' }}" href="{{ route('reception.invoices.index') }}">
+                            <i class="bi bi-wallet2"></i> Hóa Đơn & Thu Phí VietQR
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/analytics*') ? 'active' : '' }}" href="{{ route('reception.analytics.index') }}">
+                            <i class="bi bi-graph-up-arrow"></i> Giám Sát Hiệu Suất (BI)
+                        </a>
+                    </li>
                 @endif
 
                 @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDoctor()))

@@ -238,6 +238,10 @@ class ReceptionAppointmentController extends Controller
                 $symptom = '[ƯU TIÊN] ' . $symptom;
             }
 
+            // Tự động phân loại cấp cứu chuẩn ESI
+            $latestVital = $patientProfile->latestVital;
+            $esiResult = \App\Services\EmergencyTriageService::classify($patientProfile, $symptom, $latestVital);
+
             $newAppointment = Appointment::create([
                 'appointment_code' => Appointment::generateAppointmentCode(),
                 'patient_profile_id' => $patientProfile->id,
@@ -249,6 +253,11 @@ class ReceptionAppointmentController extends Controller
                 'symptom_description' => $symptom,
                 'status' => Appointment::STATUS_CONFIRMED, // Walk-in is auto check-in
                 'created_by_user_id' => Auth::id(),
+                'esi_level' => $esiResult['level'],
+                'esi_criteria' => $esiResult['criteria'],
+                'triage_notes' => $esiResult['action_protocol'],
+                'triaged_by_user_id' => Auth::id(),
+                'triaged_at' => now(),
             ]);
 
             ClinicalAuditLog::record(
@@ -516,5 +525,30 @@ class ReceptionAppointmentController extends Controller
         }
 
         return number_format($number, 0, ',', '.') . ' VNĐ';
+    }
+
+    /**
+     * Phát lệnh gọi loa âm thanh AI & chuông Ding-Dong đến sảnh tiếp nhận.
+     */
+    public function callAudio(Appointment $appointment, Request $request)
+    {
+        $counter = $request->input('counter_number', 'Quầy 01');
+        $appointment->update([
+            'called_at' => now(),
+            'counter_number' => $counter,
+        ]);
+
+        $patientName = $appointment->patientProfile->full_name;
+        $stt = $appointment->queue_number;
+        $speechText = "Kính mời bệnh nhân {$patientName}, số thứ tự " . sprintf('%02d', $stt) . ", vui lòng đến {$counter}!";
+
+        return response()->json([
+            'success' => true,
+            'patient_name' => $patientName,
+            'stt' => $stt,
+            'counter' => $counter,
+            'speech_text' => $speechText,
+            'called_at' => $appointment->called_at->format('H:i:s'),
+        ]);
     }
 }
