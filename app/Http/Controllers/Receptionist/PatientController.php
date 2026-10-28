@@ -268,11 +268,22 @@ class PatientController extends Controller
     public function destroy(PatientProfile $patient): RedirectResponse
     {
         // Strict database integrity constraint: Cannot delete if any clinical or appointment records exist
-        if ($patient->appointments()->exists() || $patient->medicalRecords()->exists()) {
-            return back()->with('error', "Ràng buộc toàn vẹn dữ liệu: Không thể xóa hồ sơ bệnh nhân {$patient->full_name} ({$patient->patient_code}) vì đã phát sinh lịch sử khám bệnh hoặc bệnh án trong hệ thống y tế.");
+        if ($patient->appointments()->exists() 
+            || $patient->medicalRecords()->exists()
+            || $patient->vaccinationRecords()->exists()
+            || $patient->labOrders()->exists()
+            || $patient->bloodTransfusions()->exists()
+            || $patient->equipmentLoans()->exists()
+            || $patient->nutritionAssessments()->exists()) {
+            return back()->with('error', "Ràng buộc toàn vẹn dữ liệu: Không thể xóa hồ sơ bệnh nhân {$patient->full_name} ({$patient->patient_code}) vì đã phát sinh dữ liệu lâm sàng (khám bệnh, tiêm chủng, xét nghiệm, truyền máu, thiết bị hoặc dinh dưỡng) trong hệ thống y tế.");
         }
 
         DB::transaction(function () use ($patient) {
+            $patient->vitals()->delete();
+            $patient->notifications()->delete();
+            $patient->auditLogs()->delete();
+            $patient->surveys()->delete();
+            $patient->informedConsents()->delete();
             $patient->delete();
         });
 

@@ -69,13 +69,25 @@ class VaccinationRecord extends Model
 
     public static function generateRecordCode(): string
     {
-        $prefix = 'VX-' . date('Ymd') . '-';
-        $latest = self::where('record_code', 'like', $prefix . '%')->orderByDesc('id')->first();
-        $sequence = 1;
-        if ($latest && preg_match('/-(\d+)$/', $latest->record_code, $matches)) {
-            $sequence = intval($matches[1]) + 1;
+        $today = Carbon::now()->format('Ymd');
+        $prefix = "VX-{$today}-";
+
+        $latest = self::where('record_code', 'LIKE', "{$prefix}____")
+            ->orderBy('record_code', 'desc')
+            ->first();
+
+        if ($latest && preg_match('/-(\d{4})$/', $latest->record_code, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
+        } else {
+            $nextNumber = 1;
         }
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        do {
+            $candidate = sprintf('%s%04d', $prefix, $nextNumber);
+            $nextNumber++;
+        } while (self::where('record_code', $candidate)->exists());
+
+        return $candidate;
     }
 
     public function getObservationElapsedMinutesAttribute(): int

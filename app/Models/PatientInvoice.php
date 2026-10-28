@@ -113,17 +113,21 @@ class PatientInvoice extends Model
         $today = Carbon::now()->format('Ymd');
         $prefix = "HD-{$today}-";
 
-        $latest = self::where('invoice_code', 'LIKE', "{$prefix}%")
+        $latest = self::where('invoice_code', 'LIKE', "{$prefix}____")
             ->orderBy('invoice_code', 'desc')
             ->first();
 
-        if ($latest) {
-            $lastNumber = (int) substr($latest->invoice_code, -4);
-            $nextNumber = str_pad((string)($lastNumber + 1), 4, '0', STR_PAD_LEFT);
+        if ($latest && preg_match('/-(\d{4})$/', $latest->invoice_code, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
         } else {
-            $nextNumber = '0001';
+            $nextNumber = 1;
         }
 
-        return "{$prefix}{$nextNumber}";
+        do {
+            $candidate = sprintf('%s%04d', $prefix, $nextNumber);
+            $nextNumber++;
+        } while (self::where('invoice_code', $candidate)->exists());
+
+        return $candidate;
     }
 }

@@ -145,12 +145,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('admin/specialties*') ? 'active' : '' }}" href="{{ url('/admin/specialties') }}">
+                        <a class="nav-link {{ request()->is('admin/specialties*') ? 'active' : '' }}" href="{{ route('admin.specialties.index') }}">
                             <i class="bi bi-diagram-3"></i> Quản lý Chuyên khoa
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('admin/doctors*') ? 'active' : '' }}" href="{{ url('/admin/doctors') }}">
+                        <a class="nav-link {{ request()->is('admin/doctors*') ? 'active' : '' }}" href="{{ route('admin.doctors.index') }}">
                             <i class="bi bi-person-badge"></i> Bác sĩ & Lịch trực
                         </a>
                     </li>
@@ -164,7 +164,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('reception/patients*') ? 'active' : '' }}" href="{{ url('/reception/patients') }}">
+                        <a class="nav-link {{ request()->is('reception/patients*') ? 'active' : '' }}" href="{{ route('reception.patients.index') }}">
                             <i class="bi bi-person-vcard"></i> Quản lý Bệnh nhân
                         </a>
                     </li>

@@ -46,6 +46,12 @@ class PatientVitalController extends Controller
             return back()->with('error', 'Vui lòng nhập ít nhất một chỉ số sinh hiệu (Huyết áp, Mạch, Thân nhiệt hoặc SpO2).');
         }
 
+        if (!empty($validated['systolic_bp']) && !empty($validated['diastolic_bp'])) {
+            if ($validated['systolic_bp'] <= $validated['diastolic_bp']) {
+                return back()->withInput()->with('error', 'Chỉ số huyết áp không hợp lệ theo chuẩn lâm sàng: Huyết áp tâm thu (' . $validated['systolic_bp'] . ' mmHg) phải lớn hơn huyết áp tâm trương (' . $validated['diastolic_bp'] . ' mmHg).');
+            }
+        }
+
         $vital = PatientVital::create([
             'patient_profile_id' => $patient->id,
             'appointment_id' => $validated['appointment_id'] ?? null,

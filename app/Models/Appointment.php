@@ -227,17 +227,21 @@ class Appointment extends Model
         $today = Carbon::now()->format('Ymd');
         $prefix = "AP-{$today}-";
 
-        $latest = self::where('appointment_code', 'LIKE', "{$prefix}%")
+        $latest = self::where('appointment_code', 'LIKE', "{$prefix}____")
             ->orderBy('appointment_code', 'desc')
             ->first();
 
-        if ($latest) {
-            $lastNumber = (int) substr($latest->appointment_code, -4);
-            $nextNumber = str_pad((string)($lastNumber + 1), 4, '0', STR_PAD_LEFT);
+        if ($latest && preg_match('/-(\d{4})$/', $latest->appointment_code, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
         } else {
-            $nextNumber = '0001';
+            $nextNumber = 1;
         }
 
-        return "{$prefix}{$nextNumber}";
+        do {
+            $candidate = sprintf('%s%04d', $prefix, $nextNumber);
+            $nextNumber++;
+        } while (self::where('appointment_code', $candidate)->exists());
+
+        return $candidate;
     }
 }

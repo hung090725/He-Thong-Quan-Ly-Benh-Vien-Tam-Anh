@@ -79,12 +79,24 @@ class DayBedAdmission extends Model
 
     public static function generateAdmissionCode(): string
     {
-        $prefix = 'ADM-' . date('Ymd') . '-';
-        $latest = self::where('admission_code', 'like', $prefix . '%')->orderByDesc('id')->first();
-        $sequence = 1;
-        if ($latest && preg_match('/-(\d+)$/', $latest->admission_code, $matches)) {
-            $sequence = intval($matches[1]) + 1;
+        $today = Carbon::now()->format('Ymd');
+        $prefix = "ADM-{$today}-";
+
+        $latest = self::where('admission_code', 'LIKE', "{$prefix}____")
+            ->orderBy('admission_code', 'desc')
+            ->first();
+
+        if ($latest && preg_match('/-(\d{4})$/', $latest->admission_code, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
+        } else {
+            $nextNumber = 1;
         }
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        do {
+            $candidate = sprintf('%s%04d', $prefix, $nextNumber);
+            $nextNumber++;
+        } while (self::where('admission_code', $candidate)->exists());
+
+        return $candidate;
     }
 }

@@ -89,13 +89,25 @@ class ClinicalConsultation extends Model
 
     public static function generateConsultationCode(): string
     {
-        $prefix = 'HC-' . date('Ymd') . '-';
-        $latest = self::where('consultation_code', 'like', $prefix . '%')->orderByDesc('id')->first();
-        $sequence = 1;
-        if ($latest && preg_match('/-(\d+)$/', $latest->consultation_code, $matches)) {
-            $sequence = intval($matches[1]) + 1;
+        $today = Carbon::now()->format('Ymd');
+        $prefix = "HC-{$today}-";
+
+        $latest = self::where('consultation_code', 'LIKE', "{$prefix}____")
+            ->orderBy('consultation_code', 'desc')
+            ->first();
+
+        if ($latest && preg_match('/-(\d{4})$/', $latest->consultation_code, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
+        } else {
+            $nextNumber = 1;
         }
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        do {
+            $candidate = sprintf('%s%04d', $prefix, $nextNumber);
+            $nextNumber++;
+        } while (self::where('consultation_code', $candidate)->exists());
+
+        return $candidate;
     }
 
     public function getUrgencyBadgeAttribute(): string

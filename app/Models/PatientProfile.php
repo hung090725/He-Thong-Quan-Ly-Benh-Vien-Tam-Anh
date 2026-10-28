@@ -100,6 +100,26 @@ class PatientProfile extends Model
         return $this->hasMany(InformedConsent::class)->orderBy('created_at', 'desc');
     }
 
+    public function labOrders(): HasMany
+    {
+        return $this->hasMany(LabOrder::class)->orderBy('created_at', 'desc');
+    }
+
+    public function bloodTransfusions(): HasMany
+    {
+        return $this->hasMany(BloodTransfusion::class)->orderBy('created_at', 'desc');
+    }
+
+    public function equipmentLoans(): HasMany
+    {
+        return $this->hasMany(EquipmentLoan::class)->orderBy('borrowed_at', 'desc');
+    }
+
+    public function nutritionAssessments(): HasMany
+    {
+        return $this->hasMany(NutritionAssessment::class)->orderBy('assessed_at', 'desc');
+    }
+
     public function latestVital()
     {
         return $this->hasOne(PatientVital::class)->latestOfMany('recorded_at');
@@ -161,17 +181,21 @@ class PatientProfile extends Model
         $today = Carbon::now()->format('Ymd');
         $prefix = "BN-{$today}-";
 
-        $latest = self::where('patient_code', 'LIKE', "{$prefix}%")
+        $latest = self::where('patient_code', 'LIKE', "{$prefix}____")
             ->orderBy('patient_code', 'desc')
             ->first();
 
-        if ($latest) {
-            $lastNumber = (int) substr($latest->patient_code, -4);
-            $nextNumber = str_pad((string)($lastNumber + 1), 4, '0', STR_PAD_LEFT);
+        if ($latest && preg_match('/-(\d{4})$/', $latest->patient_code, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
         } else {
-            $nextNumber = '0001';
+            $nextNumber = 1;
         }
 
-        return "{$prefix}{$nextNumber}";
+        do {
+            $candidate = sprintf('%s%04d', $prefix, $nextNumber);
+            $nextNumber++;
+        } while (self::where('patient_code', $candidate)->exists());
+
+        return $candidate;
     }
 }
