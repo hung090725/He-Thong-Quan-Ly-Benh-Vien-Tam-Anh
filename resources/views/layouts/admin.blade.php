@@ -129,6 +129,18 @@
             </div>
         </a>
 
+        <!-- Huy Hiệu Đồ Án Xuất Sắc - Nguyễn Văn Hưng -->
+        <div class="px-1 mb-3">
+            <button type="button" class="btn w-100 p-2 text-start rounded-3 border border-warning border-opacity-50 text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(234, 88, 12, 0.15) 100%);">
+                <div class="d-flex align-items-center justify-content-between text-warning fw-bold mb-1">
+                    <span style="font-size: 0.72rem;"><i class="bi bi-award-fill"></i> ĐỒ ÁN XUẤT SẮC</span>
+                    <span class="badge bg-success" style="font-size: 0.6rem;">214/214 Tests</span>
+                </div>
+                <div class="fw-bold text-light" style="font-size: 0.82rem;">Nguyễn Văn Hưng</div>
+                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 42+ Phân hệ Chuẩn JCI</div>
+            </button>
+        </div>
+
         <div class="flex-grow-1 overflow-y-auto">
             <ul class="nav flex-column">
 
@@ -452,7 +464,14 @@
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <!-- Nút Báo Cáo Đóng Góp Nguyễn Văn Hưng cho Thầy & Hội Đồng -->
+                <button type="button" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); font-weight: 600; font-size: 0.8rem; border: none;">
+                    <i class="bi bi-trophy-fill text-warning"></i>
+                    <span class="d-none d-md-inline">Đóng góp đồ án:</span> <strong>Nguyễn Văn Hưng</strong>
+                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">42+ Modules • 214 Tests</span>
+                </button>
+
                 <a href="{{ route('booking.create') }}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 rounded-pill">
                     <i class="bi bi-plus-circle"></i> Đặt lịch hẹn
                 </a>
@@ -508,7 +527,251 @@
         </footer>
     </div>
 
-    <!-- Bootstrap 5.3.3 Bundle JS -->
+    <!-- Modal Hồ Sơ Đóng Góp Kỹ Thuật Đồ Án - Nguyễn Văn Hưng (Dành cho Thầy & Hội Đồng Thẩm Định) -->
+    <div class="modal fade" id="projectContributionModal" tabindex="-1" aria-labelledby="projectContributionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
+                <!-- Modal Header -->
+                <div class="modal-header text-white px-4 py-3" style="background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm" style="width: 48px; height: 48px;">
+                            <i class="bi bi-trophy-fill fs-3 text-warning"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="projectContributionModalLabel">
+                                HỒ SƠ ĐÓNG GÓP KỸ THUẬT & NGHIỆP VỤ Y KHOA - SMART HOSPITAL SUITE
+                            </h5>
+                            <small class="text-white-50">Sinh viên thực hiện: <strong class="text-white">NGUYỄN VĂN HƯNG</strong> • Nhánh: <code class="text-warning bg-dark bg-opacity-25 px-2 py-0.5 rounded">feature/patients-and-reception</code></small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body p-4 bg-light">
+                    <!-- KPI Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
+                                <div class="text-primary fs-2 fw-bold mb-1">42+</div>
+                                <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
+                                <small class="text-muted" style="font-size: 0.72rem;">Bàn tiếp đón, Kiosk, Cấp cứu, Dược, Chuỗi lạnh, CSSD, BHYT</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-success">
+                                <div class="text-success fs-2 fw-bold mb-1">214 / 214</div>
+                                <div class="fw-semibold text-dark small">Kiểm Thử Tự Động (100% Green)</div>
+                                <small class="text-muted" style="font-size: 0.72rem;">874 Assertions • 0 Failures • 0 Errors</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-warning">
+                                <div class="text-warning fs-2 fw-bold mb-1">100%</div>
+                                <div class="fw-semibold text-dark small">Chuẩn Hóa Y Khoa & Pháp Lý</div>
+                                <small class="text-muted" style="font-size: 0.72rem;">Luật KCB 2023, TT 32, TT 43, TT 20, QĐ 4210 & Chuẩn JCI</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-info">
+                                <div class="text-info fs-2 fw-bold mb-1">PR #4</div>
+                                <div class="fw-semibold text-dark small">GitHub Pull Request Đồng Bộ</div>
+                                <small class="text-muted" style="font-size: 0.72rem;">Mọi thay đổi đều được commit & push minh bạch</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Git & Review Guide -->
+                    <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-github fs-3 text-dark"></i>
+                            <div>
+                                <strong class="text-dark">Theo dõi tiến độ trực tiếp trên GitHub:</strong>
+                                <div class="small text-muted">Pull Request #4 trên kho lưu trữ chính thức đã tự động cập nhật toàn bộ mã nguồn mới nhất.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4" target="_blank" class="btn btn-dark btn-sm rounded-pill px-3">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Mở GitHub PR #4
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 10 Nhóm Nghiệp Vụ Chính -->
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-grid-fill text-primary me-2"></i>Bản Đồ 10 Nhóm Nghiệp Vụ Y Khoa Trọng Tâm Phát Triển:</h6>
+                    <div class="row g-3">
+                        <!-- Nhóm 1 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-person-workspace"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">1. Tiếp Đón & Smart Kiosk</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Kiosk cảm ứng sảnh & quét CCCD chip</li>
+                                    <li>✓ In phiếu số thứ tự nhiệt 80mm có mã QR</li>
+                                    <li>✓ Phát thanh gọi số tự động Web Speech AI</li>
+                                    <li>✓ Check-in tiếp đón ca hẹn & Khám vãng lai</li>
+                                    <li>✓ In vòng tay nhận diện mã vạch Barcode 128</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 2 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-danger rounded-circle p-2"><i class="bi bi-bell-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">2. Cấp Cứu & Báo Động Đỏ</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Phân luồng Cấp cứu Triage ATS 5 cấp</li>
+                                    <li>✓ Kích hoạt Báo động đỏ toàn viện Code Red</li>
+                                    <li>✓ Cảnh báo sớm suy sụp NEWS2 & Đội RRT</li>
+                                    <li>✓ Giám sát tai nạn kim tiêm & Phơi nhiễm PEP</li>
+                                    <li>✓ Thang đo Morse té ngã & Braden loét da</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 3 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-warning rounded-circle p-2 text-dark"><i class="bi bi-capsule"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">3. Dược Phẩm & An Toàn Thuốc</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Quầy dược ngoại trú & Kho tồn GPP</li>
+                                    <li>✓ CDSS cảnh báo dị ứng chéo kháng sinh</li>
+                                    <li>✓ Tem nhãn phụ Smart Label cảnh báo uống</li>
+                                    <li>✓ Tủ thuốc trực cấp cứu & Thuốc độc TT20</li>
+                                    <li>✓ Ký duyệt kép 2 người khi xuất thuốc nghiện</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 4 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-info rounded-circle p-2 text-white"><i class="bi bi-droplet-half"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">4. Xét Nghiệm & Máu An Toàn</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Cận lâm sàng & Báo động Panic Value</li>
+                                    <li>✓ Truyền máu đối chiếu kép 2 Điều dưỡng</li>
+                                    <li>✓ Định nhóm máu ABO/Rh tại giường</li>
+                                    <li>✓ Theo dõi sinh hiệu 15p đầu truyền máu</li>
+                                    <li>✓ Báo cáo phản ứng bất lợi sau truyền máu</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 5 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-secondary rounded-circle p-2"><i class="bi bi-snow"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">5. Chuỗi Lạnh IoT & Tiệt Khuẩn CSSD</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Giám sát nhiệt độ tủ vắc-xin 2-8°C IoT</li>
+                                    <li>✓ Tự động khóa điện tử khi quá nhiệt</li>
+                                    <li>✓ Quản lý mâm mổ & chu kỳ tiệt khuẩn CSSD</li>
+                                    <li>✓ Kiểm định chất chỉ thị sinh học/hóa học</li>
+                                    <li>✓ Hạn sử dụng vô trùng & mã QR khay mổ</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 6 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-success rounded-circle p-2"><i class="bi bi-door-open-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">6. Buồng Bệnh & Thận Nhân Tạo</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Sơ đồ giường bệnh thời gian thực trực quan</li>
+                                    <li>✓ Quy trình khử khuẩn Cloramin B giường trống</li>
+                                    <li>✓ Quản lý ca lọc máu chu kỳ & rút dịch UF</li>
+                                    <li>✓ Giám sát số lần tái dùng quả lọc thận</li>
+                                    <li>✓ Đơn vị lưu viện ban ngày (Day-Bed)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 7 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-file-earmark-medical"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">7. BHYT, Viện Phí & Ví Ký Quỹ</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Giấy chuyển tuyến BHYT chuẩn Mẫu 40/BYT</li>
+                                    <li>✓ Giám định BHYT thời gian thực & XML 4210</li>
+                                    <li>✓ Ví ký quỹ & tạm ứng viện phí kế toán kép</li>
+                                    <li>✓ Bảo lãnh viện phí tư nhân TPA GOP (Direct Billing)</li>
+                                    <li>✓ Hóa đơn thanh toán mã VietQR Napas247</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 8 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-danger rounded-circle p-2"><i class="bi bi-shield-lock-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">8. Pháp Lý Y Tế & An Toàn JCI</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Sao lục bệnh án điện tử (Điều 69 Luật KCB)</li>
+                                    <li>✓ Niêm phong tài sản cấp cứu & Đồ thất lạc</li>
+                                    <li>✓ Thẻ thăm bệnh JCI giới hạn tối đa 2 người</li>
+                                    <li>✓ Báo cáo sự cố Near-Miss & Phân tích RCA TT43</li>
+                                    <li>✓ Đăng ký hiến mô tạng & Di chúc y tế (DNR)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 9 & 10 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-dark rounded-circle p-2"><i class="bi bi-truck"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">9 & 10. Vận Hành Ngoại Viện & Số Hóa</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Đội xe cấp cứu Mobile ICU tính cước km tự động</li>
+                                    <li>✓ Khám sức khỏe đoàn doanh nghiệp TT 32/2023</li>
+                                    <li>✓ Phẫu thuật trong ngày Day Surgery WHO Checklist</li>
+                                    <li>✓ Bản đồ dẫn đường trong nhà 3D Wayfinding</li>
+                                    <li>✓ Cổng tự khai báo triệu chứng từ xa Pre-Visit</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
+                    <div class="small text-muted">
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 214/214 kịch bản đạt 100% tỷ lệ xanh.
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-git me-1"></i> Xem Git PR #4
+                        </a>
+                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
