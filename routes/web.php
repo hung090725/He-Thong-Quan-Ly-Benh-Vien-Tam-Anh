@@ -49,6 +49,18 @@ use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
 use App\Http\Controllers\Receptionist\SocialWorkController;
 use App\Http\Controllers\Receptionist\VaccinationController;
 use App\Http\Controllers\Receptionist\VisitorPassController;
+use App\Http\Controllers\Receptionist\News2RapidResponseController;
+use App\Http\Controllers\Receptionist\ClinicalRiskAssessmentController;
+use App\Http\Controllers\Receptionist\NarcoticBoxController;
+use App\Http\Controllers\Receptionist\OccupationalExposureController;
+use App\Http\Controllers\Receptionist\ColdChainController;
+use App\Http\Controllers\Receptionist\CssdSurgicalTrayController;
+use App\Http\Controllers\Receptionist\HemodialysisController;
+use App\Http\Controllers\Receptionist\SmartBedBoardController;
+use App\Http\Controllers\Receptionist\HospitalWayfindingController;
+use App\Http\Controllers\Receptionist\PreVisitScreeningController;
+use App\Http\Controllers\Receptionist\InsuranceScrubberController;
+use App\Http\Controllers\Receptionist\LivingWillOrganDonationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -367,6 +379,58 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/chronic-recalls', [ChronicRecallController::class, 'store'])->name('chronic-recalls.store');
     Route::post('/chronic-recalls/{recall}/remind', [ChronicRecallController::class, 'sendReminder'])->name('chronic-recalls.remind');
     Route::patch('/chronic-recalls/{recall}/attended', [ChronicRecallController::class, 'markAttended'])->name('chronic-recalls.attended');
+
+    // 3.30. Cảnh Báo Sớm Sinh Hiệu NEWS2 & Đội Phản Ứng Nhanh (RRT)
+    Route::get('/news2-rrt', [News2RapidResponseController::class, 'index'])->name('news2-rrt.index');
+    Route::post('/news2-rrt', [News2RapidResponseController::class, 'store'])->name('news2-rrt.store');
+
+    // 3.31. Đánh Giá Nguy Cơ An Toàn Điều Dưỡng (Braden & Morse Scale)
+    Route::get('/risk-assessments', [ClinicalRiskAssessmentController::class, 'index'])->name('risk-assessments.index');
+    Route::post('/risk-assessments', [ClinicalRiskAssessmentController::class, 'store'])->name('risk-assessments.store');
+
+    // 3.32. Tủ Thuốc Trực Cấp Cứu & Quản Lý Thuốc Gây Nghiện (Thông tư 20/2017/TT-BYT)
+    Route::get('/narcotics', [NarcoticBoxController::class, 'index'])->name('narcotics.index');
+    Route::post('/narcotics/dispense', [NarcoticBoxController::class, 'dispense'])->name('narcotics.dispense');
+    Route::patch('/narcotics/verify-disposal/{log}', [NarcoticBoxController::class, 'verifyDisposal'])->name('narcotics.verify-disposal');
+
+    // 3.33. Giám Sát Tai Nạn Kim Tiêm & Phơi Nhiễm Nghề Nghiệp (Sharps Injury & PEP)
+    Route::get('/occupational-exposure', [OccupationalExposureController::class, 'index'])->name('occupational-exposure.index');
+    Route::post('/occupational-exposure', [OccupationalExposureController::class, 'store'])->name('occupational-exposure.store');
+
+    // 3.34. Chuỗi Cung Ứng Lạnh Vắc-Xin & Sinh Phẩm Y Tế IoT (Cold Chain Continuous GSP)
+    Route::get('/cold-chain', [ColdChainController::class, 'index'])->name('cold-chain.index');
+    Route::post('/cold-chain/telemetry', [ColdChainController::class, 'recordTelemetry'])->name('cold-chain.telemetry');
+
+    // 3.35. Quản Lý Tiệt Khuẩn Dụng Cụ Mổ Trung Tâm CSSD & Khay Phẫu Thuật
+    Route::get('/cssd', [CssdSurgicalTrayController::class, 'index'])->name('cssd.index');
+    Route::post('/cssd/run-cycle', [CssdSurgicalTrayController::class, 'runCycle'])->name('cssd.run-cycle');
+
+    // 3.36. Lọc Máu Thận Nhân Tạo Chu Kỳ & Tái Sử Dụng Quả Lọc
+    Route::get('/hemodialysis', [HemodialysisController::class, 'index'])->name('hemodialysis.index');
+    Route::post('/hemodialysis', [HemodialysisController::class, 'store'])->name('hemodialysis.store');
+    Route::patch('/hemodialysis/{session}/complete', [HemodialysisController::class, 'complete'])->name('hemodialysis.complete');
+
+    // 3.37. Quản Lý Buồng Bệnh, Khử Khuẩn & Điều Phối Giường Trống (Smart Bed Board)
+    Route::get('/bed-board', [SmartBedBoardController::class, 'index'])->name('bed-board.index');
+    Route::post('/bed-board/assign/{bed}', [SmartBedBoardController::class, 'assignPatient'])->name('bed-board.assign');
+    Route::post('/bed-board/discharge/{bed}', [SmartBedBoardController::class, 'dischargePatient'])->name('bed-board.discharge');
+    Route::post('/bed-board/clean/{bed}', [SmartBedBoardController::class, 'cleanBed'])->name('bed-board.clean');
+
+    // 3.38. Bản Đồ Điều Hướng Trong Nhà 3D/SVG Tìm Phòng Khám (Indoor Wayfinding)
+    Route::get('/wayfinding', [HospitalWayfindingController::class, 'index'])->name('wayfinding.index');
+    Route::post('/wayfinding', [HospitalWayfindingController::class, 'store'])->name('wayfinding.store');
+
+    // 3.39. Cổng Tự Khai Báo Tiền Sử & Triệu Chứng Từ Xa Trước Khám (Pre-Visit Screener)
+    Route::get('/pre-visit', [PreVisitScreeningController::class, 'index'])->name('pre-visit.index');
+    Route::post('/pre-visit', [PreVisitScreeningController::class, 'store'])->name('pre-visit.store');
+
+    // 3.40. Giám Định BHYT Thời Gian Thực Chống Xuất Toán & Cổng Dữ Liệu XML 4210/BYT
+    Route::get('/claim-scrubber', [InsuranceScrubberController::class, 'index'])->name('claim-scrubber.index');
+    Route::post('/claim-scrubber/scrub', [InsuranceScrubberController::class, 'scrub'])->name('claim-scrubber.scrub');
+
+    // 3.41. Đăng Ký Hiến Tạng Nhân Đạo & Di Chúc Y Tế Giảm Nhẹ (Living Will / DNR)
+    Route::get('/living-will', [LivingWillOrganDonationController::class, 'index'])->name('living-will.index');
+    Route::post('/living-will', [LivingWillOrganDonationController::class, 'store'])->name('living-will.store');
 });
 
 

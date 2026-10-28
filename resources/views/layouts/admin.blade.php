@@ -305,6 +305,70 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading">Lâm Sàng Cấp Cao & An Toàn JCI</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/news2-rrt*') ? 'active' : '' }}" href="{{ route('reception.news2-rrt.index') }}">
+                            <i class="bi bi-activity text-danger"></i> Cảnh Báo Sớm NEWS2 & RRT
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/risk-assessments*') ? 'active' : '' }}" href="{{ route('reception.risk-assessments.index') }}">
+                            <i class="bi bi-shield-check text-warning"></i> Thang Đo Braden & Morse
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/narcotics*') ? 'active' : '' }}" href="{{ route('reception.narcotics.index') }}">
+                            <i class="bi bi-capsule text-primary"></i> Tủ Thuốc Gây Nghiện TT20
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/occupational-exposure*') ? 'active' : '' }}" href="{{ route('reception.occupational-exposure.index') }}">
+                            <i class="bi bi-bandaid-fill text-danger"></i> Phơi Nhiễm Kim Tiêm & PEP
+                        </a>
+                    </li>
+
+                    <li class="sidebar-heading">Công Nghệ Dược, CSSD & Vận Hành Giường</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/cold-chain*') ? 'active' : '' }}" href="{{ route('reception.cold-chain.index') }}">
+                            <i class="bi bi-snow text-info"></i> Chuỗi Lạnh IoT Vắc-Xin
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/cssd*') ? 'active' : '' }}" href="{{ route('reception.cssd.index') }}">
+                            <i class="bi bi-tools text-secondary"></i> Tiệt Khuẩn Dụng Cụ CSSD
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/hemodialysis*') ? 'active' : '' }}" href="{{ route('reception.hemodialysis.index') }}">
+                            <i class="bi bi-droplet-fill text-danger"></i> Lọc Máu Thận Nhân Tạo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/bed-board*') ? 'active' : '' }}" href="{{ route('reception.bed-board.index') }}">
+                            <i class="bi bi-door-open-fill text-success"></i> Quản Lý Buồng Bệnh & Giường
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/wayfinding*') ? 'active' : '' }}" href="{{ route('reception.wayfinding.index') }}">
+                            <i class="bi bi-map-fill text-primary"></i> Bản Đồ Dẫn Đường Trong Nhà
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/pre-visit*') ? 'active' : '' }}" href="{{ route('reception.pre-visit.index') }}">
+                            <i class="bi bi-phone-fill text-info"></i> Tự Khai Báo Pre-Visit
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/claim-scrubber*') ? 'active' : '' }}" href="{{ route('reception.claim-scrubber.index') }}">
+                            <i class="bi bi-file-earmark-code-fill text-warning"></i> Giám Định BHYT & XML 4210
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/living-will*') ? 'active' : '' }}" href="{{ route('reception.living-will.index') }}">
+                            <i class="bi bi-heart-pulse-fill text-danger"></i> Hiến Tạng & Di Chúc Y Tế
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
