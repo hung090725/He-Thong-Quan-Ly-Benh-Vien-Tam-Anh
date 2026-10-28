@@ -199,6 +199,26 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/vaccinations*') ? 'active' : '' }}" href="{{ route('reception.vaccinations.index') }}">
+                            <i class="bi bi-shield-check"></i> Tiêm Chủng & Sổ Vắc-Xin
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/code-red*') ? 'active' : '' }}" href="{{ route('reception.code-red.index') }}">
+                            <i class="bi bi-bell-fill text-danger"></i> Báo Động Đỏ Cấp Cứu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/deliveries*') ? 'active' : '' }}" href="{{ route('reception.deliveries.index') }}">
+                            <i class="bi bi-box2-heart"></i> Giao Thuốc Tận Nhà
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/surveys*') ? 'active' : '' }}" href="{{ route('reception.surveys.index') }}">
+                            <i class="bi bi-star-half"></i> Khảo Sát Hài Lòng BYT
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
                             <i class="bi bi-chat-quote"></i> Thông Báo ZNS & SMS
                         </a>

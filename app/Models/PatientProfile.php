@@ -75,6 +75,21 @@ class PatientProfile extends Model
         return $this->hasMany(ClinicalConsultation::class);
     }
 
+    public function vaccinationRecords(): HasMany
+    {
+        return $this->hasMany(VaccinationRecord::class)->orderBy('administered_at', 'desc');
+    }
+
+    public function medicationDeliveries(): HasMany
+    {
+        return $this->hasMany(MedicationDelivery::class)->orderBy('created_at', 'desc');
+    }
+
+    public function surveys(): HasMany
+    {
+        return $this->hasMany(PatientSurvey::class)->orderBy('created_at', 'desc');
+    }
+
     public function auditLogs(): HasMany
     {
         return $this->hasMany(ClinicalAuditLog::class)->orderBy('created_at', 'desc');

@@ -11,12 +11,16 @@ use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Doctor\DoctorQueueController;
 use App\Http\Controllers\Patient\PatientPortalController;
 use App\Http\Controllers\Public\BookingController;
+use App\Http\Controllers\Public\DeliveryTrackingController;
 use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\KioskController;
 use App\Http\Controllers\Public\PatientJourneyController;
+use App\Http\Controllers\Public\PatientSurveyController;
+use App\Http\Controllers\Receptionist\CodeRedEmergencyController;
 use App\Http\Controllers\Receptionist\DayBedController;
 use App\Http\Controllers\Receptionist\InformedConsentController;
+use App\Http\Controllers\Receptionist\MedicationDeliveryController;
 use App\Http\Controllers\Receptionist\MedicationScheduleController;
 use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\PatientInvoiceController;
@@ -26,7 +30,9 @@ use App\Http\Controllers\Receptionist\PharmacyInventoryController;
 use App\Http\Controllers\Receptionist\ReceptionAnalyticsController;
 use App\Http\Controllers\Receptionist\ReceptionAppointmentController;
 use App\Http\Controllers\Receptionist\ReceptionNotificationController;
+use App\Http\Controllers\Receptionist\ReceptionSurveyController;
 use App\Http\Controllers\Receptionist\SickLeaveCertificateController;
+use App\Http\Controllers\Receptionist\VaccinationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -82,6 +88,14 @@ Route::get('/billing/lookup', [PatientInvoiceController::class, 'publicLookup'])
 
 // Cổng Theo Dõi Hành Trình Khám Trực Tuyến Thời Gian Thực (Smart Patient Journey Live Tracker)
 Route::get('/journey/{code}', [PatientJourneyController::class, 'show'])->name('public.journey.show');
+
+// Cổng Tra Cứu Giao Thuốc Tận Nhà Trực Tuyến (Public Medication Delivery Tracking)
+Route::get('/delivery/{tracking_code}', [DeliveryTrackingController::class, 'show'])->name('public.delivery.tracking');
+
+// Khảo Sát Đánh Giá Trải Nghiệm & Hài Lòng Người Bệnh Chuẩn Bộ Y Tế (MOH 83-Criteria CSAT & NPS)
+Route::get('/survey/{appointment_code}', [PatientSurveyController::class, 'create'])->name('public.survey.create');
+Route::post('/survey', [PatientSurveyController::class, 'store'])->name('public.survey.store');
+Route::get('/survey-thankyou', [PatientSurveyController::class, 'thankyou'])->name('public.survey.thankyou');
 
 // 1.3. Quản lý Tài khoản Người dùng (Admin)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -201,6 +215,31 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::get('/notifications', [ReceptionNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/appointments/{appointment}/alert', [ReceptionNotificationController::class, 'dispatchAlert'])->name('notifications.alert');
     Route::post('/appointments/{appointment}/prescription-alert', [ReceptionNotificationController::class, 'dispatchPrescriptionAlert'])->name('notifications.prescription-alert');
+
+    // 3.10. Trung Tâm Tiêm Chủng Ngoại Trú (Vaccination Management)
+    Route::get('/vaccinations', [VaccinationController::class, 'index'])->name('vaccinations.index');
+    Route::get('/vaccinations/create', [VaccinationController::class, 'create'])->name('vaccinations.create');
+    Route::post('/vaccinations', [VaccinationController::class, 'store'])->name('vaccinations.store');
+    Route::get('/vaccinations/{record}', [VaccinationController::class, 'show'])->name('vaccinations.show');
+    Route::post('/vaccinations/{record}/clear', [VaccinationController::class, 'clearObservation'])->name('vaccinations.clear');
+    Route::get('/vaccinations/{record}/certificate', [VaccinationController::class, 'printCertificate'])->name('vaccinations.certificate');
+
+    // 3.11. Tiếp Nhận Cấp Cứu Trước Viện & Báo Động Đỏ Toàn Viện (Code Red Emergency)
+    Route::get('/code-red', [CodeRedEmergencyController::class, 'index'])->name('code-red.index');
+    Route::post('/code-red', [CodeRedEmergencyController::class, 'store'])->name('code-red.store');
+    Route::post('/code-red/{codeRed}/mark-arrived', [CodeRedEmergencyController::class, 'markArrived'])->name('code-red.mark-arrived');
+    Route::post('/code-red/{codeRed}/mark-intervention', [CodeRedEmergencyController::class, 'markIntervention'])->name('code-red.mark-intervention');
+    Route::post('/code-red/{codeRed}/resolve', [CodeRedEmergencyController::class, 'resolve'])->name('code-red.resolve');
+
+    // 3.12. Giao Thuốc Ngoại Trú Tận Nhà & Cấp Thuốc Bệnh Mãn Tính (Medication Delivery)
+    Route::get('/deliveries', [MedicationDeliveryController::class, 'index'])->name('deliveries.index');
+    Route::post('/deliveries', [MedicationDeliveryController::class, 'store'])->name('deliveries.store');
+    Route::post('/deliveries/{delivery}/status', [MedicationDeliveryController::class, 'updateStatus'])->name('deliveries.status');
+    Route::get('/deliveries/{delivery}/waybill', [MedicationDeliveryController::class, 'printWaybill'])->name('deliveries.waybill');
+
+    // 3.13. Khảo Sát Đánh Giá Trải Nghiệm & Hài Lòng Bộ Y Tế (Patient CSAT & NPS)
+    Route::get('/surveys', [ReceptionSurveyController::class, 'index'])->name('surveys.index');
+    Route::post('/surveys/{survey}/resolve', [ReceptionSurveyController::class, 'resolveFollowup'])->name('surveys.resolve');
 });
 
 

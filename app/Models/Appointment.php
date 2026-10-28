@@ -123,6 +123,16 @@ class Appointment extends Model
         return $this->hasMany(ClinicalConsultation::class);
     }
 
+    public function vaccinationRecords(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(VaccinationRecord::class);
+    }
+
+    public function surveys(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PatientSurvey::class);
+    }
+
     public function latestVital(): HasOne
     {
         return $this->hasOne(PatientVital::class, 'appointment_id')->latestOfMany('recorded_at');
