@@ -64,61 +64,158 @@ class BookingController extends Controller
 
         try {
             $appointment = DB::transaction(function () use ($validated) {
-                // 1. Resolve or create Patient Profile
+                // 1. Pessimistic Lock on DoctorSchedule to prevent race condition overbooking
+                $date = Carbon::parse($validated['appointment_date']);
+                $dayOfWeek = strtolower($date->englishDayOfWeek);
+
+                $schedule = DoctorSchedule::where('doctor_id', $validated['doctor_id'])
+                    ->where('day_of_week', $dayOfWeek)
+                    ->where('shift', $validated['shift'])
+                    ->where('is_active', true)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$schedule) {
+                    throw new \Exception('Bác sĩ không có lịch làm việc trong ca khám đã chọn.');
+                }
+
+                // 2. Atomic count of current active appointments in this shift with row locking
+                $currentBookingsCount = Appointment::where('doctor_id', $validated['doctor_id'])
+                    ->whereDate('appointment_date', $date->toDateString())
+                    ->where('shift', $validated['shift'])
+                    ->where('status', '!=', Appointment::STATUS_CANCELLED)
+                    ->lockForUpdate()
+                    ->count();
+
+                if ($currentBookingsCount >= $schedule->max_patients) {
+                    $shiftVn = $validated['shift'] === 'morning' ? 'buổi sáng' : 'buổi chiều';
+                    throw new \Exception("Ca khám {$shiftVn} ngày {$date->format('d/m/Y')} của bác sĩ vừa nhận đủ số lượng tối đa ({$schedule->max_patients}/{$schedule->max_patients} bệnh nhân). Vui lòng chọn ca khám hoặc ngày khác.");
+                }
+
+                // 3. Resolve or create Patient Profile securely (Preventing Profile Hijacking)
                 $patientProfile = null;
+                $currentUser = Auth::user();
 
-                if (Auth::check()) {
-                    $patientProfile = PatientProfile::where('user_id', Auth::id())->first();
-                }
+                if ($currentUser) {
+                    // Check if current user already has an owned primary profile
+                    $userProfile = PatientProfile::where('user_id', $currentUser->id)->first();
 
-                if (!$patientProfile) {
-                    $patientProfile = PatientProfile::where('phone', $validated['phone'])->first();
-                }
+                    // Check if the booking is for the current user themselves
+                    if ($userProfile && (
+                        $userProfile->phone === $validated['phone'] ||
+                        mb_strtolower(trim($userProfile->full_name)) === mb_strtolower(trim($validated['full_name']))
+                    )) {
+                        $patientProfile = $userProfile;
+                        // Safely update missing fields if provided
+                        $updateData = [];
+                        if (empty($patientProfile->email) && !empty($validated['email'])) {
+                            $updateData['email'] = $validated['email'];
+                        }
+                        if (empty($patientProfile->address) && !empty($validated['address'])) {
+                            $updateData['address'] = $validated['address'];
+                        }
+                        if (empty($patientProfile->identity_card) && !empty($validated['identity_card'])) {
+                            $updateData['identity_card'] = $validated['identity_card'];
+                        }
+                        if (!empty($updateData)) {
+                            $patientProfile->update($updateData);
+                        }
+                    } else {
+                        // User is booking for a dependent/relative, OR user doesn't have a profile yet
+                        $matchedProfile = PatientProfile::where('phone', $validated['phone'])
+                            ->whereRaw('LOWER(TRIM(full_name)) = ?', [mb_strtolower(trim($validated['full_name']))])
+                            ->first();
 
-                if (!$patientProfile) {
-                    $patientProfile = PatientProfile::create([
-                        'user_id' => Auth::check() ? Auth::id() : null,
-                        'patient_code' => PatientProfile::generatePatientCode(),
-                        'full_name' => $validated['full_name'],
-                        'dob' => $validated['dob'],
-                        'gender' => $validated['gender'],
-                        'phone' => $validated['phone'],
-                        'email' => $validated['email'] ?? null,
-                        'address' => $validated['address'] ?? null,
-                        'identity_card' => $validated['identity_card'] ?? null,
-                    ]);
+                        if ($matchedProfile) {
+                            $patientProfile = $matchedProfile;
+                            // Only bind user_id if profile is orphaned AND user currently has NO profile
+                            if (!$userProfile && empty($matchedProfile->user_id)) {
+                                $matchedProfile->update(['user_id' => $currentUser->id]);
+                            }
+                        } else {
+                            // Create separate profile for the dependent (or user)
+                            $patientProfile = PatientProfile::create([
+                                'user_id' => (!$userProfile) ? $currentUser->id : null,
+                                'patient_code' => PatientProfile::generatePatientCode(),
+                                'full_name' => $validated['full_name'],
+                                'dob' => $validated['dob'],
+                                'gender' => $validated['gender'],
+                                'phone' => $validated['phone'],
+                                'email' => $validated['email'] ?? null,
+                                'address' => $validated['address'] ?? null,
+                                'identity_card' => $validated['identity_card'] ?? null,
+                            ]);
+                        }
+                    }
                 } else {
-                    // Update latest contact info if missing
-                    $updateData = [];
-                    if (empty($patientProfile->user_id) && Auth::check()) {
-                        $updateData['user_id'] = Auth::id();
-                    }
-                    if (!empty($validated['email']) && empty($patientProfile->email)) {
-                        $updateData['email'] = $validated['email'];
-                    }
-                    if (!empty($validated['address']) && empty($patientProfile->address)) {
-                        $updateData['address'] = $validated['address'];
-                    }
-                    if (!empty($updateData)) {
-                        $patientProfile->update($updateData);
+                    // Guest booking (unauthenticated) - match BOTH phone AND full_name
+                    $patientProfile = PatientProfile::where('phone', $validated['phone'])
+                        ->whereRaw('LOWER(TRIM(full_name)) = ?', [mb_strtolower(trim($validated['full_name']))])
+                        ->first();
+
+                    if ($patientProfile) {
+                        $updateData = [];
+                        if (empty($patientProfile->email) && !empty($validated['email'])) {
+                            $updateData['email'] = $validated['email'];
+                        }
+                        if (empty($patientProfile->address) && !empty($validated['address'])) {
+                            $updateData['address'] = $validated['address'];
+                        }
+                        if (!empty($updateData)) {
+                            $patientProfile->update($updateData);
+                        }
+                    } else {
+                        $patientProfile = PatientProfile::create([
+                            'user_id' => null,
+                            'patient_code' => PatientProfile::generatePatientCode(),
+                            'full_name' => $validated['full_name'],
+                            'dob' => $validated['dob'],
+                            'gender' => $validated['gender'],
+                            'phone' => $validated['phone'],
+                            'email' => $validated['email'] ?? null,
+                            'address' => $validated['address'] ?? null,
+                            'identity_card' => $validated['identity_card'] ?? null,
+                        ]);
                     }
                 }
 
-                // 2. Create Appointment record
-                $appointmentCode = Appointment::generateAppointmentCode();
+                // 4. Duplicate appointment guard for same patient in same shift
+                $isDuplicate = Appointment::where('patient_profile_id', $patientProfile->id)
+                    ->whereDate('appointment_date', $date->toDateString())
+                    ->where('shift', $validated['shift'])
+                    ->where('status', '!=', Appointment::STATUS_CANCELLED)
+                    ->exists();
 
-                return Appointment::create([
-                    'appointment_code' => $appointmentCode,
-                    'patient_profile_id' => $patientProfile->id,
-                    'doctor_id' => $validated['doctor_id'],
-                    'specialty_id' => $validated['specialty_id'],
-                    'appointment_date' => $validated['appointment_date'],
-                    'shift' => $validated['shift'],
-                    'appointment_time' => $validated['appointment_time'] ?? null,
-                    'symptom_description' => $validated['symptom_description'],
-                    'status' => Appointment::STATUS_PENDING,
-                    'created_by_user_id' => Auth::id(),
-                ]);
+                if ($isDuplicate) {
+                    throw new \Exception('Bệnh nhân này đã có một lịch hẹn trong cùng ca khám ngày ' . $date->format('d/m/Y') . '. Vui lòng kiểm tra lại thông tin.');
+                }
+
+                // 5. Create Appointment with retry loop to guarantee code collision safety
+                $appointment = null;
+                for ($attempt = 1; $attempt <= 3; $attempt++) {
+                    try {
+                        $appointment = Appointment::create([
+                            'appointment_code' => Appointment::generateAppointmentCode(),
+                            'patient_profile_id' => $patientProfile->id,
+                            'doctor_id' => $validated['doctor_id'],
+                            'specialty_id' => $validated['specialty_id'],
+                            'appointment_date' => $validated['appointment_date'],
+                            'shift' => $validated['shift'],
+                            'appointment_time' => $validated['appointment_time'] ?? null,
+                            'symptom_description' => $validated['symptom_description'],
+                            'status' => Appointment::STATUS_PENDING,
+                            'created_by_user_id' => Auth::id(),
+                        ]);
+                        break;
+                    } catch (\Illuminate\Database\QueryException $qe) {
+                        if ($qe->getCode() == 23000 && $attempt < 3) {
+                            continue;
+                        }
+                        throw $qe;
+                    }
+                }
+
+                return $appointment;
             });
 
             // 3. Send confirmation email (with exception protection)
@@ -168,9 +265,9 @@ class BookingController extends Controller
 
         if ($keyword) {
             $keyword = trim($keyword);
-            // Search by exact appointment code or phone number
+            // Search by exact appointment code or phone number (Masking & Clinical isolation enforced)
             if (str_starts_with(strtoupper($keyword), 'AP-')) {
-                $appointment = Appointment::with(['patientProfile', 'doctor.user', 'specialty', 'medicalRecord.prescriptions'])
+                $appointment = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
                     ->where('appointment_code', strtoupper($keyword))
                     ->first();
             } else {
@@ -180,6 +277,7 @@ class BookingController extends Controller
                           ->orWhere('patient_code', strtoupper($keyword));
                     })
                     ->latest()
+                    ->take(10)
                     ->get();
             }
         }

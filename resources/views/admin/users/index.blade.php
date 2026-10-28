@@ -56,6 +56,7 @@
                         <th>Email liên hệ</th>
                         <th>Số điện thoại</th>
                         <th>Vai trò (Role)</th>
+                        <th>Trạng thái</th>
                         <th>Ngày tạo</th>
                         <th class="text-end pe-3" style="width: 140px;">Thao tác</th>
                     </tr>
@@ -86,6 +87,17 @@
                                     {{ $user->role_name }}
                                 </span>
                             </td>
+                            <td>
+                                @if($user->is_active)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Hoạt động
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
+                                        <i class="bi bi-lock-fill me-1"></i> Đã khóa
+                                    </span>
+                                @endif
+                            </td>
                             <td class="text-muted small">
                                 {{ $user->created_at ? $user->created_at->format('d/m/Y H:i') : '—' }}
                             </td>
@@ -98,7 +110,7 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                     @if($user->id !== Auth::id())
-                                        <button type="button" class="btn btn-outline-danger" title="Xóa tài khoản" onclick="if(confirm('Bạn có chắc chắn muốn xóa tài khoản {{ $user->name }}?')) document.getElementById('delete-user-{{ $user->id }}').submit();">
+                                        <button type="button" class="btn btn-outline-danger" title="Xóa tài khoản" onclick="if(confirm('Bạn có chắc chắn muốn xóa tài khoản {{ addslashes(e($user->name)) }}?')) document.getElementById('delete-user-{{ $user->id }}').submit();">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                         <form id="delete-user-{{ $user->id }}" action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-none">
@@ -111,7 +123,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-people fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Không tìm thấy người dùng nào phù hợp với bộ lọc tìm kiếm.
                             </td>

@@ -156,17 +156,18 @@ class Appointment extends Model
         $today = Carbon::now()->format('Ymd');
         $prefix = "AP-{$today}-";
 
-        $latest = self::where('appointment_code', 'LIKE', "{$prefix}%")
-            ->orderBy('appointment_code', 'desc')
-            ->first();
+        // Generate 4-character alphanumeric token (avoiding ambiguous chars 0, O, 1, I)
+        $charset = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $charsetLen = strlen($charset);
 
-        if ($latest) {
-            $lastNumber = (int) substr($latest->appointment_code, -4);
-            $nextNumber = str_pad((string)($lastNumber + 1), 4, '0', STR_PAD_LEFT);
-        } else {
-            $nextNumber = '0001';
-        }
+        do {
+            $token = '';
+            for ($i = 0; $i < 4; $i++) {
+                $token .= $charset[random_int(0, $charsetLen - 1)];
+            }
+            $code = "{$prefix}{$token}";
+        } while (self::where('appointment_code', $code)->exists());
 
-        return "{$prefix}{$nextNumber}";
+        return $code;
     }
 }

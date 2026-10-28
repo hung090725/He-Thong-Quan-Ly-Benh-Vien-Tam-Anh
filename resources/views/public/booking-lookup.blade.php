@@ -51,8 +51,8 @@
                             <strong class="fs-6">{{ $appointment->patientProfile->full_name }}</strong>
                         </div>
                         <div class="col-md-6">
-                            <span class="text-muted small d-block">Mã hồ sơ:</span>
-                            <code>{{ $appointment->patientProfile->patient_code }}</code>
+                            <span class="text-muted small d-block">Số điện thoại liên hệ:</span>
+                            <code class="fs-6">{{ \Illuminate\Support\Str::mask($appointment->patientProfile->phone, '*', 3, -3) }}</code>
                         </div>
                         <div class="col-md-6">
                             <span class="text-muted small d-block">Bác sĩ khám:</span>
@@ -67,7 +67,7 @@
                             <strong>{{ $appointment->appointment_date->format('d/m/Y') }}</strong> - {{ $appointment->shift_name }}
                         </div>
                         <div class="col-md-6">
-                            <span class="text-muted small d-block">Lý do khám:</span>
+                            <span class="text-muted small d-block">Lý do đăng ký khám:</span>
                             <span>{{ $appointment->symptom_description }}</span>
                         </div>
                         @if($appointment->cancellation_reason)
@@ -79,52 +79,27 @@
                         @endif
                     </div>
 
-                    @if($appointment->medicalRecord)
-                        <div class="p-3 bg-light rounded-3 mt-3 border">
-                            <div class="d-flex align-items-center gap-2 mb-2 text-success fw-bold">
-                                <i class="bi bi-file-earmark-medical-fill fs-5"></i>
-                                <span>KẾT QUẢ KHÁM BỆNH & ĐƠN THUỐC</span>
+                    <!-- Medical Privacy Card: Hiding Clinical Data from Public View -->
+                    <div class="card border-primary-subtle bg-light-subtle shadow-sm mt-3">
+                        <div class="card-body p-4 text-center">
+                            <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-2">
+                                <i class="bi bi-shield-lock-fill fs-3"></i>
                             </div>
-                            <div class="row g-2 small mb-3">
-                                <div class="col-md-6"><strong>Mã bệnh án:</strong> <code>{{ $appointment->medicalRecord->record_code }}</code></div>
-                                <div class="col-md-6"><strong>Chẩn đoán chính:</strong> {{ $appointment->medicalRecord->diagnosis }}</div>
-                                @if($appointment->medicalRecord->treatment_plan)
-                                    <div class="col-12"><strong>Kế hoạch điều trị:</strong> {{ $appointment->medicalRecord->treatment_plan }}</div>
-                                @endif
-                                @if($appointment->medicalRecord->follow_up_date)
-                                    <div class="col-12 text-primary"><strong>Hẹn tái khám:</strong> {{ $appointment->medicalRecord->follow_up_date->format('d/m/Y') }}</div>
-                                @endif
-                            </div>
-
-                            @if($appointment->medicalRecord->prescriptions->isNotEmpty())
-                                <div class="fw-semibold small mb-1">Đơn thuốc được kê:</div>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-bordered bg-white mb-0 small">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Tên thuốc</th>
-                                                <th>Liều dùng</th>
-                                                <th>Tần suất</th>
-                                                <th>Số ngày</th>
-                                                <th>Cách dùng</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($appointment->medicalRecord->prescriptions as $p)
-                                                <tr>
-                                                    <td class="fw-semibold">{{ $p->medication_name }}</td>
-                                                    <td>{{ $p->dosage }}</td>
-                                                    <td>{{ $p->frequency }}</td>
-                                                    <td>{{ $p->duration_days }} ngày</td>
-                                                    <td>{{ $p->instructions ?? '—' }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
+                            <h6 class="fw-bold text-dark mb-2">BẢO MẬT HỒ SƠ Y TẾ & KẾT QUẢ KHÁM</h6>
+                            <p class="text-muted small mx-auto mb-3" style="max-width: 580px;">
+                                Để bảo vệ quyền riêng tư và bí mật bệnh án theo quy chuẩn Bộ Y Tế, thông tin chẩn đoán lâm sàng, kết quả xét nghiệm và đơn thuốc điện tử chỉ được cung cấp trực tiếp qua <strong>Cổng thông tin Bệnh nhân</strong> có xác thực tài khoản.
+                            </p>
+                            @auth
+                                <a href="{{ route('patient.appointments.show', $appointment) }}" class="btn btn-primary btn-sm px-4 fw-semibold">
+                                    <i class="bi bi-folder2-open me-1"></i> Xem Kết Quả Khám & Đơn Thuốc Trong Cổng Bệnh Nhân
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-primary btn-sm px-4 fw-semibold">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng Nhập Để Xem Kết Quả Khám & Đơn Thuốc
+                                </a>
+                            @endauth
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
 
@@ -133,7 +108,7 @@
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="fw-bold mb-0 text-dark">
-                        Tìm thấy {{ $appointments->count() }} lịch hẹn liên quan đến số điện thoại <code>{{ $keyword }}</code>:
+                        Tìm thấy {{ $appointments->count() }} lịch hẹn liên quan đến số điện thoại <code>{{ \Illuminate\Support\Str::mask($keyword, '*', 3, -3) }}</code>:
                     </h5>
                 </div>
                 <div class="card-body p-0">

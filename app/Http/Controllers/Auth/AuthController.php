@@ -40,10 +40,23 @@ class AuthController extends Controller
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
             /** @var User $user */
             $user = Auth::user();
+
+            // Account suspension check
+            if (! $user->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors([
+                        'email' => 'Tài khoản của bạn đã bị tạm khóa bởi ban quản lý. Vui lòng liên hệ quản trị viên bệnh viện để được hỗ trợ.',
+                    ]);
+            }
+
+            $request->session()->regenerate();
 
             return $this->redirectBasedOnRole($user)
                 ->with('success', "Xin chào {$user->name}! Bạn đã đăng nhập thành công với vai trò {$user->role_name}.");

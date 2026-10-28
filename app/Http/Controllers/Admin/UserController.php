@@ -73,6 +73,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'] ?? null,
             'role' => $validated['role'],
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : true,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'Tạo tài khoản người dùng mới thành công!');
@@ -106,6 +107,7 @@ class UserController extends Controller
             'password' => ['nullable', 'string', 'min:6'],
             'phone' => ['nullable', 'string', 'max:20'],
             'role' => ['required', Rule::in([User::ROLE_ADMIN, User::ROLE_RECEPTIONIST, User::ROLE_DOCTOR, User::ROLE_PATIENT])],
+            'is_active' => ['nullable', 'boolean'],
         ], [
             'name.required' => 'Họ và tên là bắt buộc.',
             'email.required' => 'Email là bắt buộc.',
@@ -116,11 +118,23 @@ class UserController extends Controller
             'role.in' => 'Vai trò được chọn không hợp lệ.',
         ]);
 
+        // Safety gate 1: Prevent self-demotion from Admin
+        if ($user->id === Auth::id() && $validated['role'] !== User::ROLE_ADMIN) {
+            return back()->withInput()->with('error', 'Bạn không thể tự hạ quyền Admin của chính mình để tránh mất quyền quản trị hệ thống.');
+        }
+
+        // Safety gate 2: Prevent self-deactivation
+        $isActive = $request->has('is_active') ? $request->boolean('is_active') : $user->is_active;
+        if ($user->id === Auth::id() && !$isActive) {
+            return back()->withInput()->with('error', 'Bạn không thể tự khóa tài khoản của chính mình khi đang đăng nhập.');
+        }
+
         $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'role' => $validated['role'],
+            'is_active' => $isActive,
         ];
 
         if (!empty($validated['password'])) {
@@ -139,6 +153,14 @@ class UserController extends Controller
     {
         if ($user->id === Auth::id()) {
             return back()->with('error', 'Bạn không thể tự xóa tài khoản của chính mình khi đang đăng nhập!');
+        }
+
+        // Integrity check: Prevent deletion if doctor has appointments or patient has profile with appointments
+        $hasDoctorAppointments = $user->doctor && $user->doctor->appointments()->exists();
+        $hasPatientAppointments = $user->patientProfile && $user->patientProfile->appointments()->exists();
+
+        if ($hasDoctorAppointments || $hasPatientAppointments) {
+            return back()->with('error', "Không thể xóa tài khoản \"{$user->name}\" vì đã có lịch sử khám bệnh/lịch hẹn liên kết. Vui lòng khóa tài khoản thay vì xóa vĩnh viễn.");
         }
 
         $userName = $user->name;
