@@ -61,6 +61,10 @@ use App\Http\Controllers\Receptionist\HospitalWayfindingController;
 use App\Http\Controllers\Receptionist\PreVisitScreeningController;
 use App\Http\Controllers\Receptionist\InsuranceScrubberController;
 use App\Http\Controllers\Receptionist\LivingWillOrganDonationController;
+use App\Http\Controllers\OperatingRoomSuiteController;
+use App\Http\Controllers\ClinicalAiDiagnosticsController;
+use App\Http\Controllers\BiomedicalAndInfectionController;
+use App\Http\Controllers\MaternityInfantOncologyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -431,7 +435,39 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     // 3.41. Đăng Ký Hiến Tạng Nhân Đạo & Di Chúc Y Tế Giảm Nhẹ (Living Will / DNR)
     Route::get('/living-will', [LivingWillOrganDonationController::class, 'index'])->name('living-will.index');
     Route::post('/living-will', [LivingWillOrganDonationController::class, 'store'])->name('living-will.store');
+
+    // 3.42. Phòng Mổ Thông Minh & Hồi Tỉnh PACU (Smart OR & Aldrete Score)
+    Route::get('/operating-room', [OperatingRoomSuiteController::class, 'index'])->name('operating-room.index');
+    Route::post('/operating-room/case', [OperatingRoomSuiteController::class, 'storeCase'])->name('operating-room.store-case');
+    Route::patch('/operating-room/case/{case}/phase', [OperatingRoomSuiteController::class, 'updatePhase'])->name('operating-room.update-phase');
+    Route::post('/operating-room/case/{case}/sponge-count', [OperatingRoomSuiteController::class, 'recordSpongeCount'])->name('operating-room.sponge-count');
+    Route::post('/operating-room/case/{case}/aldrete-score', [OperatingRoomSuiteController::class, 'recordAldreteScore'])->name('operating-room.aldrete-score');
+
+    // 3.43. AI Lâm Sàng, Đọc Phim PACS Khẩn Cấp & Sepsis qSOFA
+    Route::get('/clinical-ai', [ClinicalAiDiagnosticsController::class, 'index'])->name('clinical-ai.index');
+    Route::post('/clinical-ai/pacs', [ClinicalAiDiagnosticsController::class, 'storePacsAnalysis'])->name('clinical-ai.pacs');
+    Route::post('/clinical-ai/sepsis', [ClinicalAiDiagnosticsController::class, 'recordSepsisQsofa'])->name('clinical-ai.sepsis');
+    Route::post('/clinical-ai/pharmacogenomic', [ClinicalAiDiagnosticsController::class, 'storePharmacogenomic'])->name('clinical-ai.pharmacogenomic');
+    Route::post('/clinical-ai/transfusion-reaction', [ClinicalAiDiagnosticsController::class, 'reportTransfusionReaction'])->name('clinical-ai.transfusion-reaction');
+
+    // 3.44. Kỹ Thuật Y Sinh CMMS NĐ 98/2021 & Kiểm Soát Nhiễm Khuẩn (HAI - ASP)
+    Route::get('/biomedical-infection', [BiomedicalAndInfectionController::class, 'index'])->name('biomedical-infection.index');
+    Route::post('/biomedical-infection/equipment', [BiomedicalAndInfectionController::class, 'storeEquipment'])->name('biomedical-infection.equipment');
+    Route::post('/biomedical-infection/repair-sos', [BiomedicalAndInfectionController::class, 'reportRepairSos'])->name('biomedical-infection.repair-sos');
+    Route::post('/biomedical-infection/hai', [BiomedicalAndInfectionController::class, 'recordHaiInfection'])->name('biomedical-infection.hai');
+    Route::post('/biomedical-infection/asp', [BiomedicalAndInfectionController::class, 'approveAntimicrobial'])->name('biomedical-infection.asp');
+
+    // 3.45. Sản - Nhi An Toàn RFID, Ung Bướu Tumor Board & Hộp Đen Cấp Cứu Giờ Vàng
+    Route::get('/maternity-oncology', [MaternityInfantOncologyController::class, 'index'])->name('maternity-oncology.index');
+    Route::post('/maternity-oncology/partograph', [MaternityInfantOncologyController::class, 'storePartograph'])->name('maternity-oncology.partograph');
+    Route::post('/maternity-oncology/infant-tag', [MaternityInfantOncologyController::class, 'pairInfantTag'])->name('maternity-oncology.infant-tag');
+    Route::post('/maternity-oncology/chemo-cycle', [MaternityInfantOncologyController::class, 'recordChemoCycle'])->name('maternity-oncology.chemo-cycle');
+    Route::post('/maternity-oncology/tumor-board', [MaternityInfantOncologyController::class, 'storeTumorBoard'])->name('maternity-oncology.tumor-board');
+    Route::post('/maternity-oncology/golden-hour', [MaternityInfantOncologyController::class, 'recordGoldenHour'])->name('maternity-oncology.golden-hour');
 });
+
+// Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ
+Route::get('/or-waiting-board', [OperatingRoomSuiteController::class, 'publicWaitingBoard'])->name('public.or-waiting-board');
 
 
 // =========================================================================

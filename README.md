@@ -12,7 +12,7 @@
 | :---: | :--- | :--- | :--- |
 | 1 | **Nguyễn Thành Quý** | **Technical Lead & System Core** | Kiến trúc hệ thống, Khởi tạo dự án, Auth & RBAC Middleware, Master Layouts, Engine Đặt lịch khám, Mail thông báo & Điều phối tích hợp Git |
 | 2 | **Nguyễn Văn Đạt** | **Master Data & Public Portal** | Quản lý Chuyên khoa (CRUD), Hồ sơ Bác sĩ, Cấu hình Lịch trực ca trong tuần, Giao diện Trang chủ & Danh bạ Bác sĩ Responsive |
-| 3 | **Nguyễn Văn Hưng** | **Patient Reception, Clinical Safety & Smart Hospital Suite** | Quản lý Hồ sơ BN, Bàn tiếp nhận, Kiosk sảnh, Thuốc độc TT20, Cấp cứu Triage ATS, Báo động đỏ, NEWS2 & RRT, Chuỗi lạnh IoT, CSSD, Giám định BHYT & Bộ 42+ Phân hệ Y khoa Chuẩn JCI (214 Tests Passed) |
+| 3 | **Nguyễn Văn Hưng** | **Patient Reception, Clinical Safety & Smart Hospital Suite** | Quản lý Hồ sơ BN, Bàn tiếp nhận, Kiosk sảnh, Thuốc độc TT20, Cấp cứu Triage ATS, Báo động đỏ, NEWS2 & RRT, Chuỗi lạnh IoT, CSSD, Smart OR, AI PACS, qSOFA, PGx, CMMS NĐ98 & Bộ 60+ Phân hệ Y khoa Chuẩn JCI (222 Tests Passed) |
 | 4 | **Võ Lê Gia Bảo** | **Consultation, Records & Analytics** | Màn hình hàng đợi khám của Bác sĩ, Lập bệnh án & Kê đơn thuốc lặp, Upload/Download tệp y tế bảo mật (Policy), Dashboard Quản trị viên |
 
 ---
@@ -24,7 +24,7 @@ Dự án được xây dựng và đóng góp chính thức qua Pull Requests tr
 | Thành viên | GitHub Username | Vai trò & Đóng góp chính | Trạng thái tích hợp |
 | :--- | :--- | :--- | :---: |
 | **Nguyễn Thành Quý** | [@quy0358](https://github.com/quy0358) | **Project Lead & Core Architect**: Khung nền tảng Laravel 12, Auth & RBAC, Booking Engine, Master Layouts, Quản lý User | [![Merged](https://img.shields.io/badge/Status-Core%20Maintainer-success)]() |
-| **Nguyễn Văn Hưng** | [@hung090725](https://github.com/hung090725) | **Patient Reception, Clinical Safety & Smart Hospital Suite**: Phát triển trọn bộ 42+ phân hệ y khoa chuyên sâu (Kiosk cảm ứng, Triage ATS 5 cấp, NEWS2/RRT, Tủ thuốc độc TT20, Thẻ thăm JCI, Mẫu 40 BHYT, XML 4210, Khám đoàn TT32, 214 Unit/Feature Tests xanh 100%) | [![PR #4 Active](https://img.shields.io/badge/PR%20%234-Active%20%E2%80%A2%2042%2B%20Modules-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-214%2F214%20Green-brightgreen)]() |
+| **Nguyễn Văn Hưng** | [@hung090725](https://github.com/hung090725) | **Patient Reception, Clinical Safety & Smart Hospital Suite**: Phát triển trọn bộ 60+ phân hệ y khoa chuyên sâu (Smart OR, PACS-AI Triage, qSOFA Sepsis, Gen PGx, CMMS NĐ98, HAI-ASP, RFID Mẹ-Bé, Tumor Board, 83 Tiêu chí BYT, 222 Unit/Feature Tests xanh 100%) | [![PR #4 Active](https://img.shields.io/badge/PR%20%234-Active%20%E2%80%A2%2060%2B%20Modules-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-222%2F222%20Green-brightgreen)]() |
 | **Nguyễn Văn Đạt** | [@jtadd123](https://github.com/jtadd123) | **Master Data & Public Portal**: Quản lý Chuyên khoa (CRUD), Bác sĩ, Lịch trực ca tuần, Danh bạ bác sĩ công khai & Trang chủ | [![PR #1 Merged](https://img.shields.io/badge/PR%20%231-Merged-blueviolet)]() |
 | **Võ Lê Gia Bảo** | [@gbao289](https://github.com/gbao289) | **Consultation, Records & Analytics**: Bàn khám bác sĩ, Bệnh án điện tử, Đơn thuốc lặp, File y tế bảo mật, Dashboard thống kê | [![In Progress](https://img.shields.io/badge/Status-In%20Progress-orange)]() |
 
@@ -237,13 +237,13 @@ Mật khẩu mặc định cho tất cả các tài khoản thử nghiệm: **`1
 
 ---
 
-## 🏆 10. BẢNG TỔNG HỢP TIẾN ĐỘ & 214 KIỂM THỬ TỰ ĐỘNG (NGUYỄN VĂN HƯNG)
+## 🏆 10. BẢNG TỔNG HỢP TIẾN ĐỘ & 222 KIỂM THỬ TỰ ĐỘNG (NGUYỄN VĂN HƯNG)
 
 Nhằm đảm bảo tính minh bạch cao nhất phục vụ Thầy và Hội đồng chấm đồ án, toàn bộ mã nguồn của thành viên **Nguyễn Văn Hưng** đều được kiểm thử tự động đạt 100% tỷ lệ pass:
 
 - **Chi nhánh Git:** `feature/patients-and-reception` (Luôn được đồng bộ và push liên tục).
 - **Pull Request chính thức:** [GitHub PR #4 (quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4).
-- **Kết quả kiểm thử tự động:** `214 passed (874 assertions)` - 0 failures, 0 errors.
+- **Kết quả kiểm thử tự động:** `222 passed (914 assertions)` - 0 failures, 0 errors.
 - **Tài liệu thẩm định chuyên sâu:** Xem tại [docs/DONG_GOP_CHUYEN_MON_NGUYEN_VAN_HUNG.md](./docs/DONG_GOP_CHUYEN_MON_NGUYEN_VAN_HUNG.md).
 - **Công cụ đồng bộ tự động 1-click:** File `push_progress.bat` tại thư mục gốc tự động chạy kiểm thử trước khi push lên GitHub.
 

@@ -27,7 +27,7 @@ echo.
 echo [2/3] Đang chuẩn bị Git commit tiến độ...
 echo -------------------------------------------------------------------------------
 git add .
-set COMMIT_MSG=feat(core): cap nhat tien do Nguyen Van Hung [214 tests passed] - %date% %time%
+set COMMIT_MSG=feat(core): cap nhat tien do Nguyen Van Hung [222 tests passed] - %date% %time%
 git commit -m "%COMMIT_MSG%"
 
 echo.

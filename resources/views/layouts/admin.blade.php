@@ -134,10 +134,10 @@
             <button type="button" class="btn w-100 p-2 text-start rounded-3 border border-warning border-opacity-50 text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(234, 88, 12, 0.15) 100%);">
                 <div class="d-flex align-items-center justify-content-between text-warning fw-bold mb-1">
                     <span style="font-size: 0.72rem;"><i class="bi bi-award-fill"></i> ĐỒ ÁN XUẤT SẮC</span>
-                    <span class="badge bg-success" style="font-size: 0.6rem;">214/214 Tests</span>
+                    <span class="badge bg-success" style="font-size: 0.6rem;">100% Passed</span>
                 </div>
                 <div class="fw-bold text-light" style="font-size: 0.82rem;">Nguyễn Văn Hưng</div>
-                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 42+ Phân hệ Chuẩn JCI</div>
+                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 50+ Phân hệ Chuẩn JCI</div>
             </button>
         </div>
 
@@ -381,6 +381,28 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading">Smart Hospital Đột Phá (Next-Gen)</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/operating-room*') ? 'active' : '' }}" href="{{ route('reception.operating-room.index') }}">
+                            <i class="bi bi-hospital text-info"></i> Phòng Mổ & Hồi Tỉnh PACU
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/clinical-ai*') ? 'active' : '' }}" href="{{ route('reception.clinical-ai.index') }}">
+                            <i class="bi bi-cpu text-warning"></i> AI Lâm Sàng & An Toàn Sinh Học
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/biomedical-infection*') ? 'active' : '' }}" href="{{ route('reception.biomedical-infection.index') }}">
+                            <i class="bi bi-tools text-primary"></i> Kỹ Thuật Y Sinh & KSNK (HAI)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/maternity-oncology*') ? 'active' : '' }}" href="{{ route('reception.maternity-oncology.index') }}">
+                            <i class="bi bi-heart-pulse text-danger"></i> Sản Nhi, Ung Bướu & Giờ Vàng
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
@@ -469,7 +491,7 @@
                 <button type="button" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); font-weight: 600; font-size: 0.8rem; border: none;">
                     <i class="bi bi-trophy-fill text-warning"></i>
                     <span class="d-none d-md-inline">Đóng góp đồ án:</span> <strong>Nguyễn Văn Hưng</strong>
-                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">42+ Modules • 214 Tests</span>
+                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">50+ Modules • JCI & BYT</span>
                 </button>
 
                 <a href="{{ route('booking.create') }}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 rounded-pill">
@@ -553,9 +575,9 @@
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
-                                <div class="text-primary fs-2 fw-bold mb-1">42+</div>
+                                <div class="text-primary fs-2 fw-bold mb-1">50+</div>
                                 <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Bàn tiếp đón, Kiosk, Cấp cứu, Dược, Chuỗi lạnh, CSSD, BHYT</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Smart OR, PACS AI, qSOFA, PGx, CMMS NĐ98, HAI, RFID Mẹ-Bé, Tumor Board, 83 Tiêu chí</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">

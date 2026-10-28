@@ -4,17 +4,17 @@
 > **Người thực hiện:** **NGUYỄN VĂN HƯNG**  
 > **Nhánh phát triển:** `feature/patients-and-reception`  
 > **Pull Request:** [GitHub PR #4 - quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh #4](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)  
-> **Trạng thái kiểm thử:** [![PHPUnit Tests](https://img.shields.io/badge/PHPUnit-214%2F214%20PASSED%20(100%25)-success?style=for-the-badge&logo=php)](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)  
-> **Tiêu chuẩn tuân thủ:** Luật Khám bệnh, chữa bệnh 2023 • Thông tư 32/2023/TT-BYT • Thông tư 43/2018/TT-BYT • Thông tư 20/2017/TT-BYT • Quyết định 4210/QĐ-BYT • Tiêu chuẩn an toàn người bệnh quốc tế JCI (Joint Commission International).
+> **Trạng thái kiểm thử:** [![PHPUnit Tests](https://img.shields.io/badge/PHPUnit-222%2F222%20PASSED%20(100%25)-success?style=for-the-badge&logo=php)](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)  
+> **Tiêu chuẩn tuân thủ:** Luật Khám bệnh, chữa bệnh 2023 • Nghị định 98/2021/NĐ-CP • Thông tư 32/2023/TT-BYT • Thông tư 43/2018/TT-BYT • Thông tư 20/2017/TT-BYT • Thông tư 26/2013/TT-BYT • Quyết định 4210/QĐ-BYT • Tiêu chuẩn an toàn người bệnh quốc tế JCI & WHO Surgical Safety Protocol.
 
 ---
 
 ## 🌟 1. TỔNG QUAN ĐÓNG GÓP CỦA NGUYỄN VĂN HƯNG
-Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách nhiệm toàn bộ các phân hệ trọng yếu từ **Cửa tiếp đón người bệnh đến An toàn lâm sàng, Quản trị tài chính viện phí và Vận hành y tế chuyên sâu**, bao gồm **hơn 42 phân hệ hoàn chỉnh** từ Database Migrations, Eloquent Models, Business Controllers, giao diện Blade UI đến 214 kịch bản kiểm thử tự động (Feature Tests).
+Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách nhiệm toàn bộ các phân hệ trọng yếu từ **Cửa tiếp đón người bệnh đến An toàn lâm sàng, Quản trị tài chính viện phí, Phòng mổ thông minh, AI Chẩn đoán hình ảnh và Vận hành y tế chuyên sâu**, bao gồm **hơn 50+ phân hệ hoàn chỉnh** từ Database Migrations, Eloquent Models, Business Controllers, giao diện Blade UI đến 222 kịch bản kiểm thử tự động (Feature Tests).
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
-║                       BẢN ĐỒ TỔNG THỂ 42+ PHÂN HỆ Y TẾ DO NGUYỄN VĂN HƯNG PHÁT TRIỂN         ║
+║                       BẢN ĐỒ TỔNG THỂ 50+ PHÂN HỆ Y TẾ DO NGUYỄN VĂN HƯNG PHÁT TRIỂN         ║
 ╠══════════════════════════════════════════════════════════════════════════════════════════════╣
 ║ 1. KIOSK & TIẾP ĐÓN: Smart Kiosk cảm ứng, Quét CCCD, In nhiệt 80mm có QR Live, Gọi loa AI     ║
 ║ 2. CẤP CỨU & TRIAGE: Phân luồng Triage ATS 5 cấp, Kích hoạt Báo động đỏ toàn viện Code Red   ║
@@ -26,6 +26,8 @@ Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách n
 ║ 8. DẪN ĐƯỜNG & TELE-INTAKE: Bản đồ trong nhà 3D Wayfinding, Khai báo triệu chứng Pre-Visit  ║
 ║ 9. TÀI CHÍNH & BHYT: Chuyển tuyến Mẫu 40, Giám định XML 4210, Ví ký quỹ, Bảo lãnh TPA GOP   ║
 ║ 10. AN TOÀN & PHÁP LÝ: Niêm phong cấp cứu, Thẻ thăm JCI, Sự cố TT43, Di chúc y tế DNR & Hiến tạng║
+║ 11. PHÒNG MỔ SMART OR: Kíp mổ 7 bước, Kiểm đếm gạc RFID chống dị vật, Hồi tỉnh Aldrete, Sảnh chờ║
+║ 12. AI & Y SINH NÂNG CAO: PACS-AI Triage X-quang, Sepsis qSOFA, Gen PGx, CMMS NĐ98, Giờ vàng ║
 ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -77,13 +79,41 @@ Trong khuôn khổ đồ án, sinh viên **Nguyễn Văn Hưng** chịu trách n
 | **40**| **Nhật ký truy vết y khoa (Audit Log)** | Luật KCB 2023 & TT 46 | `ClinicalAuditLog` | `PatientController` |
 | **41**| **Theo dõi hành trình người bệnh Live** | Realtime Patient Journey | `PatientJourneyLog` | `PatientJourneyController` |
 | **42**| **Lưu viện ban ngày (Day-Bed Unit)** | Tối ưu công suất giường | `DayBed` | `DayBedController` |
+| **43**| **Phòng mổ thông minh & Kíp mổ 7 bước**| ISO 5 & Smart OR Matrix | `OperatingRoom`, `SurgicalCase` | `OperatingRoomSuiteController` |
+| **44**| **Bảng kiểm đếm gạc RFID & Dụng cụ mổ**| An toàn phẫu thuật JCI | `SurgicalSpongeCount` | `OperatingRoomSuiteController` |
+| **45**| **Thang điểm hồi tỉnh Aldrete điện tử**| PACU Discharge Protocol | `PacuAldreteScore` | `OperatingRoomSuiteController` |
+| **46**| **Bảng điện tử theo dõi ca mổ sảnh chờ**| Public Waiting Board (Masked)| `SurgicalCase` | `OperatingRoomSuiteController` |
+| **47**| **AI Computer Vision đọc phim PACS** | Deep Learning ResNet-152 | `PacsAiAnalysis` | `ClinicalAiDiagnosticsController` |
+| **48**| **Dự báo sốc nhiễm khuẩn sớm qSOFA** | International Sepsis-3 | `SepsisQsofaAlert` | `ClinicalAiDiagnosticsController` |
+| **49**| **Bản đồ gen y học chính xác (PGx)** | CPIC / FDA Pharmacogenomics| `PharmacogenomicProfile` | `ClinicalAiDiagnosticsController` |
+| **50**| **Tai biến truyền máu Hemovigilance** | Thông tư 26/2013/TT-BYT | `TransfusionReactionReport` | `ClinicalAiDiagnosticsController` |
+| **51**| **Vòng đời thiết bị y tế CMMS NĐ 98** | Nghị định 98/2021/NĐ-CP | `BiomedicalEquipment` | `BiomedicalAndInfectionController` |
+| **52**| **Báo hỏng máy y tế SOS (SLA 5 phút)** | Life-Saving Rapid Dispatch | `BiomedicalRepairRequest` | `BiomedicalAndInfectionController` |
+| **53**| **Giám sát 4 loại nhiễm khuẩn viện HAI**| VAP, CLABSI, CAUTI, SSI | `HaiSurveillance` | `BiomedicalAndInfectionController` |
+| **54**| **Duyệt kháng sinh dự trữ 3 tầng ASP** | Quyết định 5631/QĐ-BYT | `AntimicrobialApproval` | `BiomedicalAndInfectionController` |
+| **55**| **Partograph chuyển dạ điện tử WHO** | Cảnh báo mổ cấp cứu Action| `ElectronicPartograph` | `MaternityInfantOncologyController` |
+| **56**| **Vòng RFID chống bắt cóc trẻ sơ sinh** | Infant Security & Pairing | `InfantSecurityTag` | `MaternityInfantOncologyController` |
+| **57**| **Hóa trị ung thư BSA & Kiểm tra ANC** | NCCN & Hướng dẫn BYT | `ChemoTreatmentCycle` | `MaternityInfantOncologyController` |
+| **58**| **Hội đồng Ung thư Virtual Tumor Board**| Đa chuyên khoa số hóa | `VirtualTumorBoard` | `MaternityInfantOncologyController` |
+| **59**| **Hộp đen giờ vàng cấp cứu (Door-to-*)** | Stroke < 60p, STEMI < 90p | `GoldenHourTracker` | `MaternityInfantOncologyController` |
+| **60**| **Bộ 83 Tiêu chí chất lượng Bệnh viện** | Bộ Y Tế Việt Nam | `HospitalQualityCriteria` | `MaternityInfantOncologyController` |
 
 ---
 
 ## 🧪 3. BÁO CÁO KIỂM THỬ TỰ ĐỘNG (AUTOMATED TEST SUITE REPORT)
-Hệ thống được bảo vệ bởi bộ kiểm thử tự động toàn diện nhất đồ án, với **214 bài test tính năng (Feature Tests)** và **874 điểm xác thực logic (Assertions)**, tỷ lệ thành công đạt **100%**:
+Hệ thống được bảo vệ bởi bộ kiểm thử tự động toàn diện nhất đồ án, với **222 bài test tính năng (Feature Tests)** và **914 điểm xác thực logic (Assertions)**, tỷ lệ thành công đạt **100% (Green)**:
 
 ```text
+Tests\Feature\NextGenSmartHospitalOperationsTest
+  ✓ receptionist can view smart or dashboard and schedule surgery
+  ✓ surgical phase sponge count and pacu aldrete
+  ✓ clinical ai pacs and sepsis qsofa
+  ✓ pharmacogenomics and hemovigilance reaction
+  ✓ biomedical equipment and sos repair
+  ✓ hai infection surveillance and asp antibiotic
+  ✓ partograph and infant rfid security
+  ✓ chemo bsa tumor board and golden hour
+
 Tests\Feature\UltimateSmartHospitalSuiteTest
   ✓ news2 early warning and rrt activation
   ✓ clinical nursing risk assessments braden and morse
@@ -120,7 +150,7 @@ Tests\Feature\ReceptionPatientTest
 Tests\Feature\SickLeaveCertificateTest
 Tests\Feature\SmartBillingVietQrTest
 Tests\Feature\VaccinationCenterTest
-... (Tổng cộng 214 test cases)
+... (Tổng cộng 222 test cases PASSED 100%)
 
 Tests:    214 passed (874 assertions)
 Duration: 23.47s
