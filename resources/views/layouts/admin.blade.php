@@ -183,6 +183,11 @@
                             <i class="bi bi-journal-medical"></i> Sổ Giấy Nghỉ BHXH
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/consents*') ? 'active' : '' }}" href="{{ route('reception.consents.index') }}">
+                            <i class="bi bi-file-earmark-check"></i> Bản Cam Đoan Ký Số
+                        </a>
+                    </li>
                 @endif
 
                 @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDoctor()))

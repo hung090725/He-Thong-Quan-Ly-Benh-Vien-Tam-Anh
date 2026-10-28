@@ -65,6 +65,11 @@ class PatientProfile extends Model
         return $this->hasMany(ClinicalAuditLog::class)->orderBy('created_at', 'desc');
     }
 
+    public function informedConsents(): HasMany
+    {
+        return $this->hasMany(InformedConsent::class)->orderBy('created_at', 'desc');
+    }
+
     public function latestVital()
     {
         return $this->hasOne(PatientVital::class)->latestOfMany('recorded_at');

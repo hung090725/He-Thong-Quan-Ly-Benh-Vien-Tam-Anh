@@ -190,6 +190,18 @@
                                             </span>
                                         </div>
                                     @endif
+
+                                    @php
+                                        $medList = $record->prescriptions->map(fn($p) => ['name' => $p->medication_name, 'active_ingredient' => $p->medication_name])->toArray();
+                                        $allergyResult = \App\Services\AllergyCrossReactionService::checkAllergies($record->patientProfile->allergies, $medList);
+                                    @endphp
+                                    @if($allergyResult['has_critical_allergy'])
+                                        <div class="mt-1">
+                                            <span class="badge bg-danger text-white border border-danger small animate-pulse" title="{{ $allergyResult['alerts'][0]['explanation'] }}">
+                                                <i class="bi bi-shield-slash-fill me-1"></i>NGUY CƠ DỊ ỨNG ({{ $allergyResult['alerts_count'] }})
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
                             </td>
 
@@ -234,6 +246,11 @@
                                     <!-- Print Drug Bag Label -->
                                     <a href="{{ route('reception.pharmacy.label', $record) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm" title="In nhãn hướng dẫn túi thuốc dán bao bì">
                                         <i class="bi bi-tag-fill"></i> In nhãn túi
+                                    </a>
+
+                                    <!-- Visual Schedule & iCal -->
+                                    <a href="{{ route('reception.pharmacy.schedule', $record) }}" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1 shadow-sm" title="Thời gian biểu dùng thuốc & Đồng bộ Lịch điện thoại (.ics)">
+                                        <i class="bi bi-calendar2-check"></i> Lịch uống
                                     </a>
 
                                     <!-- Print MOH Prescription -->

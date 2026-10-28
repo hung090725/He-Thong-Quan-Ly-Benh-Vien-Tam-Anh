@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClinicalAuditLog;
 use App\Models\MedicalRecord;
 use App\Models\Medication;
+use App\Services\AllergyCrossReactionService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,13 +84,27 @@ class PharmacyController extends Controller
     }
 
     /**
-     * Mark a prescription record as dispensed.
+     * Mark a prescription record as dispensed with FEFO safety guard.
      */
     public function dispense(Request $request, MedicalRecord $record): RedirectResponse
     {
         $validated = $request->validate([
             'dispense_notes' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $record->load(['prescriptions', 'patientProfile']);
+
+        // 1. FEFO Expiry Safety Guard: Block expired or critical near-expired medications (<=30 days)
+        foreach ($record->prescriptions as $p) {
+            $firstWord = explode(' ', trim($p->medication_name))[0] ?? '';
+            if (mb_strlen($firstWord) >= 3) {
+                $med = Medication::where('name', 'like', "%{$firstWord}%")->first();
+                if ($med && !$med->fefo_status['is_dispensable']) {
+                    $expStr = $med->expiry_date ? $med->expiry_date->format('d/m/Y') : 'Không xác định';
+                    return back()->with('error', "CẢNH BÁO AN TOÀN DƯỢC (GPP/JCI): Thuốc [{$med->name}] (Số Lô: {$med->batch_number}) {$med->fefo_status['label']} (HSD: {$expStr}). Hệ thống khóa tự động, nghiêm cấm xuất cấp phát cho bệnh nhân!");
+                }
+            }
+        }
 
         $record->update([
             'dispensed_at' => Carbon::now(),
@@ -98,7 +113,6 @@ class PharmacyController extends Controller
         ]);
 
         // Real-time automated medication inventory deduction
-        $record->load('prescriptions');
         foreach ($record->prescriptions as $p) {
             $firstWord = explode(' ', trim($p->medication_name))[0] ?? '';
             if (mb_strlen($firstWord) >= 3) {

@@ -141,6 +141,11 @@
                     <i class="bi bi-shield-check text-info me-1"></i> Nhật Ký Truy Vết ({{ $patient->auditLogs->count() }})
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link px-4" id="consents-tab" data-bs-toggle="pill" data-bs-target="#consents" type="button" role="tab">
+                    <i class="bi bi-file-earmark-check text-success me-1"></i> Cam Đoan Thủ Thuật ({{ $patient->informedConsents->count() }})
+                </button>
+            </li>
         </ul>
 
         <div class="tab-content" id="patientTabsContent">
@@ -636,6 +641,105 @@
                             <div class="p-5 text-center text-muted">
                                 <i class="bi bi-shield-slash fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Chưa có nhật ký truy vết nào được ghi nhận cho hồ sơ này.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: Informed Consents & Digital Signatures -->
+            <div class="tab-pane fade" id="consents" role="tabpanel">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h6 class="card-title fw-bold text-dark mb-0">
+                                <i class="bi bi-file-earmark-check-fill text-success me-1"></i> Hồ Sơ Cam Đoan Phẫu Thuật / Thủ Thuật Y Khoa Ký Số (E-Consent)
+                            </h6>
+                            <small class="text-muted">Lưu trữ chữ ký điện tử hợp pháp của Bệnh nhân / Thân nhân theo Luật Khám bệnh, chữa bệnh 2023</small>
+                        </div>
+                        <a href="{{ route('reception.consents.create', $patient) }}" class="btn btn-success btn-sm shadow-sm">
+                            <i class="bi bi-pen-fill me-1"></i> Lập Bản Cam Đoan Ký Số Mới
+                        </a>
+                    </div>
+
+                    <div class="card-body p-0">
+                        @if($patient->informedConsents->isNotEmpty())
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3" style="width: 140px;">Mã Bản Cam Kết</th>
+                                            <th>Tên Thủ Thuật / Phẫu Thuật</th>
+                                            <th>Bác Sĩ Phụ Trách</th>
+                                            <th>Người Ký & Quan Hệ</th>
+                                            <th style="width: 130px;">Chữ Ký Số</th>
+                                            <th style="width: 150px;">Thời Gian Ký</th>
+                                            <th class="text-end pe-3" style="width: 130px;">Thao Tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($patient->informedConsents as $consent)
+                                            <tr>
+                                                <td class="ps-3 font-monospace fw-bold text-primary">
+                                                    {{ $consent->consent_code }}
+                                                </td>
+                                                <td>
+                                                    <strong class="text-dark d-block">{{ $consent->procedure_name }}</strong>
+                                                    <span class="badge bg-light text-dark border">{{ $consent->department_name }}</span>
+                                                </td>
+                                                <td>
+                                                    {{ $consent->doctor ? $consent->doctor->full_name_with_title : '--' }}
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold text-dark">{{ $consent->signer_name }}</div>
+                                                    <span class="badge bg-secondary-subtle text-secondary small">{{ $consent->signer_relationship_text }}</span>
+                                                    @if($consent->signer_id_card)
+                                                        <div class="text-muted" style="font-size: 0.72rem;">CCCD: {{ $consent->signer_id_card }}</div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($consent->signature_data)
+                                                        <div class="border rounded bg-white p-1 text-center" style="max-width: 100px;">
+                                                            <img src="{{ $consent->signature_data }}" alt="Chữ ký" style="height: 32px; max-width: 100%; object-fit: contain;">
+                                                        </div>
+                                                        <span class="badge bg-success-subtle text-success mt-1" style="font-size: 0.65rem;">
+                                                            <i class="bi bi-shield-check"></i> Đã ký số
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-warning-subtle text-warning">Chưa ký</span>
+                                                    @endif
+                                                </td>
+                                                <td class="font-monospace text-muted">
+                                                    {{ $consent->signed_at ? $consent->signed_at->format('d/m/Y H:i') : '--' }}
+                                                    <div style="font-size: 0.7rem;">IP: {{ $consent->ip_address ?: '127.0.0.1' }}</div>
+                                                </td>
+                                                <td class="text-end pe-3">
+                                                    <div class="d-inline-flex gap-1">
+                                                        <a href="{{ route('reception.consents.print', $consent) }}" target="_blank" class="btn btn-outline-primary btn-sm py-1 px-2" title="In bản cam đoan chuẩn Bộ Y Tế">
+                                                            <i class="bi bi-printer"></i>
+                                                        </a>
+                                                        <form action="{{ route('reception.consents.destroy', $consent) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản cam đoan này?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm py-1 px-2" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="p-5 text-center text-muted">
+                                <i class="bi bi-file-earmark-lock fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                <h6 class="fw-bold text-dark">Chưa có bản cam đoan nào được lập cho bệnh nhân này</h6>
+                                <p class="small text-muted mb-3">Thực hiện lập và ký số giấy cam đoan phẫu thuật/thủ thuật trên màn hình cảm ứng hoặc tablet trước khi can thiệp y khoa.</p>
+                                <a href="{{ route('reception.consents.create', $patient) }}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-pen me-1"></i> Lập Bản Cam Đoan Mới Ngay
+                                </a>
                             </div>
                         @endif
                     </div>

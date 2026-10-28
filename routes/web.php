@@ -13,6 +13,8 @@ use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\DoctorPublicController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\KioskController;
+use App\Http\Controllers\Receptionist\InformedConsentController;
+use App\Http\Controllers\Receptionist\MedicationScheduleController;
 use App\Http\Controllers\Receptionist\PatientController;
 use App\Http\Controllers\Receptionist\PatientVitalController;
 use App\Http\Controllers\Receptionist\PharmacyController;
@@ -136,6 +138,8 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/pharmacy/{record}/dispense', [PharmacyController::class, 'dispense'])->name('pharmacy.dispense');
     Route::post('/pharmacy/{record}/undo', [PharmacyController::class, 'undoDispense'])->name('pharmacy.undo');
     Route::get('/pharmacy/{record}/label', [PharmacyController::class, 'printLabel'])->name('pharmacy.label');
+    Route::get('/pharmacy/{record}/schedule', [MedicationScheduleController::class, 'show'])->name('pharmacy.schedule');
+    Route::get('/pharmacy/{record}/schedule/ical', [MedicationScheduleController::class, 'downloadIcal'])->name('pharmacy.schedule.ical');
 
     // 3.3b. Quản lý Kho Dược & Danh Mục Thuốc Ngoại Trú (Pharmacy Formulary & Inventory)
     Route::get('/pharmacy/inventory', [PharmacyInventoryController::class, 'index'])->name('pharmacy.inventory.index');
@@ -150,6 +154,13 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/records/{record}/certificate', [SickLeaveCertificateController::class, 'store'])->name('certificates.store');
     Route::get('/certificates/{certificate}/print', [SickLeaveCertificateController::class, 'print'])->name('certificates.print');
     Route::delete('/certificates/{certificate}', [SickLeaveCertificateController::class, 'destroy'])->name('certificates.destroy');
+
+    // 3.5. Bản Cam Đoan Phẫu Thuật / Thủ Thuật Y Khoa Ký Chữ Ký Số Điện Tử (E-Informed Consent)
+    Route::get('/consents', [InformedConsentController::class, 'index'])->name('consents.index');
+    Route::get('/patients/{patient}/consents/create', [InformedConsentController::class, 'create'])->name('consents.create');
+    Route::post('/consents', [InformedConsentController::class, 'store'])->name('consents.store');
+    Route::get('/consents/{consent}/print', [InformedConsentController::class, 'print'])->name('consents.print');
+    Route::delete('/consents/{consent}', [InformedConsentController::class, 'destroy'])->name('consents.destroy');
 });
 
 
