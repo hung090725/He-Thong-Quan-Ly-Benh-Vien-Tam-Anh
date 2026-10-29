@@ -644,12 +644,12 @@
                             <i class="bi bi-github fs-3 text-dark"></i>
                             <div>
                                 <strong class="text-dark">Theo dõi tiến độ trực tiếp trên GitHub:</strong>
-                                <div class="small text-muted">Pull Request #4 trên kho lưu trữ chính thức đã tự động cập nhật toàn bộ mã nguồn mới nhất.</div>
+                                <div class="small text-muted">Pull Request #6 trên kho lưu trữ chính thức đã tự động cập nhật toàn bộ mã nguồn mới nhất.</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4" target="_blank" class="btn btn-dark btn-sm rounded-pill px-3">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Mở GitHub PR #4
+                            <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-dark btn-sm rounded-pill px-3">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Mở GitHub PR #6
                             </a>
                         </div>
                     </div>
@@ -937,8 +937,8 @@
                         <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 265 kịch bản đạt 100% tỷ lệ xanh toàn diện (1,135 assertions).
                     </div>
                     <div class="d-flex gap-2">
-                        <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                            <i class="bi bi-git me-1"></i> Xem Git PR #4
+                        <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-git me-1"></i> Xem Git PR #6
                         </a>
                         <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
                     </div>
