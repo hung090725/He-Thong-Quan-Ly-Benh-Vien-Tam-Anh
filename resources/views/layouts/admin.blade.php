@@ -137,7 +137,7 @@
                     <span class="badge bg-success" style="font-size: 0.6rem;">100% Passed</span>
                 </div>
                 <div class="fw-bold text-light" style="font-size: 0.82rem;">Nguyễn Văn Hưng</div>
-                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 70+ Phân hệ Chuẩn JCI & BYT</div>
+                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 90+ Phân hệ Chuẩn JCI & BYT (Wave 1-6)</div>
             </button>
         </div>
 
@@ -438,6 +438,28 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading text-warning">Đột Phá Y Khoa Wave 6 (Hưng)</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/critical-resuscitation*') ? 'active' : '' }}" href="{{ route('reception.critical-resuscitation.index') }}">
+                            <i class="bi bi-shield-shaded text-danger"></i> Hồi Sức Tích Cực, DERS & PBM
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/transplant-robotics*') ? 'active' : '' }}" href="{{ route('reception.transplant-robotics.index') }}">
+                            <i class="bi bi-robot text-primary"></i> Ghép Tạng, Da Vinci & Hybrid OR
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/emergency-maternity-cardio*') ? 'active' : '' }}" href="{{ route('reception.emergency-maternity-cardio.index') }}">
+                            <i class="bi bi-broadcast text-warning"></i> Cấp Cứu 5G, Sản Nhi & Can Thiệp
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/genomics-hospital-at-home*') ? 'active' : '' }}" href="{{ route('reception.genomics-hospital-at-home.index') }}">
+                            <i class="bi bi-dna text-info"></i> Di Truyền, Biobank & HAH Tại Nhà
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
@@ -526,7 +548,7 @@
                 <button type="button" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); font-weight: 600; font-size: 0.8rem; border: none;">
                     <i class="bi bi-trophy-fill text-warning"></i>
                     <span class="d-none d-md-inline">Đóng góp đồ án:</span> <strong>Nguyễn Văn Hưng</strong>
-                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">70+ Modules • JCI & BYT</span>
+                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">90+ Modules • JCI & BYT</span>
                 </button>
 
                 <a href="{{ route('booking.create') }}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 rounded-pill">
@@ -928,13 +950,80 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Nhóm 18 (Wave 6) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-danger border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-danger rounded-circle p-2 text-white"><i class="bi bi-shield-shaded"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">18. Hồi Sức Tích Cực DERS, Y-Site, MTP & PBM</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Bơm tiêm thông minh DERS Guardrail chặn liều tử vong Hard Limit</li>
+                                    <li>✓ Ma trận tương kỵ chạc Y-site 2 đường truyền chuẩn Trissel's 2026</li>
+                                    <li>✓ MTP truyền máu tối cấp tỷ lệ cân bằng 1:1:1 phân tích TEG/ROTEM</li>
+                                    <li>✓ Quản lý máu PBM & Máy thu hồi máu Cell Saver tự thân trong mổ</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 19 (Wave 6) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-primary border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2 text-white"><i class="bi bi-robot"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">19. Ghép Tạng HLA, Robot Da Vinci & Hybrid OR</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Điều phối ghép tạng: Khớp HLA, Crossmatch & Cold Ischemia</li>
+                                    <li>✓ Robot phẫu thuật Da Vinci Xi & Đếm chu kỳ sử dụng tay dao EndoWrist</li>
+                                    <li>✓ Phòng mổ Hybrid đa năng, điều hướng StealthStation TRE & Nguy cơ CIN</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 20 (Wave 6) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-warning border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-warning rounded-circle p-2 text-dark"><i class="bi bi-heart-pulse-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">20. Cấp Cứu 5G, Thảm Họa START & Can Thiệp Chuyên Sâu</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Xe cấp cứu Tele-EMS 5G kích hoạt trước Cathlab STEMI / Stroke Team</li>
+                                    <li>✓ Thuật toán START Triage thảm họa hàng loạt phân 4 vùng thẻ màu</li>
+                                    <li>✓ Tim thai trung tâm CTG AI (FIGO & ACOG) cảnh báo mổ cấp cứu</li>
+                                    <li>✓ Chấm điểm phôi IVF Gardner AI & Xác thực đối chiếu RFID Witnessing</li>
+                                    <li>✓ Thang điểm cảnh báo sớm Nhi khoa PEWS & Kích hoạt MET khẩn cấp</li>
+                                    <li>✓ Can thiệp mạch vành FFR/IVUS/OCT & Đột quỵ mở rộng 6-24h DAWN/DEFUSE</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 21 (Wave 6) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-success border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-success rounded-circle p-2 text-white"><i class="bi bi-dna"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">21. Di Truyền, Biobank, Command Center & HAH</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Giải trình tự gen Somatic/Germline khớp thuốc đích FDA & NIPT cfDNA</li>
+                                    <li>✓ Ngân hàng tế bào gốc Biobank -196°C chuẩn vô trùng FACT-JACIE</li>
+                                    <li>✓ Hospital Command Center điều phối giường bệnh & Dự báo Gridlock</li>
+                                    <li>✓ Đánh giá tự động 83 Tiêu chí Chất lượng BYT 2.0 & Chuẩn JCI Quốc tế</li>
+                                    <li>✓ Tủ thuốc giải độc hiếm Orphan Antidote & Phác đồ liều đầu cấp cứu</li>
+                                    <li>✓ Hospital-at-Home (HAH Virtual Ward) giám sát từ xa phát hiện mất bù</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
                     <div class="small text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 265 kịch bản đạt 100% tỷ lệ xanh toàn diện (1,135 assertions).
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 285+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,200+ assertions).
                     </div>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">

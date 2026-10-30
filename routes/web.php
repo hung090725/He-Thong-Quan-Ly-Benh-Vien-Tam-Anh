@@ -72,6 +72,10 @@ use App\Http\Controllers\AdvancedSpecialtyController;
 use App\Http\Controllers\HospitalOperationsController;
 use App\Http\Controllers\FinanceHrController;
 use App\Http\Controllers\PatientExperienceController;
+use App\Http\Controllers\CriticalCareResuscitationController;
+use App\Http\Controllers\TransplantRoboticsHybridController;
+use App\Http\Controllers\EmergencyMaternityCardioController;
+use App\Http\Controllers\GenomicsHospitalAtHomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -529,6 +533,43 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/patient-experience/screening-campaign', [PatientExperienceController::class, 'storeScreeningCampaign'])->name('patient-experience.screening-campaign');
     Route::post('/patient-experience/loyalty-points', [PatientExperienceController::class, 'storeLoyaltyPoints'])->name('patient-experience.loyalty-points');
     Route::post('/patient-experience/chronic-cohort', [PatientExperienceController::class, 'storeChronicCohort'])->name('patient-experience.chronic-cohort');
+
+    // =========================================================================
+    // ====== WAVE 6: 20 PHÂN HỆ ĐỘT PHÁ CÔNG NGHỆ & Y KHOA CHUYÊN SÂU ========
+    // ====== Phụ trách: NGUYỄN VĂN HƯNG =======================================
+    // =========================================================================
+
+    // 3.53. Hồi Sức Tích Cực, Bơm Tiêm DERS, Ma Trận Tương Kỵ Y-Site, MTP Truyền Máu Tối Cấp & PBM
+    Route::get('/critical-resuscitation', [CriticalCareResuscitationController::class, 'index'])->name('critical-resuscitation.index');
+    Route::post('/critical-resuscitation/ders', [CriticalCareResuscitationController::class, 'storeDers'])->name('critical-resuscitation.ders');
+    Route::post('/critical-resuscitation/ysite-check', [CriticalCareResuscitationController::class, 'checkYsite'])->name('critical-resuscitation.ysite-check');
+    Route::post('/critical-resuscitation/mtp', [CriticalCareResuscitationController::class, 'storeMtp'])->name('critical-resuscitation.mtp');
+    Route::post('/critical-resuscitation/pbm', [CriticalCareResuscitationController::class, 'storePbm'])->name('critical-resuscitation.pbm');
+
+    // 3.54. Điều Phối Ghép Tạng HLA, Phẫu Thuật Robot Da Vinci & Phòng Mổ Hybrid Navigation
+    Route::get('/transplant-robotics', [TransplantRoboticsHybridController::class, 'index'])->name('transplant-robotics.index');
+    Route::post('/transplant-robotics/transplant', [TransplantRoboticsHybridController::class, 'storeTransplant'])->name('transplant-robotics.transplant');
+    Route::post('/transplant-robotics/robotic', [TransplantRoboticsHybridController::class, 'storeRobotic'])->name('transplant-robotics.robotic');
+    Route::post('/transplant-robotics/hybrid-or', [TransplantRoboticsHybridController::class, 'storeHybridOr'])->name('transplant-robotics.hybrid-or');
+
+    // 3.55. Cấp Cứu Ngoại Viện 5G, Thảm Họa START, Tim Thai CTG AI, IVF Phôi Học, PEWS, FFR/IVUS & Đột Quỵ 24h
+    Route::get('/emergency-maternity-cardio', [EmergencyMaternityCardioController::class, 'index'])->name('emergency-maternity-cardio.index');
+    Route::post('/emergency-maternity-cardio/tele-ems', [EmergencyMaternityCardioController::class, 'storeTeleEms'])->name('emergency-maternity-cardio.tele-ems');
+    Route::post('/emergency-maternity-cardio/mci-triage', [EmergencyMaternityCardioController::class, 'storeMciTriage'])->name('emergency-maternity-cardio.mci-triage');
+    Route::post('/emergency-maternity-cardio/ctg', [EmergencyMaternityCardioController::class, 'storeCtg'])->name('emergency-maternity-cardio.ctg');
+    Route::post('/emergency-maternity-cardio/ivf', [EmergencyMaternityCardioController::class, 'storeIvf'])->name('emergency-maternity-cardio.ivf');
+    Route::post('/emergency-maternity-cardio/pews', [EmergencyMaternityCardioController::class, 'storePews'])->name('emergency-maternity-cardio.pews');
+    Route::post('/emergency-maternity-cardio/coronary', [EmergencyMaternityCardioController::class, 'storeCoronary'])->name('emergency-maternity-cardio.coronary');
+    Route::post('/emergency-maternity-cardio/stroke-extended', [EmergencyMaternityCardioController::class, 'storeStrokeExtended'])->name('emergency-maternity-cardio.stroke-extended');
+
+    // 3.56. Di Truyền NIPT/Onco, Biobank Tế Bào Gốc, Command Center Giường Bệnh, Chuẩn JCI/83 Tiêu Chí, Antidote & HAH
+    Route::get('/genomics-hospital-at-home', [GenomicsHospitalAtHomeController::class, 'index'])->name('genomics-hospital-at-home.index');
+    Route::post('/genomics-hospital-at-home/genomics', [GenomicsHospitalAtHomeController::class, 'storeGenomics'])->name('genomics-hospital-at-home.genomics');
+    Route::post('/genomics-hospital-at-home/biobank', [GenomicsHospitalAtHomeController::class, 'storeBiobank'])->name('genomics-hospital-at-home.biobank');
+    Route::post('/genomics-hospital-at-home/bed-command', [GenomicsHospitalAtHomeController::class, 'storeBedCommand'])->name('genomics-hospital-at-home.bed-command');
+    Route::post('/genomics-hospital-at-home/kpi', [GenomicsHospitalAtHomeController::class, 'storeKpi'])->name('genomics-hospital-at-home.kpi');
+    Route::post('/genomics-hospital-at-home/antidote', [GenomicsHospitalAtHomeController::class, 'storeAntidote'])->name('genomics-hospital-at-home.antidote');
+    Route::post('/genomics-hospital-at-home/virtual-ward', [GenomicsHospitalAtHomeController::class, 'storeVirtualWard'])->name('genomics-hospital-at-home.virtual-ward');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ
