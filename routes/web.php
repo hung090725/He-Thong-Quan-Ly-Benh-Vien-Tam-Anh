@@ -79,6 +79,9 @@ use App\Http\Controllers\GenomicsHospitalAtHomeController;
 use App\Http\Controllers\OncologyAdvancedTherapyController;
 use App\Http\Controllers\CriticalExtracorporealLifeController;
 use App\Http\Controllers\AdvancedInterventionSafetyController;
+use App\Http\Controllers\CriticalResuscitationSafetyController;
+use App\Http\Controllers\SurgicalChemoDeviceController;
+use App\Http\Controllers\PatientSafetyTrialPediatricController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -602,6 +605,34 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/advanced-intervention/cied', [AdvancedInterventionSafetyController::class, 'storeCied'])->name('advanced-intervention.cied');
     Route::post('/advanced-intervention/antibiogram', [AdvancedInterventionSafetyController::class, 'storeAntibiogram'])->name('advanced-intervention.antibiogram');
     Route::post('/advanced-intervention/exoskeleton', [AdvancedInterventionSafetyController::class, 'storeExoskeleton'])->name('advanced-intervention.exoskeleton');
+
+    // =========================================================================
+    // ====== WAVE 8: HỒI SỨC SỐNG CÒN, THIẾT BỊ NÂNG CAO & AN TOÀN SƠ SINH ====
+    // =========================================================================
+
+    // 3.60. Hồi Sức Ngừng Tim Code Blue, Khí Y Tế MGPS, Ngộ Độc Cấp, ROTEM & Helipad
+    Route::get('/critical-resuscitation-safety', [CriticalResuscitationSafetyController::class, 'index'])->name('critical-resuscitation-safety.index');
+    Route::post('/critical-resuscitation-safety/code-blue', [CriticalResuscitationSafetyController::class, 'storeCodeBlue'])->name('critical-resuscitation-safety.code-blue');
+    Route::post('/critical-resuscitation-safety/medical-gas', [CriticalResuscitationSafetyController::class, 'storeMedicalGas'])->name('critical-resuscitation-safety.medical-gas');
+    Route::post('/critical-resuscitation-safety/toxicology', [CriticalResuscitationSafetyController::class, 'storeToxicology'])->name('critical-resuscitation-safety.toxicology');
+    Route::post('/critical-resuscitation-safety/rotem', [CriticalResuscitationSafetyController::class, 'storeRotem'])->name('critical-resuscitation-safety.rotem');
+    Route::post('/critical-resuscitation-safety/helipad', [CriticalResuscitationSafetyController::class, 'storeHelipad'])->name('critical-resuscitation-safety.helipad');
+
+    // 3.61. Digital Twin Tiệt Trùng CSSD, Giảm Đau PCA, Hóa Trị Gravimetric, Thần Kinh IONM & LVAD
+    Route::get('/surgical-chemo-device', [SurgicalChemoDeviceController::class, 'index'])->name('surgical-chemo-device.index');
+    Route::post('/surgical-chemo-device/cssd', [SurgicalChemoDeviceController::class, 'storeCssd'])->name('surgical-chemo-device.cssd');
+    Route::post('/surgical-chemo-device/pca', [SurgicalChemoDeviceController::class, 'storePca'])->name('surgical-chemo-device.pca');
+    Route::post('/surgical-chemo-device/chemo', [SurgicalChemoDeviceController::class, 'storeChemo'])->name('surgical-chemo-device.chemo');
+    Route::post('/surgical-chemo-device/ionm', [SurgicalChemoDeviceController::class, 'storeIonm'])->name('surgical-chemo-device.ionm');
+    Route::post('/surgical-chemo-device/lvad', [SurgicalChemoDeviceController::class, 'storeLvad'])->name('surgical-chemo-device.lvad');
+
+    // 3.62. An Ninh Sơ Sinh RTLS, Nệm Thông Minh Braden, Ngân Hàng Sữa Mẹ, Bức Xạ Hạt Nhân & Thử Nghiệm Lâm Sàng
+    Route::get('/patient-safety-pediatric', [PatientSafetyTrialPediatricController::class, 'index'])->name('patient-safety-pediatric.index');
+    Route::post('/patient-safety-pediatric/rtls', [PatientSafetyTrialPediatricController::class, 'storeRtls'])->name('patient-safety-pediatric.rtls');
+    Route::post('/patient-safety-pediatric/braden', [PatientSafetyTrialPediatricController::class, 'storeBraden'])->name('patient-safety-pediatric.braden');
+    Route::post('/patient-safety-pediatric/milk-bank', [PatientSafetyTrialPediatricController::class, 'storeMilkBank'])->name('patient-safety-pediatric.milk-bank');
+    Route::post('/patient-safety-pediatric/nuclear', [PatientSafetyTrialPediatricController::class, 'storeNuclear'])->name('patient-safety-pediatric.nuclear');
+    Route::post('/patient-safety-pediatric/trial', [PatientSafetyTrialPediatricController::class, 'storeTrial'])->name('patient-safety-pediatric.trial');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ

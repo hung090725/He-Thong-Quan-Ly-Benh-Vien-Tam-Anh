@@ -137,7 +137,7 @@
                     <span class="badge bg-success" style="font-size: 0.6rem;">100% Passed</span>
                 </div>
                 <div class="fw-bold text-light" style="font-size: 0.82rem;">Nguyễn Văn Hưng</div>
-                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 105+ Phân Hệ Chuẩn JCI & BYT (Wave 1-7)</div>
+                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 120+ Phân Hệ Chuẩn JCI & BYT (Wave 1-8)</div>
             </button>
         </div>
 
@@ -477,6 +477,23 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading text-warning">Đột Phá Y Khoa Wave 8 (Hưng)</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/critical-resuscitation-safety*') ? 'active' : '' }}" href="{{ route('reception.critical-resuscitation-safety.index') }}">
+                            <i class="bi bi-activity text-danger"></i> Hồi Sức Code Blue, ROTEM & MGPS
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/surgical-chemo-device*') ? 'active' : '' }}" href="{{ route('reception.surgical-chemo-device.index') }}">
+                            <i class="bi bi-tools text-primary"></i> Tiệt Trùng CSSD, Giảm Đau PCA & LVAD
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/patient-safety-pediatric*') ? 'active' : '' }}" href="{{ route('reception.patient-safety-pediatric.index') }}">
+                            <i class="bi bi-shield-lock-fill text-danger"></i> An Ninh Sơ Sinh RTLS & Thử Nghiệm GCP
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
@@ -565,7 +582,7 @@
                 <button type="button" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); font-weight: 600; font-size: 0.8rem; border: none;">
                     <i class="bi bi-trophy-fill text-warning"></i>
                     <span class="d-none d-md-inline">Đóng góp đồ án:</span> <strong>Nguyễn Văn Hưng</strong>
-                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">105+ Modules • JCI & BYT</span>
+                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">120+ Modules • JCI & BYT</span>
                 </button>
 
                 <a href="{{ route('booking.create') }}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 rounded-pill">
@@ -649,23 +666,23 @@
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
-                                <div class="text-primary fs-2 fw-bold mb-1">105+</div>
+                                <div class="text-primary fs-2 fw-bold mb-1">120+</div>
                                 <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Xạ trị 4D Linac, CAR-T CRS, ECMO, AIIR, MTB, Awake Craniotomy, ESD/POEM, CIED, Antibiogram, RSBI SBT, CRRT Citrate, PICS</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Code Blue AI, Khí Y Tế MGPS, Lọc Độc Tố, ROTEM, Helipad, Tiệt Trùng CSSD, Giảm Đau PCA, Hóa Trị Gravimetric, IONM, LVAD, RTLS Sơ Sinh, Braden Smart Bed</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-success">
-                                <div class="text-success fs-2 fw-bold mb-1">310+ / 310+</div>
+                                <div class="text-success fs-2 fw-bold mb-1">330+ / 330+</div>
                                 <div class="fw-semibold text-dark small">Kiểm Thử Tự Động (100% Green)</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">1,350+ Assertions • 0 Failures • 0 Errors</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">1,420+ Assertions • 0 Failures • 0 Errors</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-warning">
                                 <div class="text-warning fs-2 fw-bold mb-1">100%</div>
                                 <div class="fw-semibold text-dark small">Chuẩn Hóa Y Khoa & Pháp Lý</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Luật KCB 2023, TT 32, TT 43, TT 20, QĐ 4210 & Chuẩn JCI Quốc Tế</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Luật KCB 2023, TT 32, TT 43, TT 20, QĐ 4210, JCI, AHA & IAEA</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
@@ -1100,13 +1117,79 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Nhóm 26 (Wave 8) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-danger border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-danger rounded-circle p-2 text-white"><i class="bi bi-heart-pulse-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">26. Hồi Sức Ngừng Tim Code Blue, ROTEM & MGPS</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Hồi sinh tim phổi nâng cao ACLS ép tim CCF $\ge 80\%$ & ROSC thành công</li>
+                                    <li>✓ Mạng lưới khí y tế trung tâm MGPS & dự báo cạn bồn oxy lỏng LOX</li>
+                                    <li>✓ Lọc máu hấp phụ ngộ độc cấp theo đồ thị Rumack-Matthew</li>
+                                    <li>✓ Phân tích đàn nhớt ROTEM/TEG chỉ huy truyền máu trúng đích và dùng TXA</li>
+                                    <li>✓ Điều phối chuyển viện rủi ro cao TRIPS & trực thăng cấp cứu bãi Helipad</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 27 (Wave 8) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-primary border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2 text-white"><i class="bi bi-tools"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">27. Bản Sao Số Tiệt Trùng CSSD & Giảm Đau PCA</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Digital Twin chuỗi vô trùng dụng cụ mổ CSSD bằng mã vạch 2D & chỉ thị bào tử</li>
+                                    <li>✓ Cấp phát khay dụng cụ vô khuẩn chính xác phòng mổ theo lịch phẫu thuật</li>
+                                    <li>✓ Bơm tiêm giảm đau PCA tự kiểm soát liều duy trì, bolus và thời gian lockout</li>
+                                    <li>✓ Tự động ngắt bơm tiêm PCA khi EtCO2 $> 50\text{ mmHg}$ hoặc tụt SpO2 ngừa suy hô hấp</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 28 (Wave 8) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-warning border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-warning rounded-circle p-2 text-dark"><i class="bi bi-eyedropper"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">28. Pha Hóa Trị Gravimetric, IONM & Máy LVAD</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Pha chế thuốc ung thư độc tế bào bằng cân trọng khối Gravimetric trong tủ BSC</li>
+                                    <li>✓ Giám sát thần kinh trong mổ IONM (MEP/SSEP/EMG) phẫu thuật cột sống & tủy</li>
+                                    <li>✓ Báo động biến cố tụt MEP $> 50\%$ để phẫu thuật viên nới lỏng kéo nắn kịp thời</li>
+                                    <li>✓ Phân tích 4 thông số thiết bị hỗ trợ thất trái LVAD (RPM/Flow/Power/PI) ngừa tắc bơm</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 29 (Wave 8) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-success border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-success rounded-circle p-2 text-white"><i class="bi bi-shield-lock-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">29. An Ninh Sơ Sinh RTLS, Sữa Mẹ, Hạt Nhân & GCP</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Vòng tay định vị thời gian thực RTLS cảm biến da & khóa thang máy chống bắt cóc</li>
+                                    <li>✓ Giường nệm thông minh Braden tự động nhắc xoay trở và góc nâng đầu $\le 30^\circ$</li>
+                                    <li>✓ Ngân hàng sữa mẹ thanh trùng Holder DHMB vô khuẩn cho trẻ sinh non NICU</li>
+                                    <li>✓ An toàn bức xạ y học hạt nhân PET/CT tính suy giảm hoạt độ theo chuẩn IAEA</li>
+                                    <li>✓ Quản trị thử nghiệm lâm sàng CTMS, ký e-Consent và báo cáo biến cố SAE trong 24h</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
                     <div class="small text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 310+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,350+ assertions).
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 330+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,420+ assertions).
                     </div>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
