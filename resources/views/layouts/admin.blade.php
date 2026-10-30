@@ -511,6 +511,23 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading text-warning">Logistics & ESG Wave 10 (Hưng)</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/autonomous-logistics-esg*') ? 'active' : '' }}" href="{{ route('reception.autonomous-logistics-esg.index') }}">
+                            <i class="bi bi-robot text-primary"></i> Robot AGV, Ống Khí Nén & Microgrid
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/asset-engineering-haccp-linen*') ? 'active' : '' }}" href="{{ route('reception.asset-engineering-haccp-linen.index') }}">
+                            <i class="bi bi-geo-alt-fill text-warning"></i> Định Vị BLE, CMMS & Bếp HACCP
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/disaster-safety-fatigue-discharge*') ? 'active' : '' }}" href="{{ route('reception.disaster-safety-fatigue-discharge.index') }}">
+                            <i class="bi bi-shield-shaded text-danger"></i> Thảm Họa HICS & Meds-to-Beds
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
@@ -683,16 +700,16 @@
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
-                                <div class="text-primary fs-2 fw-bold mb-1">135+</div>
+                                <div class="text-primary fs-2 fw-bold mb-1">150+</div>
                                 <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Code Blue, Khí MGPS, ROTEM, Helipad, CSSD, PCA, IONM, LVAD, RTLS, Braden, Buồng Thông Minh IoT, Ghép Tủy PE, Phòng Chì X-Ray, Phòng Sạch ISO 5, Kho Bệnh Án FM-200</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Code Blue, Khí MGPS, ROTEM, Helipad, CSSD, PCA, IONM, LVAD, RTLS, Braden, Buồng IoT, Ghép Tủy PE, Phòng Chì, Phòng Sạch ISO 5, FM-200, Robot AGV, Ống Khí Nén PTS, Microgrid ESG, Nước RO Thận, CMMS, Thảm Họa HICS</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-success">
-                                <div class="text-success fs-2 fw-bold mb-1">345+ / 345+</div>
+                                <div class="text-success fs-2 fw-bold mb-1">365+ / 365+</div>
                                 <div class="fw-semibold text-dark small">Kiểm Thử Tự Động (100% Green)</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">1,520+ Assertions • 0 Failures • 0 Errors</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">1,600+ Assertions • 0 Failures • 0 Errors</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
@@ -1253,13 +1270,64 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Nhóm 33 (Wave 10) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-primary border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2 text-white"><i class="bi bi-robot"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">33. Robot AGV Vận Chuyển, Ống Khí Nén & Năng Lượng ESG</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Đội xe tự hành robot AGV/AMR vận chuyển dụng cụ phẫu thuật, thuốc ung thư, khay cơm bệnh lý</li>
+                                    <li>✓ Đường ống khí nén PTS siêu tốc 6-8 m/s cảm biến gia tốc G-force chống vỡ hồng cầu</li>
+                                    <li>✓ Lưới điện vi mô Microgrid Tier-4, chuyển mạch ATS $\le 10$s, UPS $\ge 30$p & điện mặt trời ESG</li>
+                                    <li>✓ Nghiền hấp vi sóng rác lây nhiễm tại chỗ $\ge 100^\circ\text{C}$ giảm $80\%$ thể tích biến thành rác trơ an toàn</li>
+                                    <li>✓ Nước lọc thận siêu tinh khiết RO AAMI/ISO 23500: độ dẫn $< 10\text{ }\mu\text{S/cm}$, Endotoxin $< 0.25\text{ EU/ml}$</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 34 (Wave 10) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-warning border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-warning rounded-circle p-2 text-dark"><i class="bi bi-geo-alt-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">34. Định Vị BLE, CMMS IEC 62353, Barie ALPR & Bếp HACCP</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Định vị tài nguyên thiết bị y tế BLE/UWB máy thở, máy sốc điện trên bản đồ số kèm Geofence</li>
+                                    <li>✓ Quản lý kỹ thuật y sinh CMMS, đo dòng rò điện y tế IEC 62353 $< 100\text{ }\mu\text{A}$, tiếp đất $< 0.2\text{ }\Omega$</li>
+                                    <li>✓ Bãi xe ngầm Camera AI nhận diện biển số ALPR xe cấp cứu tự động mở barie luồng xanh khẩn cấp</li>
+                                    <li>✓ Bếp ăn bệnh viện dinh dưỡng điều trị chuẩn HACCP / ISO 22000: nấu tâm $\ge 75^\circ\text{C}$, lưu mẫu 24h</li>
+                                    <li>✓ Quản lý đồ vải & săng mổ gắn chip RFID giặt tiệt khuẩn chịu nhiệt $200^\circ\text{C}$ & vòng đời 100 lần</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 35 (Wave 10) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-danger border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-danger rounded-circle p-2 text-white"><i class="bi bi-shield-shaded"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">35. Chỉ Huy Thảm Họa HICS, Két Bảo Mật & Meds-to-Beds</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Trung tâm chỉ huy thảm họa HICS kích hoạt Code Yellow/Silver/Black, huy động 50 giường sau 15p</li>
+                                    <li>✓ Két an toàn lưu giữ tư trang bệnh nhân hôn mê vô danh bảo mật kép 2 nhân viên ký chéo</li>
+                                    <li>✓ Cung ứng mẫu sinh thiết lạnh phòng mổ Frozen Section $\le 3$p, telepathology trả kết quả $\le 20$p</li>
+                                    <li>✓ Giám sát kiệt sức ca trực Fatigue Risk Index, cảnh báo bắt buộc nghỉ ngủ bù chống sai sót phẫu thuật</li>
+                                    <li>✓ Phòng chờ xuất viện Discharge Lounge & Dịch vụ cấp phát thuốc tận giường Meds-to-Beds trước 10h</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
                     <div class="small text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 345+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,520+ assertions).
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 365+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,600+ assertions).
                     </div>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">

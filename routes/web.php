@@ -85,6 +85,9 @@ use App\Http\Controllers\PatientSafetyTrialPediatricController;
 use App\Http\Controllers\SmartInpatientWardFacilityController;
 use App\Http\Controllers\SpecialtyHighRiskRoomController;
 use App\Http\Controllers\FacilityAutomationLoungeController;
+use App\Http\Controllers\AutonomousLogisticsEsgController;
+use App\Http\Controllers\AssetEngineeringHaccpLinenController;
+use App\Http\Controllers\DisasterSafetyFatigueDischargeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -669,6 +672,42 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/facility-automation-lounge/daycare-infusion', [FacilityAutomationLoungeController::class, 'storeDayCareInfusion'])->name('facility-automation-lounge.daycare-infusion');
     Route::post('/facility-automation-lounge/infusion-emergency/{id}', [FacilityAutomationLoungeController::class, 'triggerInfusionEmergency'])->name('facility-automation-lounge.infusion-emergency');
     Route::post('/facility-automation-lounge/infusion-complete/{id}', [FacilityAutomationLoungeController::class, 'completeInfusion'])->name('facility-automation-lounge.infusion-complete');
+
+    // =========================================================================
+    // ====== WAVE 10: SIÊU TRUNG TÂM LOGISTICS Y TẾ, ESG & QUẢN TRỊ 5 SAO =====
+    // =========================================================================
+
+    // 3.66. Robot AGV Vận Chuyển, Ống Khí Nén PTS, Microgrid ESG, Nghiền Hấp Vi Sóng & Nước Lọc Thận RO
+    Route::get('/autonomous-logistics-esg', [AutonomousLogisticsEsgController::class, 'index'])->name('autonomous-logistics-esg.index');
+    Route::post('/autonomous-logistics-esg/agv-robot', [AutonomousLogisticsEsgController::class, 'storeAgvRobot'])->name('autonomous-logistics-esg.agv-robot');
+    Route::post('/autonomous-logistics-esg/agv-dispatch/{id}', [AutonomousLogisticsEsgController::class, 'dispatchAgvDelivery'])->name('autonomous-logistics-esg.agv-dispatch');
+    Route::post('/autonomous-logistics-esg/pneumatic-tube', [AutonomousLogisticsEsgController::class, 'storePneumaticTube'])->name('autonomous-logistics-esg.pneumatic-tube');
+    Route::post('/autonomous-logistics-esg/microgrid', [AutonomousLogisticsEsgController::class, 'storeMicrogridEsg'])->name('autonomous-logistics-esg.microgrid');
+    Route::post('/autonomous-logistics-esg/microwave-shredder', [AutonomousLogisticsEsgController::class, 'storeMicrowaveShredder'])->name('autonomous-logistics-esg.microwave-shredder');
+    Route::post('/autonomous-logistics-esg/ro-water', [AutonomousLogisticsEsgController::class, 'storeRoWater'])->name('autonomous-logistics-esg.ro-water');
+
+    // 3.67. Định Vị Thiết Bị BLE, Bảo Trì CMMS IEC 62353, Barie Bãi Xe ALPR, Bếp Ăn HACCP & Đồ Vải RFID
+    Route::get('/asset-engineering-haccp-linen', [AssetEngineeringHaccpLinenController::class, 'index'])->name('asset-engineering-haccp-linen.index');
+    Route::post('/asset-engineering-haccp-linen/asset-ble', [AssetEngineeringHaccpLinenController::class, 'storeAssetBle'])->name('asset-engineering-haccp-linen.asset-ble');
+    Route::post('/asset-engineering-haccp-linen/asset-alarm/{id}', [AssetEngineeringHaccpLinenController::class, 'triggerTheftAlarm'])->name('asset-engineering-haccp-linen.asset-alarm');
+    Route::post('/asset-engineering-haccp-linen/biomedical-cmms', [AssetEngineeringHaccpLinenController::class, 'storeBiomedicalCmms'])->name('asset-engineering-haccp-linen.biomedical-cmms');
+    Route::post('/asset-engineering-haccp-linen/parking-gate', [AssetEngineeringHaccpLinenController::class, 'storeParkingGate'])->name('asset-engineering-haccp-linen.parking-gate');
+    Route::post('/asset-engineering-haccp-linen/parking-fasttrack/{id}', [AssetEngineeringHaccpLinenController::class, 'fastTrackAmbulance'])->name('asset-engineering-haccp-linen.parking-fasttrack');
+    Route::post('/asset-engineering-haccp-linen/kitchen-haccp', [AssetEngineeringHaccpLinenController::class, 'storeKitchenHaccp'])->name('asset-engineering-haccp-linen.kitchen-haccp');
+    Route::post('/asset-engineering-haccp-linen/linen-rfid', [AssetEngineeringHaccpLinenController::class, 'storeLinenRfid'])->name('asset-engineering-haccp-linen.linen-rfid');
+    Route::post('/asset-engineering-haccp-linen/linen-wash/{id}', [AssetEngineeringHaccpLinenController::class, 'recordWashCycle'])->name('asset-engineering-haccp-linen.linen-wash');
+
+    // 3.68. Chỉ Huy Thảm Họa HICS, Két Bảo Mật Kép, Sinh Thiết Lạnh Frozen Section, Chống Mệt Mỏi Ca Trực & Meds-to-Beds
+    Route::get('/disaster-safety-fatigue-discharge', [DisasterSafetyFatigueDischargeController::class, 'index'])->name('disaster-safety-fatigue-discharge.index');
+    Route::post('/disaster-safety-fatigue-discharge/hics', [DisasterSafetyFatigueDischargeController::class, 'storeHicsDisaster'])->name('disaster-safety-fatigue-discharge.hics');
+    Route::post('/disaster-safety-fatigue-discharge/hics-deescalate/{id}', [DisasterSafetyFatigueDischargeController::class, 'deEscalateHics'])->name('disaster-safety-fatigue-discharge.hics-deescalate');
+    Route::post('/disaster-safety-fatigue-discharge/biometric-vault', [DisasterSafetyFatigueDischargeController::class, 'storeBiometricVault'])->name('disaster-safety-fatigue-discharge.biometric-vault');
+    Route::post('/disaster-safety-fatigue-discharge/vault-release/{id}', [DisasterSafetyFatigueDischargeController::class, 'releaseVaultItems'])->name('disaster-safety-fatigue-discharge.vault-release');
+    Route::post('/disaster-safety-fatigue-discharge/frozen-section', [DisasterSafetyFatigueDischargeController::class, 'storeFrozenSection'])->name('disaster-safety-fatigue-discharge.frozen-section');
+    Route::post('/disaster-safety-fatigue-discharge/clinician-fatigue', [DisasterSafetyFatigueDischargeController::class, 'storeClinicianFatigue'])->name('disaster-safety-fatigue-discharge.clinician-fatigue');
+    Route::post('/disaster-safety-fatigue-discharge/discharge-lounge', [DisasterSafetyFatigueDischargeController::class, 'storeDischargeLounge'])->name('disaster-safety-fatigue-discharge.discharge-lounge');
+    Route::post('/disaster-safety-fatigue-discharge/meds-deliver/{id}', [DisasterSafetyFatigueDischargeController::class, 'completeMedsToBeds'])->name('disaster-safety-fatigue-discharge.meds-deliver');
+    Route::post('/disaster-safety-fatigue-discharge/discharge-home/{id}', [DisasterSafetyFatigueDischargeController::class, 'dispatchPatientHome'])->name('disaster-safety-fatigue-discharge.discharge-home');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ
