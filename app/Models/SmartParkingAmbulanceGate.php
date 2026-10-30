@@ -27,9 +27,10 @@ class SmartParkingAmbulanceGate extends Model
 
     public function fastTrackEmergencyAccess(): void
     {
-        $this->update([
-            'barrier_gate_status' => 'auto_opened_fast_track',
-            'emergency_siren_detected' => true,
-        ]);
+        $this->barrier_gate_status = 'auto_opened_fast_track';
+        $this->emergency_siren_detected = true;
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

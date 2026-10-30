@@ -37,7 +37,10 @@ class BiomedicalEquipmentCmms extends Model
             $status = 'certified_safe_pass';
         }
 
-        $this->update(['certification_status' => $status]);
+        $this->certification_status = $status;
+        if ($this->exists) {
+            $this->save();
+        }
         return $status;
     }
 }

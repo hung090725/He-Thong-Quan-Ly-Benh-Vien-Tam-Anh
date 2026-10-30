@@ -31,15 +31,15 @@ class CentralKitchenHaccp extends Model
     public function auditHaccpFoodSafety(): bool
     {
         // Chuẩn HACCP: nấu chín tâm >= 75°C, giữ nóng >= 65°C, giữ lạnh <= 4°C, lưu mẫu 24h
-        if ($this->cooking_core_temp_celsius >= 75.0 && 
+        $passed = ($this->cooking_core_temp_celsius >= 75.0 && 
             $this->rethermalization_hot_temp >= 65.0 && 
-            $this->rethermalization_cold_temp <= 4.0 && 
-            $this->food_sample_refrigerated_24h) {
-            $this->update(['haccp_audit_passed' => true]);
-            return true;
-        }
+            ($this->rethermalization_cold_temp === null || $this->rethermalization_cold_temp <= 4.0) && 
+            $this->food_sample_refrigerated_24h);
 
-        $this->update(['haccp_audit_passed' => false]);
-        return false;
+        $this->haccp_audit_passed = (bool) $passed;
+        if ($this->exists) {
+            $this->save();
+        }
+        return $this->haccp_audit_passed;
     }
 }

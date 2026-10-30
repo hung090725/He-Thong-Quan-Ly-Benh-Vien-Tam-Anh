@@ -38,8 +38,8 @@ class ClinicianFatigueCircadian extends Model
     public function evaluateFatigueRisk(): string
     {
         // Thang điểm Fatigue Risk Index (0-100)
-        // Ca mổ > 6h hoặc thức > 18h hoặc điểm > 70 => Bắt buộc nghỉ ngủ bù
-        if ($this->fatigue_risk_index_score >= 70 || $this->consecutive_surgical_hours >= 6.0 || $this->shift_duration_hours >= 20.0) {
+        // Ca mổ > 6h hoặc thức >= 18h hoặc điểm >= 70 => Bắt buộc nghỉ ngủ bù
+        if ($this->fatigue_risk_index_score >= 70 || $this->consecutive_surgical_hours >= 6.0 || $this->shift_duration_hours >= 18.0) {
             $status = 'grounded_mandatory_sleep';
             $this->mandatory_rest_alert = true;
         } elseif ($this->fatigue_risk_index_score >= 40) {
@@ -50,10 +50,10 @@ class ClinicianFatigueCircadian extends Model
             $this->mandatory_rest_alert = false;
         }
 
-        $this->update([
-            'fitness_for_duty_status' => $status,
-            'mandatory_rest_alert' => $this->mandatory_rest_alert,
-        ]);
+        $this->fitness_for_duty_status = $status;
+        if ($this->exists) {
+            $this->save();
+        }
 
         return $status;
     }

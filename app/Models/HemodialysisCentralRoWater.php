@@ -40,7 +40,10 @@ class HemodialysisCentralRoWater extends Model
             $status = 'iso_ultra_pure_pass';
         }
 
-        $this->update(['aami_iso23500_compliance' => $status]);
+        $this->aami_iso23500_compliance = $status;
+        if ($this->exists) {
+            $this->save();
+        }
         return $status;
     }
 }

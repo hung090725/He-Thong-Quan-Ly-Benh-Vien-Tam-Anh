@@ -28,10 +28,11 @@ class SmartAssetTrackingBle extends Model
 
     public function triggerTheftAlarm(): void
     {
-        $this->update([
-            'in_geofence_perimeter' => false,
-            'asset_status' => 'out_of_bounds_theft_alarm',
-            'last_movement_at' => now(),
-        ]);
+        $this->in_geofence_perimeter = false;
+        $this->asset_status = 'out_of_bounds_theft_alarm';
+        $this->last_movement_at = now();
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

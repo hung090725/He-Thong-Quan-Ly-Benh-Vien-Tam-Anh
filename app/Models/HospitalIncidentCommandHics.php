@@ -29,11 +29,17 @@ class HospitalIncidentCommandHics extends Model
 
     public function deEscalateToStandby(): void
     {
-        $this->update(['activation_status' => 'de_escalated_standby']);
+        $this->activation_status = 'de_escalated_standby';
+        if ($this->exists) {
+            $this->save();
+        }
     }
 
     public function terminateIncident(): void
     {
-        $this->update(['activation_status' => 'terminated_post_incident']);
+        $this->activation_status = 'terminated_post_incident';
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

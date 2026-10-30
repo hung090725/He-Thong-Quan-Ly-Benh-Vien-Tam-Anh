@@ -35,9 +35,10 @@ class BiometricSafekeepingVault extends Model
 
     public function releaseToGuardian(): void
     {
-        $this->update([
-            'custody_status' => 'released_to_guardian',
-            'released_at' => now(),
-        ]);
+        $this->custody_status = 'released_to_guardian';
+        $this->released_at = now();
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

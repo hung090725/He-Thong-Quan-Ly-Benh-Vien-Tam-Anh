@@ -33,6 +33,8 @@ class LinenRfidLifecycleTracking extends Model
         } else {
             $this->linen_condition = 'in_circulation_sterile';
         }
-        $this->save();
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

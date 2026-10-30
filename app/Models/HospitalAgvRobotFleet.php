@@ -29,18 +29,20 @@ class HospitalAgvRobotFleet extends Model
     public function checkBatteryAndReturn(): void
     {
         if ($this->battery_percentage <= 20) {
-            $this->update([
-                'navigation_status' => 'charging_return',
-                'destination_location' => 'Dock Sạc Tầng Hầm B1',
-            ]);
+            $this->navigation_status = 'charging_return';
+            $this->destination_location = 'Dock Sạc Tầng Hầm B1';
+            if ($this->exists) {
+                $this->save();
+            }
         }
     }
 
     public function deliverPayload(): void
     {
-        $this->update([
-            'navigation_status' => 'delivering_payload',
-            'obstacle_detected' => false,
-        ]);
+        $this->navigation_status = 'delivering_payload';
+        $this->obstacle_detected = false;
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

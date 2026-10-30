@@ -37,16 +37,18 @@ class DischargeLoungeMedsToBeds extends Model
 
     public function completeMedsDelivery(): void
     {
-        $this->update([
-            'meds_to_beds_delivered' => true,
-            'overall_discharge_status' => 'counseled_meds_received',
-        ]);
+        $this->meds_to_beds_delivered = true;
+        $this->overall_discharge_status = 'counseled_meds_received';
+        if ($this->exists) {
+            $this->save();
+        }
     }
 
     public function dispatchHome(): void
     {
-        $this->update([
-            'overall_discharge_status' => 'discharged_transport_home',
-        ]);
+        $this->overall_discharge_status = 'discharged_transport_home';
+        if ($this->exists) {
+            $this->save();
+        }
     }
 }

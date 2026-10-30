@@ -33,12 +33,11 @@ class BiohazardMicrowaveShredder extends Model
     public function completeDecontaminationCycle(): bool
     {
         // Chuẩn vi sóng: nhiệt độ >= 100°C và giảm thể tích >= 80%
-        if ($this->microwave_temp_celsius >= 100.0 && $this->volume_reduction_pct >= 80.0 && $this->spore_bacillus_atrophaeus_killed) {
-            $this->update(['processing_status' => 'decontaminated_inert']);
-            return true;
+        $isSafe = ($this->microwave_temp_celsius >= 100.0 && $this->volume_reduction_pct >= 80.0 && $this->spore_bacillus_atrophaeus_killed);
+        $this->processing_status = $isSafe ? 'decontaminated_inert' : 'maintenance_blade_dull';
+        if ($this->exists) {
+            $this->save();
         }
-
-        $this->update(['processing_status' => 'maintenance_blade_dull']);
-        return false;
+        return (bool) $isSafe;
     }
 }

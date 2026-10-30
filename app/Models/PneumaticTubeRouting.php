@@ -31,18 +31,12 @@ class PneumaticTubeRouting extends Model
     public function assessHemolysisRisk(): bool
     {
         // Chuẩn an toàn mẫu máu: gia tốc G-force <= 2.5G và vận tốc 6.0 - 8.0 m/s
-        if ($this->g_force_shock_peak > 2.50) {
-            $this->update([
-                'hemolysis_risk_alert' => true,
-                'delivery_status' => 'diverted_maintenance',
-            ]);
-            return true;
+        $isHighRisk = ($this->g_force_shock_peak > 2.50);
+        $this->hemolysis_risk_alert = $isHighRisk;
+        $this->delivery_status = $isHighRisk ? 'diverted_maintenance' : 'arrived_safe';
+        if ($this->exists) {
+            $this->save();
         }
-
-        $this->update([
-            'hemolysis_risk_alert' => false,
-            'delivery_status' => 'arrived_safe',
-        ]);
-        return false;
+        return $isHighRisk;
     }
 }
