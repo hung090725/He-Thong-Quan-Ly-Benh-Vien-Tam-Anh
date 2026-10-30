@@ -137,7 +137,7 @@
                     <span class="badge bg-success" style="font-size: 0.6rem;">100% Passed</span>
                 </div>
                 <div class="fw-bold text-light" style="font-size: 0.82rem;">Nguyễn Văn Hưng</div>
-                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 90+ Phân hệ Chuẩn JCI & BYT (Wave 1-6)</div>
+                <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-patch-check-fill text-info"></i> 105+ Phân Hệ Chuẩn JCI & BYT (Wave 1-7)</div>
             </button>
         </div>
 
@@ -460,6 +460,23 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading text-warning">Đột Phá Y Khoa Wave 7 (Hưng)</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/oncology-advanced*') ? 'active' : '' }}" href="{{ route('reception.oncology-advanced.index') }}">
+                            <i class="bi bi-radioactive text-danger"></i> Ung Thư 4D, CAR-T & Hội Đồng MTB
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/critical-extracorporeal*') ? 'active' : '' }}" href="{{ route('reception.critical-extracorporeal.index') }}">
+                            <i class="bi bi-lungs text-primary"></i> Hồi Sức Sống Còn, ECMO & CRRT
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/advanced-intervention*') ? 'active' : '' }}" href="{{ route('reception.advanced-intervention.index') }}">
+                            <i class="bi bi-heart-pulse-fill text-danger"></i> Can Thiệp ESD, CIED & Radar Kháng Sinh
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
@@ -548,7 +565,7 @@
                 <button type="button" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectContributionModal" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); font-weight: 600; font-size: 0.8rem; border: none;">
                     <i class="bi bi-trophy-fill text-warning"></i>
                     <span class="d-none d-md-inline">Đóng góp đồ án:</span> <strong>Nguyễn Văn Hưng</strong>
-                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">90+ Modules • JCI & BYT</span>
+                    <span class="badge bg-white text-dark ms-1 rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">105+ Modules • JCI & BYT</span>
                 </button>
 
                 <a href="{{ route('booking.create') }}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 rounded-pill">
@@ -632,28 +649,28 @@
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
-                                <div class="text-primary fs-2 fw-bold mb-1">70+</div>
+                                <div class="text-primary fs-2 fw-bold mb-1">105+</div>
                                 <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Smart OR, PACS AI, qSOFA, PGx, CMMS NĐ98, HAI, TDM Dược Lâm Sàng, TPN, FIM, YHCT, ESG</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Xạ trị 4D Linac, CAR-T CRS, ECMO, AIIR, MTB, Awake Craniotomy, ESD/POEM, CIED, Antibiogram, RSBI SBT, CRRT Citrate, PICS</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-success">
-                                <div class="text-success fs-2 fw-bold mb-1">230+ / 230+</div>
+                                <div class="text-success fs-2 fw-bold mb-1">310+ / 310+</div>
                                 <div class="fw-semibold text-dark small">Kiểm Thử Tự Động (100% Green)</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">950+ Assertions • 0 Failures • 0 Errors</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">1,350+ Assertions • 0 Failures • 0 Errors</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-warning">
                                 <div class="text-warning fs-2 fw-bold mb-1">100%</div>
                                 <div class="fw-semibold text-dark small">Chuẩn Hóa Y Khoa & Pháp Lý</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Luật KCB 2023, TT 32, TT 43, TT 20, QĐ 4210 & Chuẩn JCI</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Luật KCB 2023, TT 32, TT 43, TT 20, QĐ 4210 & Chuẩn JCI Quốc Tế</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-info">
-                                <div class="text-info fs-2 fw-bold mb-1">PR #4</div>
+                                <div class="text-info fs-2 fw-bold mb-1">PR #6</div>
                                 <div class="fw-semibold text-dark small">GitHub Pull Request Đồng Bộ</div>
                                 <small class="text-muted" style="font-size: 0.72rem;">Mọi thay đổi đều được commit & push minh bạch</small>
                             </div>
@@ -1017,13 +1034,79 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Nhóm 22 (Wave 7) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-danger border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-danger rounded-circle p-2 text-white"><i class="bi bi-radioactive"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">22. Ung Thư 4D, CAR-T & Hội Đồng Phân Tử MTB</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Xạ trị Linac 4D-CT & DIBH nín thở bảo vệ tim và cơ quan nguy cấp OAR</li>
+                                    <li>✓ Liệu pháp tế bào CAR-T phân độ bão Cytokine CRS (ASTCT) & Tocilizumab</li>
+                                    <li>✓ Hội đồng Ung thư Phân tử MTB đối chiếu biến thể NGS & thuốc điều trị đích</li>
+                                    <li>✓ Phẫu thuật não khi tỉnh thức Awake Craniotomy kích thích điện vỏ não</li>
+                                    <li>✓ Dược động học cá thể hóa Bayesian AUC24/MIC Vancomycin & Meropenem</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 23 (Wave 7) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-primary border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2 text-white"><i class="bi bi-lungs"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">23. Hồi Sức Sống Còn ECMO, AIIR & CRRT Citrate</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Tuần hoàn ngoài cơ thể VA/VV ECMO, chênh áp màng & hạ thân nhiệt TTM</li>
+                                    <li>✓ Buồng cách ly áp lực âm AIIR luân chuyển $\ge 12$ ACH & màng HEPA H14</li>
+                                    <li>✓ Cai máy thở SBT chỉ số thở nhanh nông RSBI & nghiệm pháp Cuff Leak Test</li>
+                                    <li>✓ Phân loại Đa chấn thương nặng ISS & kích hoạt báo động Trauma Team Level 1</li>
+                                    <li>✓ Lọc máu liên tục CVVHDF chống đông Citrate cục bộ RCA duy trì Ca2+ an toàn</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 24 (Wave 7) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-warning border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-warning rounded-circle p-2 text-dark"><i class="bi bi-broadcast-pin"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">24. Can Thiệp ESD/POEM & Giám Sát Từ Xa CIED</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Cắt tách niêm mạc ESD & POEM cắt trọn khối R0 triệt căn chuẩn ASGE</li>
+                                    <li>✓ Đặt stent tụy & Indomethacin dự phòng viêm tụy cấp sau can thiệp ERCP</li>
+                                    <li>✓ Giám sát thiết bị tim mạch cấy ghép CIED từ xa phát hiện Bão điện học VT/VF</li>
+                                    <li>✓ Cảnh báo sớm gãy dây điện cực Lead Fracture & cạn kiệt pin máy tạo nhịp</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 25 (Wave 7) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-info border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-info rounded-circle p-2 text-white"><i class="bi bi-shield-check"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">25. An Toàn Nhiễm Khuẩn, Radar Kháng Sinh & PHCN Robot</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Bản đồ nhạy cảm kháng sinh Antibiogram CLSI M39 phát hiện ổ dịch MDRO</li>
+                                    <li>✓ Gói can thiệp ICU ABCDEF Bundle phòng chống hội chứng suy yếu PICS</li>
+                                    <li>✓ Robot khung xương ngoài Exoskeleton phục hồi vận động thần kinh</li>
+                                    <li>✓ Thuật toán phân tích dáng đi tự thích ứng Assistance-as-Needed & GSI</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
                     <div class="small text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 285+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,200+ assertions).
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 310+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,350+ assertions).
                     </div>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">

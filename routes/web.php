@@ -76,6 +76,9 @@ use App\Http\Controllers\CriticalCareResuscitationController;
 use App\Http\Controllers\TransplantRoboticsHybridController;
 use App\Http\Controllers\EmergencyMaternityCardioController;
 use App\Http\Controllers\GenomicsHospitalAtHomeController;
+use App\Http\Controllers\OncologyAdvancedTherapyController;
+use App\Http\Controllers\CriticalExtracorporealLifeController;
+use App\Http\Controllers\AdvancedInterventionSafetyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -570,6 +573,35 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/genomics-hospital-at-home/kpi', [GenomicsHospitalAtHomeController::class, 'storeKpi'])->name('genomics-hospital-at-home.kpi');
     Route::post('/genomics-hospital-at-home/antidote', [GenomicsHospitalAtHomeController::class, 'storeAntidote'])->name('genomics-hospital-at-home.antidote');
     Route::post('/genomics-hospital-at-home/virtual-ward', [GenomicsHospitalAtHomeController::class, 'storeVirtualWard'])->name('genomics-hospital-at-home.virtual-ward');
+
+    // =========================================================================
+    // ====== WAVE 7: 15 PHÂN HỆ ĐỘT PHÁ CÔNG NGHỆ Y KHOA ĐẲNG CẤP QUỐC TẾ ====
+    // ====== Phụ trách: NGUYỄN VĂN HƯNG =======================================
+    // =========================================================================
+
+    // 3.57. Ung Thư Chính Xác, Xạ Trị 4D Linac, CAR-T Bão Cytokine, MTB & Mổ Não Khi Tỉnh Thức
+    Route::get('/oncology-advanced', [OncologyAdvancedTherapyController::class, 'index'])->name('oncology-advanced.index');
+    Route::post('/oncology-advanced/radiation-plan', [OncologyAdvancedTherapyController::class, 'storeRadiationPlan'])->name('oncology-advanced.radiation-plan');
+    Route::post('/oncology-advanced/cart', [OncologyAdvancedTherapyController::class, 'storeCarT'])->name('oncology-advanced.cart');
+    Route::post('/oncology-advanced/mtb', [OncologyAdvancedTherapyController::class, 'storeMtb'])->name('oncology-advanced.mtb');
+    Route::post('/oncology-advanced/awake-craniotomy', [OncologyAdvancedTherapyController::class, 'storeAwakeCraniotomy'])->name('oncology-advanced.awake-craniotomy');
+    Route::post('/oncology-advanced/pkpd', [OncologyAdvancedTherapyController::class, 'storePkPd'])->name('oncology-advanced.pkpd');
+
+    // 3.58. Hồi Sức Tuần Hoàn Sống Còn, ECMO & TTM, Buồng Áp Lực Âm AIIR, Cai Máy Thở, Đa Chấn Thương ISS & CRRT
+    Route::get('/critical-extracorporeal', [CriticalExtracorporealLifeController::class, 'index'])->name('critical-extracorporeal.index');
+    Route::post('/critical-extracorporeal/ecmo', [CriticalExtracorporealLifeController::class, 'storeEcmo'])->name('critical-extracorporeal.ecmo');
+    Route::post('/critical-extracorporeal/aiir', [CriticalExtracorporealLifeController::class, 'storeAiir'])->name('critical-extracorporeal.aiir');
+    Route::post('/critical-extracorporeal/sbt', [CriticalExtracorporealLifeController::class, 'storeSbt'])->name('critical-extracorporeal.sbt');
+    Route::post('/critical-extracorporeal/trauma-iss', [CriticalExtracorporealLifeController::class, 'storeTraumaIss'])->name('critical-extracorporeal.trauma-iss');
+    Route::post('/critical-extracorporeal/crrt', [CriticalExtracorporealLifeController::class, 'storeCrrt'])->name('critical-extracorporeal.crrt');
+    Route::post('/critical-extracorporeal/bundle', [CriticalExtracorporealLifeController::class, 'storeBundle'])->name('critical-extracorporeal.bundle');
+
+    // 3.59. Can Thiệp Chuyên Sâu, Nội Soi ESD/POEM, Tim Mạch Từ Xa CIED, Robot Phục Hồi Chức Năng & Radar Kháng Sinh
+    Route::get('/advanced-intervention', [AdvancedInterventionSafetyController::class, 'index'])->name('advanced-intervention.index');
+    Route::post('/advanced-intervention/endoscopy', [AdvancedInterventionSafetyController::class, 'storeEndoscopy'])->name('advanced-intervention.endoscopy');
+    Route::post('/advanced-intervention/cied', [AdvancedInterventionSafetyController::class, 'storeCied'])->name('advanced-intervention.cied');
+    Route::post('/advanced-intervention/antibiogram', [AdvancedInterventionSafetyController::class, 'storeAntibiogram'])->name('advanced-intervention.antibiogram');
+    Route::post('/advanced-intervention/exoskeleton', [AdvancedInterventionSafetyController::class, 'storeExoskeleton'])->name('advanced-intervention.exoskeleton');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ
