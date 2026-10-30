@@ -82,6 +82,9 @@ use App\Http\Controllers\AdvancedInterventionSafetyController;
 use App\Http\Controllers\CriticalResuscitationSafetyController;
 use App\Http\Controllers\SurgicalChemoDeviceController;
 use App\Http\Controllers\PatientSafetyTrialPediatricController;
+use App\Http\Controllers\SmartInpatientWardFacilityController;
+use App\Http\Controllers\SpecialtyHighRiskRoomController;
+use App\Http\Controllers\FacilityAutomationLoungeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -633,6 +636,39 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/patient-safety-pediatric/milk-bank', [PatientSafetyTrialPediatricController::class, 'storeMilkBank'])->name('patient-safety-pediatric.milk-bank');
     Route::post('/patient-safety-pediatric/nuclear', [PatientSafetyTrialPediatricController::class, 'storeNuclear'])->name('patient-safety-pediatric.nuclear');
     Route::post('/patient-safety-pediatric/trial', [PatientSafetyTrialPediatricController::class, 'storeTrial'])->name('patient-safety-pediatric.trial');
+
+    // =========================================================================
+    // ====== WAVE 9: QUẢN TRỊ KHOA PHÒNG, TÒA NHÀ & CƠ SỞ VẬT CHẤT 5 SAO ======
+    // =========================================================================
+
+    // 3.63. Buồng Bệnh Nội Trú Thông Minh IoT, Phân Bổ Phòng Khám E-Paper, Khử Trùng UV-C, Phòng Sinh LDRP & Trạm Điều Dưỡng
+    Route::get('/smart-inpatient-ward-facility', [SmartInpatientWardFacilityController::class, 'index'])->name('smart-inpatient-ward-facility.index');
+    Route::post('/smart-inpatient-ward-facility/console', [SmartInpatientWardFacilityController::class, 'storeInpatientConsole'])->name('smart-inpatient-ward-facility.console');
+    Route::post('/smart-inpatient-ward-facility/nurse-call/{id}', [SmartInpatientWardFacilityController::class, 'triggerNurseCall'])->name('smart-inpatient-ward-facility.nurse-call');
+    Route::post('/smart-inpatient-ward-facility/opd-allocator', [SmartInpatientWardFacilityController::class, 'storeOpdAllocator'])->name('smart-inpatient-ward-facility.opd-allocator');
+    Route::post('/smart-inpatient-ward-facility/opd-advance/{id}', [SmartInpatientWardFacilityController::class, 'advanceOpdQueue'])->name('smart-inpatient-ward-facility.opd-advance');
+    Route::post('/smart-inpatient-ward-facility/disinfection', [SmartInpatientWardFacilityController::class, 'storeTerminalDisinfection'])->name('smart-inpatient-ward-facility.disinfection');
+    Route::post('/smart-inpatient-ward-facility/ldrp', [SmartInpatientWardFacilityController::class, 'storeDeliverySuiteLdrp'])->name('smart-inpatient-ward-facility.ldrp');
+    Route::post('/smart-inpatient-ward-facility/nurse-hub', [SmartInpatientWardFacilityController::class, 'storeNurseStationHub'])->name('smart-inpatient-ward-facility.nurse-hub');
+
+    // 3.64. Phòng Cách Ly Áp Lực Dương PE Ghép Tủy, An Toàn X-Ray/MRI Bọc Chì, Nhà Đại Thể, Phòng Nội Soi AER & Phòng Sạch TPN
+    Route::get('/specialty-high-risk-room', [SpecialtyHighRiskRoomController::class, 'index'])->name('specialty-high-risk-room.index');
+    Route::post('/specialty-high-risk-room/pe-cleanroom', [SpecialtyHighRiskRoomController::class, 'storeProtectiveCleanroomPe'])->name('specialty-high-risk-room.pe-cleanroom');
+    Route::post('/specialty-high-risk-room/radiology-lead', [SpecialtyHighRiskRoomController::class, 'storeLeadLinedRadiology'])->name('specialty-high-risk-room.radiology-lead');
+    Route::post('/specialty-high-risk-room/beam-emission/{id}', [SpecialtyHighRiskRoomController::class, 'triggerBeamEmission'])->name('specialty-high-risk-room.beam-emission');
+    Route::post('/specialty-high-risk-room/mortuary', [SpecialtyHighRiskRoomController::class, 'storePathologyMortuary'])->name('specialty-high-risk-room.mortuary');
+    Route::post('/specialty-high-risk-room/endoscopy-turnover', [SpecialtyHighRiskRoomController::class, 'storeEndoscopyTurnover'])->name('specialty-high-risk-room.endoscopy-turnover');
+    Route::post('/specialty-high-risk-room/cleanroom-pharmacy', [SpecialtyHighRiskRoomController::class, 'storeCleanroomPharmacy'])->name('specialty-high-risk-room.cleanroom-pharmacy');
+
+    // 3.65. Phòng Rác Lây Nhiễm Sluice, Cửa Liên Động Thẻ Từ/FaceID, Chất Lượng Không Khí IAQ & HVAC, Lưu Trữ Bệnh Án FM-200, Truyền Ban Ngày Lounge
+    Route::get('/facility-automation-lounge', [FacilityAutomationLoungeController::class, 'index'])->name('facility-automation-lounge.index');
+    Route::post('/facility-automation-lounge/biohazard-sluice', [FacilityAutomationLoungeController::class, 'storeBiohazardSluice'])->name('facility-automation-lounge.biohazard-sluice');
+    Route::post('/facility-automation-lounge/access-interlock', [FacilityAutomationLoungeController::class, 'storeSterileAreaInterlock'])->name('facility-automation-lounge.access-interlock');
+    Route::post('/facility-automation-lounge/iaq-hvac', [FacilityAutomationLoungeController::class, 'storeIaqHvac'])->name('facility-automation-lounge.iaq-hvac');
+    Route::post('/facility-automation-lounge/medical-archive', [FacilityAutomationLoungeController::class, 'storeMedicalRecordsArchive'])->name('facility-automation-lounge.medical-archive');
+    Route::post('/facility-automation-lounge/daycare-infusion', [FacilityAutomationLoungeController::class, 'storeDayCareInfusion'])->name('facility-automation-lounge.daycare-infusion');
+    Route::post('/facility-automation-lounge/infusion-emergency/{id}', [FacilityAutomationLoungeController::class, 'triggerInfusionEmergency'])->name('facility-automation-lounge.infusion-emergency');
+    Route::post('/facility-automation-lounge/infusion-complete/{id}', [FacilityAutomationLoungeController::class, 'completeInfusion'])->name('facility-automation-lounge.infusion-complete');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ

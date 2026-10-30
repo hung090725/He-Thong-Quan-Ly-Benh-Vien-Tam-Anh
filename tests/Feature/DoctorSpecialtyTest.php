@@ -73,7 +73,7 @@ class DoctorSpecialtyTest extends TestCase
 
     public function test_admin_can_create_new_specialty_with_auto_slug(): void
     {
-        $uniqueName = 'Khoa Chẩn Đoán Hình Ảnh ' . rand(100, 999);
+        $uniqueName = 'Khoa Chẩn Đoán Hình Ảnh ' . uniqid() . '_' . rand(1000, 9999);
         $response = $this->actingAs($this->admin)->post(route('admin.specialties.store'), [
             'name' => $uniqueName,
             'description' => 'Chẩn đoán hình ảnh kỹ thuật cao',

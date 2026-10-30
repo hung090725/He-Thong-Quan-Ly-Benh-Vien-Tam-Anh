@@ -494,6 +494,23 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-heading text-warning">Khoa Phòng & Tòa Nhà Wave 9 (Hưng)</li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/smart-inpatient-ward-facility*') ? 'active' : '' }}" href="{{ route('reception.smart-inpatient-ward-facility.index') }}">
+                            <i class="bi bi-hospital-fill text-primary"></i> Buồng Bệnh & Trạm Điều Dưỡng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/specialty-high-risk-room*') ? 'active' : '' }}" href="{{ route('reception.specialty-high-risk-room.index') }}">
+                            <i class="bi bi-shield-lock-fill text-warning"></i> Phòng Ghép Tủy PE & Phòng Chì
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('reception/facility-automation-lounge*') ? 'active' : '' }}" href="{{ route('reception.facility-automation-lounge.index') }}">
+                            <i class="bi bi-cpu-fill text-success"></i> Tự Động Hóa Tòa Nhà & Lounge VIP
+                        </a>
+                    </li>
+
                     <li class="sidebar-heading">Báo Cáo & Liên Thông</li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('reception/notifications*') ? 'active' : '' }}" href="{{ route('reception.notifications.index') }}">
@@ -666,16 +683,16 @@
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-primary">
-                                <div class="text-primary fs-2 fw-bold mb-1">120+</div>
+                                <div class="text-primary fs-2 fw-bold mb-1">135+</div>
                                 <div class="fw-semibold text-dark small">Phân Hệ Y Khoa Chuyên Sâu</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Code Blue AI, Khí Y Tế MGPS, Lọc Độc Tố, ROTEM, Helipad, Tiệt Trùng CSSD, Giảm Đau PCA, Hóa Trị Gravimetric, IONM, LVAD, RTLS Sơ Sinh, Braden Smart Bed</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">Code Blue, Khí MGPS, ROTEM, Helipad, CSSD, PCA, IONM, LVAD, RTLS, Braden, Buồng Thông Minh IoT, Ghép Tủy PE, Phòng Chì X-Ray, Phòng Sạch ISO 5, Kho Bệnh Án FM-200</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm bg-white p-3 text-center rounded-3 border-top border-4 border-success">
-                                <div class="text-success fs-2 fw-bold mb-1">330+ / 330+</div>
+                                <div class="text-success fs-2 fw-bold mb-1">345+ / 345+</div>
                                 <div class="fw-semibold text-dark small">Kiểm Thử Tự Động (100% Green)</div>
-                                <small class="text-muted" style="font-size: 0.72rem;">1,420+ Assertions • 0 Failures • 0 Errors</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">1,520+ Assertions • 0 Failures • 0 Errors</small>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
@@ -1183,13 +1200,66 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Nhóm 30 (Wave 9) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-primary border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-primary rounded-circle p-2 text-white"><i class="bi bi-tablet-landscape"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">30. Buồng Bệnh IoT 5 Sao, E-Paper & Trạm Điều Dưỡng</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Buồng bệnh nội trú thông minh IoT: ánh sáng sinh học Circadian, rèm, nhiệt độ</li>
+                                    <li>✓ Chuông gọi điều dưỡng tích hợp đánh giá điểm đau trực tiếp trên tablet đầu giường</li>
+                                    <li>✓ Điều phối động phòng khám chuyên khoa & Biển tên điện tử E-Paper đổi ca tự động</li>
+                                    <li>✓ Robot UV-C / VHP khử khuẩn buồng bệnh sau xuất viện với kiểm định ATP $\le 30$ RLU</li>
+                                    <li>✓ Buồng sinh gia đình 4-trong-1 LDRP: bàn sinh đa năng, bồn ngâm giảm đau & sưởi ấm trẻ</li>
+                                    <li>✓ Trạm điều dưỡng trung tâm hiển thị ma trận toàn khoa & trạng thái sẵn sàng Code Blue</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 31 (Wave 9) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-warning border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-warning rounded-circle p-2 text-dark"><i class="bi bi-shield-lock-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">31. Phòng Áp Dương Ghép Tủy PE, Phòng Chì & Dược ISO 5</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Phòng áp lực dương PE ($> +8\text{ Pa}$, HEPA H14, $\ge 12\text{ ACH}$) chống nấm phổi ghép tủy</li>
+                                    <li>✓ Phòng X-Ray/CT/MRI bọc chì $\ge 2\text{mm Pb}$ & Cảm biến chống kim loại từ tính Ferromagnetic</li>
+                                    <li>✓ Cửa khóa liên động điện từ tự ngắt phát tia X khi cửa hé mở bảo vệ an toàn thai phụ</li>
+                                    <li>✓ Nhà đại thể lạnh $+2^\circ\text{C} - 4^\circ\text{C}$ / âm sâu $-15^\circ\text{C}$, nhận diện RFID & hút khí độc Formalin</li>
+                                    <li>✓ Chu chuyển phòng nội soi & máy rửa AER tự động, kiểm tra nồng độ axit peracetic</li>
+                                    <li>✓ Phòng sạch pha chế dịch dinh dưỡng tĩnh mạch TPN & nhãn khoa chuẩn vô trùng ISO Class 5</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Nhóm 32 (Wave 9) -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100 p-3 bg-white rounded-3 border-start border-success border-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-success rounded-circle p-2 text-white"><i class="bi bi-cpu-fill"></i></span>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">32. Tự Động Hóa Tòa Nhà, Airlock FaceID & Lounge VIP</h6>
+                                </div>
+                                <ul class="list-unstyled small text-secondary mb-0 ps-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    <li>✓ Phòng xử lý rác lây nhiễm Sluice: máy tiệt khuẩn bô vịt $\ge 85^\circ\text{C}$ & cân rác túi vàng</li>
+                                    <li>✓ Cửa liên động Airlock xác thực FaceID & thẻ từ bảo mật 2 lớp phòng mổ và kho thuốc độc</li>
+                                    <li>✓ Giám sát chất lượng không khí IAQ (PM2.5, CO2, TVOC) & tự động điều khiển van gió tươi HVAC</li>
+                                    <li>✓ Kho lưu trữ bệnh án giấy 20 năm: kệ compactor di động & bình chữa cháy khí sạch FM-200 25 bar</li>
+                                    <li>✓ Phòng truyền hóa chất ban ngày VIP: ghế massage ngả lưng, tablet gọi y tá & ngắt sốc tức thì</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-white px-4 py-3 d-flex justify-content-between">
                     <div class="small text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 330+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,420+ assertions).
+                        <i class="bi bi-shield-check text-success me-1"></i> Tác giả: <strong>Nguyễn Văn Hưng</strong> - Đã kiểm thử tự động 345+ kịch bản đạt 100% tỷ lệ xanh toàn diện (1,520+ assertions).
                     </div>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/6" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
