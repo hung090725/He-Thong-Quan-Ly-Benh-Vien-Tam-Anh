@@ -139,7 +139,7 @@ class PharmacyInventoryTest extends TestCase
     public function test_can_update_medication_details(): void
     {
         $medication = Medication::create([
-            'medication_code' => 'MED-UPD-' . rand(1000, 9999),
+            'medication_code' => 'MED-UPD-' . strtoupper(uniqid()),
             'name' => 'Nexium 40mg ' . rand(100, 999),
             'dosage_form' => 'Viên nén',
             'unit' => 'Viên',

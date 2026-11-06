@@ -171,7 +171,9 @@ class DoctorSpecialtyTest extends TestCase
 
         $doctor = Doctor::first();
         if ($doctor && $doctor->user) {
-            $file = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg', 300, 300);
+            $file = function_exists('imagecreatetruecolor')
+                ? \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg', 300, 300)
+                : \Illuminate\Http\UploadedFile::fake()->create('avatar.jpg', 100, 'image/jpeg');
 
             $response = $this->actingAs($this->admin)->put(route('admin.doctors.update', $doctor), [
                 'name' => $doctor->user->name,
