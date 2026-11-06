@@ -31,6 +31,7 @@ class BookingController extends Controller
 
         $selectedSpecialtyId = $request->query('specialty_id');
         $selectedDoctorId = $request->query('doctor_id');
+        $selectedDate = $request->query('date', date('Y-m-d'));
 
         // Pre-fill patient information if patient is logged in
         $patientProfile = null;
@@ -44,10 +45,22 @@ class BookingController extends Controller
 
         $doctors = collect();
         if ($selectedSpecialtyId) {
-            $doctors = Doctor::with('user')
+            $targetDate = Carbon::parse($selectedDate);
+            $dayOfWeek = strtolower($targetDate->englishDayOfWeek);
+
+            $doctors = Doctor::with(['user', 'schedules' => function ($q) {
+                $q->where('is_active', true);
+            }])
                 ->where('specialty_id', $selectedSpecialtyId)
                 ->where('is_available', true)
-                ->get();
+                ->whereHas('schedules', function ($q) {
+                    $q->where('is_active', true);
+                })
+                ->get()
+                ->sortByDesc(function ($doc) use ($dayOfWeek) {
+                    return $doc->schedules->where('day_of_week', $dayOfWeek)->isNotEmpty() ? 1 : 0;
+                })
+                ->values();
         }
 
         return view('public.booking', compact(
@@ -55,6 +68,7 @@ class BookingController extends Controller
             'doctors',
             'selectedSpecialtyId',
             'selectedDoctorId',
+            'selectedDate',
             'patientProfile',
             'familyMembers'
         ));
@@ -315,26 +329,48 @@ class BookingController extends Controller
     }
 
     /**
-     * AJAX API: Get doctors by specialty.
+     * AJAX API: Get doctors by specialty with date-awareness.
      */
-    public function getDoctorsBySpecialty(int $specialtyId): JsonResponse
+    public function getDoctorsBySpecialty(Request $request, int $specialtyId): JsonResponse
     {
+        $dateStr = $request->query('date', date('Y-m-d'));
+        try {
+            $targetDate = Carbon::parse($dateStr);
+        } catch (\Throwable $e) {
+            $targetDate = Carbon::today();
+        }
+        $dayOfWeek = strtolower($targetDate->englishDayOfWeek);
+
         $doctors = Doctor::with(['user', 'schedules' => function ($q) {
             $q->where('is_active', true);
         }])
             ->where('specialty_id', $specialtyId)
             ->where('is_available', true)
+            ->whereHas('schedules', function ($q) {
+                $q->where('is_active', true);
+            })
             ->get()
-            ->map(function ($doc) {
+            ->map(function ($doc) use ($dayOfWeek) {
+                $daySchedules = $doc->schedules->where('day_of_week', $dayOfWeek);
+                $isOnDuty = $daySchedules->isNotEmpty();
+
+                $shiftsText = $daySchedules->pluck('shift')->map(fn($s) => $s === 'morning' ? 'Sáng' : 'Chiều')->join(' & ');
+                $allDaysText = $doc->schedules->pluck('day_name')->unique()->join(', ');
+
                 return [
                     'id' => $doc->id,
                     'name' => $doc->full_name_with_title,
                     'qualification' => $doc->qualification,
-                    'room_number' => $doc->room_number,
+                    'room_number' => $doc->room_display,
                     'consultation_fee' => number_format($doc->consultation_fee, 0, ',', '.') . ' VNĐ',
+                    'is_on_duty_selected_date' => $isOnDuty,
+                    'today_shifts_text' => $shiftsText ?: 'Nghỉ ngày này',
+                    'all_days_text' => $allDaysText,
                     'available_days' => $doc->schedules->pluck('day_name')->unique()->values(),
                 ];
-            });
+            })
+            ->sortByDesc('is_on_duty_selected_date')
+            ->values();
 
         return response()->json($doctors);
     }

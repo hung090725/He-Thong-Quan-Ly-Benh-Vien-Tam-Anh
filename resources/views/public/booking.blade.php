@@ -57,45 +57,72 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="doctor_id" class="form-label fw-semibold">Bác sĩ phụ trách <span class="text-danger">*</span></label>
-                            <select class="form-select @error('doctor_id') is-invalid @enderror" id="doctor_id" name="doctor_id" required>
-                                <option value="">-- Vui lòng chọn chuyên khoa trước --</option>
-                                @foreach($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}" {{ (old('doctor_id', $selectedDoctorId) == $doctor->id) ? 'selected' : '' }}>
-                                        {{ $doctor->full_name_with_title }} (Phòng {{ $doctor->room_number }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div id="doctorHelp" class="form-text text-muted small"></div>
-                            @error('doctor_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-4">
                             <label for="appointment_date" class="form-label fw-semibold">Ngày khám dự kiến <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('appointment_date') is-invalid @enderror" id="appointment_date" name="appointment_date" value="{{ old('appointment_date', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
+                            <input type="date" class="form-control @error('appointment_date') is-invalid @enderror" id="appointment_date" name="appointment_date" value="{{ old('appointment_date', $selectedDate ?? date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
                             @error('appointment_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-12">
+                            <label for="doctor_id" class="form-label fw-semibold">Bác sĩ phụ trách <span class="text-danger">*</span></label>
+                            <select class="form-select @error('doctor_id') is-invalid @enderror" id="doctor_id" name="doctor_id" required>
+                                <option value="">-- Vui lòng chọn chuyên khoa trước --</option>
+                                @if($doctors->isNotEmpty())
+                                    @php
+                                        $targetDay = strtolower(\Carbon\Carbon::parse($selectedDate ?? date('Y-m-d'))->englishDayOfWeek);
+                                        $onDutyDocs = $doctors->filter(fn($d) => $d->schedules->where('day_of_week', $targetDay)->isNotEmpty());
+                                        $otherDocs = $doctors->reject(fn($d) => $d->schedules->where('day_of_week', $targetDay)->isNotEmpty());
+                                    @endphp
+                                    @if($onDutyDocs->isNotEmpty())
+                                        <optgroup label="⭐ BÁC SĨ CÓ LỊCH TRỰC NGÀY NÀY (KHUYÊN DÙNG)">
+                                            @foreach($onDutyDocs as $doctor)
+                                                @php
+                                                    $shifts = $doctor->schedules->where('day_of_week', $targetDay)->pluck('shift')->map(fn($s) => $s === 'morning' ? 'Sáng' : 'Chiều')->join(' & ');
+                                                @endphp
+                                                <option value="{{ $doctor->id }}" {{ (old('doctor_id', $selectedDoctorId) == $doctor->id) ? 'selected' : '' }}>
+                                                    ⭐ {{ $doctor->full_name_with_title }} ({{ $doctor->room_display }}) • Lịch: {{ $shifts }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+                                    @if($otherDocs->isNotEmpty())
+                                        <optgroup label="BÁC SĨ KHÁM CÁC NGÀY KHÁC">
+                                            @foreach($otherDocs as $doctor)
+                                                @php
+                                                    $allDays = $doctor->schedules->pluck('day_name')->unique()->join(', ');
+                                                @endphp
+                                                <option value="{{ $doctor->id }}" {{ (old('doctor_id', $selectedDoctorId) == $doctor->id) ? 'selected' : '' }}>
+                                                    👤 {{ $doctor->full_name_with_title }} ({{ $doctor->room_display }}) • Khám: {{ $allDays }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+                                @endif
+                            </select>
+                            <div id="doctorHelp" class="form-text text-muted small mt-1"></div>
+                            @error('doctor_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
                             <label for="shift" class="form-label fw-semibold">Ca khám <span class="text-danger">*</span></label>
                             <select class="form-select @error('shift') is-invalid @enderror" id="shift" name="shift" required>
                                 <option value="">-- Chọn ca khám --</option>
                                 <option value="morning" {{ old('shift') == 'morning' ? 'selected' : '' }}>Ca Sáng (07:30 - 11:30)</option>
                                 <option value="afternoon" {{ old('shift') == 'afternoon' ? 'selected' : '' }}>Ca Chiều (13:30 - 17:00)</option>
                             </select>
-                            <div id="slotNotice" class="small mt-1"></div>
+                            <div id="slotNotice" class="small mt-2"></div>
                             @error('shift')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="appointment_time" class="form-label fw-semibold">Giờ dự kiến (Tùy chọn)</label>
                             <input type="time" class="form-control @error('appointment_time') is-invalid @enderror" id="appointment_time" name="appointment_time" value="{{ old('appointment_time') }}">
+                            <div class="form-text text-muted small">Thời gian ước tính có mặt tại bệnh viện</div>
                             @error('appointment_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -243,37 +270,88 @@
         const doctorHelp = document.getElementById('doctorHelp');
         const slotNotice = document.getElementById('slotNotice');
 
-        // Dynamic Doctors by Specialty
-        specialtySelect.addEventListener('change', function () {
-            const specialtyId = this.value;
-            doctorSelect.innerHTML = '<option value="">-- Đang tải danh sách bác sĩ... --</option>';
-            doctorHelp.innerHTML = '';
-            slotNotice.innerHTML = '';
+        let currentDoctorsData = [];
 
-            if (!specialtyId) {
-                doctorSelect.innerHTML = '<option value="">-- Vui lòng chọn chuyên khoa trước --</option>';
+        function updateDoctorDropdown(data, keepSelectedId) {
+            currentDoctorsData = data || [];
+            doctorSelect.innerHTML = '<option value="">-- Chọn Bác sĩ phụ trách --</option>';
+
+            if (!data || data.length === 0) {
+                doctorSelect.innerHTML = '<option value="">-- Hiện chưa có bác sĩ trực thuộc khoa này --</option>';
+                slotNotice.innerHTML = '';
                 return;
             }
 
-            fetch(`{{ url('/booking/doctors-by-specialty') }}/${specialtyId}`)
+            const onDutyDocs = data.filter(d => d.is_on_duty_selected_date);
+            const otherDocs = data.filter(d => !d.is_on_duty_selected_date);
+
+            if (onDutyDocs.length > 0) {
+                const grp = document.createElement('optgroup');
+                grp.label = `⭐ BÁC SĨ CÓ LỊCH TRỰC NGÀY NÀY (${onDutyDocs.length} bác sĩ sẵn sàng)`;
+                onDutyDocs.forEach(doc => {
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.textContent = `⭐ ${doc.name} (${doc.room_number}) • Ca: ${doc.today_shifts_text} • Phí: ${doc.consultation_fee}`;
+                    if (keepSelectedId && keepSelectedId == doc.id) opt.selected = true;
+                    grp.appendChild(opt);
+                });
+                doctorSelect.appendChild(grp);
+            }
+
+            if (otherDocs.length > 0) {
+                const grp = document.createElement('optgroup');
+                grp.label = `BÁC SĨ KHÁM CÁC NGÀY KHÁC (${otherDocs.length} bác sĩ)`;
+                otherDocs.forEach(doc => {
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.textContent = `👤 ${doc.name} (${doc.room_number}) • Khám: ${doc.all_days_text}`;
+                    if (keepSelectedId && keepSelectedId == doc.id) opt.selected = true;
+                    grp.appendChild(opt);
+                });
+                doctorSelect.appendChild(grp);
+            }
+
+            // Auto-select first on-duty doctor if nothing selected
+            if (!doctorSelect.value && onDutyDocs.length > 0) {
+                doctorSelect.value = onDutyDocs[0].id;
+            }
+
+            checkSlots();
+        }
+
+        function loadDoctors(keepSelectedId = null) {
+            const specialtyId = specialtySelect.value;
+            const dateVal = appointmentDate.value;
+
+            if (!specialtyId) {
+                doctorSelect.innerHTML = '<option value="">-- Vui lòng chọn chuyên khoa trước --</option>';
+                slotNotice.innerHTML = '';
+                return;
+            }
+
+            doctorSelect.innerHTML = '<option value="">-- Đang cập nhật lịch trực bác sĩ... --</option>';
+
+            fetch(`{{ url('/booking/doctors-by-specialty') }}/${specialtyId}?date=${dateVal}`)
                 .then(res => res.json())
                 .then(data => {
-                    doctorSelect.innerHTML = '<option value="">-- Chọn bác sĩ phụ trách --</option>';
-                    if (data.length === 0) {
-                        doctorSelect.innerHTML = '<option value="">-- Hiện chưa có bác sĩ trực thuộc khoa này --</option>';
-                    } else {
-                        data.forEach(doc => {
-                            const opt = document.createElement('option');
-                            opt.value = doc.id;
-                            opt.textContent = `${doc.name} (Phòng ${doc.room_number}) - Phí: ${doc.consultation_fee}`;
-                            doctorSelect.appendChild(opt);
-                        });
-                    }
+                    updateDoctorDropdown(data, keepSelectedId || doctorSelect.value);
                 })
                 .catch(err => {
                     console.error(err);
                     doctorSelect.innerHTML = '<option value="">-- Lỗi tải danh sách bác sĩ --</option>';
                 });
+        }
+
+        specialtySelect.addEventListener('change', function () {
+            loadDoctors();
+        });
+
+        appointmentDate.addEventListener('change', function () {
+            if (specialtySelect.value) {
+                loadDoctors(doctorSelect.value);
+            } else {
+                checkSlots();
+            }
         });
 
         // Check availability slots
@@ -290,32 +368,99 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.slots && data.slots.length > 0) {
-                        let html = '<div class="alert alert-info py-2 px-3 mt-2 mb-0 small"><i class="bi bi-calendar3 me-1"></i><strong>Tình trạng ca khám ngày ' + data.date + ' (' + data.day_name + '):</strong><ul class="mb-0 ps-3 mt-1">';
+                        let html = `
+                            <div class="card border border-primary border-opacity-25 bg-light p-3 mt-2 shadow-sm rounded-3">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold text-dark small">
+                                        <i class="bi bi-calendar-check text-primary me-1"></i>
+                                        Tình trạng ca khám ngày ${data.date} (${data.day_name}):
+                                    </span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Có lịch tiếp nhận</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                        `;
                         data.slots.forEach(s => {
+                            const isSelected = shiftSelect.value === s.shift;
                             if (s.available) {
-                                html += `<li class="text-success">${s.shift_name}: Còn <strong>${s.remaining}</strong> chỗ trống (Đã nhận ${s.booked_count}/${s.max_patients})</li>`;
+                                html += `
+                                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-primary shadow-sm' : 'btn-outline-primary bg-white'} d-flex align-items-center gap-2 px-3 py-2 text-start" onclick="window.selectShift('${s.shift}')">
+                                        <i class="bi ${s.shift === 'morning' ? 'bi-sun-fill text-warning' : 'bi-sunset-fill text-warning'} fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold">${s.shift_name} (${s.start_time} - ${s.end_time})</div>
+                                            <small class="${isSelected ? 'text-white-50' : 'text-success'} fw-semibold">Còn ${s.remaining} chỗ trống (${s.booked_count}/${s.max_patients})</small>
+                                        </div>
+                                    </button>
+                                `;
                             } else {
-                                html += `<li class="text-danger">${s.shift_name}: <strong>ĐÃ ĐẦY (${s.booked_count}/${s.max_patients})</strong></li>`;
+                                html += `
+                                    <button type="button" class="btn btn-sm btn-outline-secondary disabled d-flex align-items-center gap-2 px-3 py-2 text-start bg-light opacity-50" disabled>
+                                        <i class="bi bi-x-circle text-danger fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold">${s.shift_name}</div>
+                                            <small class="text-danger fw-semibold">ĐÃ ĐẦY (${s.booked_count}/${s.max_patients})</small>
+                                        </div>
+                                    </button>
+                                `;
                             }
                         });
-                        html += '</ul></div>';
+                        html += `
+                                </div>
+                            </div>
+                        `;
                         slotNotice.innerHTML = html;
                     } else {
-                        slotNotice.innerHTML = '<div class="alert alert-warning py-2 px-3 mt-2 mb-0 small"><i class="bi bi-exclamation-triangle me-1"></i>Bác sĩ không có lịch trực vào ngày này. Vui lòng chọn ngày khác.</div>';
+                        const availableAlt = currentDoctorsData.find(d => d.is_on_duty_selected_date);
+                        let altBtn = '';
+                        if (availableAlt) {
+                            altBtn = `
+                                <div class="mt-2 pt-2 border-top">
+                                    <span class="text-dark small d-block mb-1 fw-semibold">Gợi ý bác sĩ cùng chuyên khoa có lịch trực sẵn sàng:</span>
+                                    <button type="button" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 shadow-sm" onclick="window.switchDoctor(${availableAlt.id})">
+                                        <i class="bi bi-person-check-fill me-1"></i> Chọn ${availableAlt.name} (${availableAlt.today_shifts_text})
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        slotNotice.innerHTML = `
+                            <div class="alert alert-warning py-3 px-3 mt-2 mb-0 shadow-sm border-start border-4 border-warning">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i>
+                                    <div>
+                                        <strong class="d-block text-dark">Bác sĩ hiện không có ca khám vào ngày đã chọn.</strong>
+                                        <p class="mb-0 text-muted small">Quý khách vui lòng chọn ngày khám khác hoặc đổi sang Bác sĩ đang trực hôm nay.</p>
+                                        ${altBtn}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     }
                 })
                 .catch(err => console.error(err));
         }
 
+        window.selectShift = function (shiftVal) {
+            shiftSelect.value = shiftVal;
+            checkSlots();
+        };
+
+        window.switchDoctor = function (docId) {
+            doctorSelect.value = docId;
+            checkSlots();
+        };
+
         doctorSelect.addEventListener('change', checkSlots);
-        appointmentDate.addEventListener('change', checkSlots);
+        shiftSelect.addEventListener('change', checkSlots);
+
+        // Initial slot check on page load if doctor already chosen
+        if (doctorSelect.value) {
+            checkSlots();
+        }
 
         // Anti-Double Submit Protection
         const bookingForm = document.querySelector('form[action="{{ route('booking.store') }}"]');
         const submitBtn = document.getElementById('submitBtn');
         if (bookingForm && submitBtn) {
             bookingForm.addEventListener('submit', function (e) {
-                // If form is valid according to HTML5 validation, disable button to prevent double clicks
                 if (bookingForm.checkValidity()) {
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> ĐANG XỬ LÝ ĐĂNG KÝ...';

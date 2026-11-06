@@ -100,6 +100,15 @@ class Doctor extends Model
         return $shifts ?: 'Nghỉ trực';
     }
 
+    public function getRoomDisplayAttribute(): string
+    {
+        $room = trim($this->room_number ?? '101');
+        if (str_starts_with(mb_strtolower($room), 'phòng') || str_starts_with(mb_strtolower($room), 'p.')) {
+            return $room;
+        }
+        return "Phòng {$room}";
+    }
+
     /**
      * Registered leave requests for this doctor.
      */
