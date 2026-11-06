@@ -551,6 +551,14 @@
                 if (currentDoc && currentDoc.value && currentDoc.getAttribute('data-specialty') !== selectedSpecialty) {
                     doctorSelect.value = '';
                 }
+
+                // Auto-select first matching doctor for the selected specialty
+                if (selectedSpecialty && !doctorSelect.value) {
+                    const firstMatch = Array.from(options).find(opt => opt.value && opt.getAttribute('data-specialty') === selectedSpecialty);
+                    if (firstMatch) {
+                        doctorSelect.value = firstMatch.value;
+                    }
+                }
             });
         }
 

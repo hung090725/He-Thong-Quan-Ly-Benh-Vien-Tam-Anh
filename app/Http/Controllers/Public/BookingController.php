@@ -29,9 +29,9 @@ class BookingController extends Controller
     {
         $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
 
-        $selectedSpecialtyId = $request->query('specialty_id');
-        $selectedDoctorId = $request->query('doctor_id');
-        $selectedDate = $request->query('date', date('Y-m-d'));
+        $selectedSpecialtyId = old('specialty_id', $request->query('specialty_id'));
+        $selectedDoctorId = old('doctor_id', $request->query('doctor_id'));
+        $selectedDate = old('appointment_date', $request->query('date', date('Y-m-d')));
 
         // Pre-fill patient information if patient is logged in
         $patientProfile = null;
@@ -45,7 +45,22 @@ class BookingController extends Controller
 
         $doctors = collect();
         if ($selectedSpecialtyId) {
-            $targetDate = Carbon::parse($selectedDate);
+            // Guarantee selected doctor belongs to selected specialty
+            if ($selectedDoctorId) {
+                $doctorBelongs = Doctor::where('id', $selectedDoctorId)
+                    ->where('specialty_id', $selectedSpecialtyId)
+                    ->where('is_available', true)
+                    ->exists();
+                if (!$doctorBelongs) {
+                    $selectedDoctorId = null;
+                }
+            }
+
+            try {
+                $targetDate = Carbon::parse($selectedDate);
+            } catch (\Throwable $e) {
+                $targetDate = Carbon::today();
+            }
             $dayOfWeek = strtolower($targetDate->englishDayOfWeek);
 
             $doctors = Doctor::with(['user', 'schedules' => function ($q) {
@@ -61,6 +76,12 @@ class BookingController extends Controller
                     return $doc->schedules->where('day_of_week', $dayOfWeek)->isNotEmpty() ? 1 : 0;
                 })
                 ->values();
+
+            // Auto-select the first on-duty doctor if not selected
+            if (!$selectedDoctorId && $doctors->isNotEmpty()) {
+                $onDuty = $doctors->first(fn($d) => $d->schedules->where('day_of_week', $dayOfWeek)->isNotEmpty());
+                $selectedDoctorId = $onDuty ? $onDuty->id : $doctors->first()->id;
+            }
         }
 
         return view('public.booking', compact(

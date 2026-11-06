@@ -91,8 +91,32 @@ class StoreAppointmentRequest extends FormRequest
             }
 
             if ($doctor->specialty_id != $specialtyId) {
-                $validator->errors()->add('doctor_id', 'Bác sĩ được chọn không thuộc chuyên khoa đã chọn.');
-                return;
+                // Auto-resolve to an on-duty doctor of the selected specialty
+                try {
+                    $carbonDate = Carbon::parse($appointmentDate);
+                    $dayOfWeek = strtolower($carbonDate->englishDayOfWeek);
+                } catch (\Throwable $e) {
+                    $dayOfWeek = strtolower(Carbon::today()->englishDayOfWeek);
+                }
+
+                $replacement = Doctor::where('specialty_id', $specialtyId)
+                    ->where('is_available', true)
+                    ->whereHas('schedules', function ($q) use ($dayOfWeek, $shift) {
+                        $q->where('day_of_week', $dayOfWeek)
+                          ->where('shift', $shift)
+                          ->where('is_active', true);
+                    })
+                    ->first()
+                    ?? Doctor::where('specialty_id', $specialtyId)->where('is_available', true)->first();
+
+                if ($replacement) {
+                    $this->merge(['doctor_id' => $replacement->id]);
+                    $doctorId = $replacement->id;
+                    $doctor = $replacement;
+                } else {
+                    $validator->errors()->add('doctor_id', 'Chuyên khoa đã chọn hiện chưa có bác sĩ tiếp nhận.');
+                    return;
+                }
             }
 
             if (!$doctor->is_available) {

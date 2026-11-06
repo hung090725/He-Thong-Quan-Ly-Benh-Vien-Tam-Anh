@@ -16,16 +16,16 @@ class BookingSpamProtection
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (app()->environment('testing')) {
-            return $next($request);
-        }
-
         // 1. Bot Honeypot Check: legitimate users leave this invisible field empty
         if ($request->filled('website_verification_code')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Yêu cầu không hợp lệ (Phát hiện truy cập bất thường)',
             ], 422);
+        }
+
+        if (app()->environment('testing')) {
+            return $next($request);
         }
 
         // 2. Velocity Check: form must take at least 1.5 seconds to be humanly completed

@@ -272,7 +272,7 @@
 
         let currentDoctorsData = [];
 
-        function updateDoctorDropdown(data, keepSelectedId) {
+        function updateDoctorDropdown(data, keepSelectedId = null) {
             currentDoctorsData = data || [];
             doctorSelect.innerHTML = '<option value="">-- Chọn Bác sĩ phụ trách --</option>';
 
@@ -281,6 +281,10 @@
                 slotNotice.innerHTML = '';
                 return;
             }
+
+            // Verify if keepSelectedId exists in the returned doctors list
+            const keepDoctorExists = keepSelectedId && data.some(d => d.id == keepSelectedId);
+            const validSelectedId = keepDoctorExists ? keepSelectedId : null;
 
             const onDutyDocs = data.filter(d => d.is_on_duty_selected_date);
             const otherDocs = data.filter(d => !d.is_on_duty_selected_date);
@@ -292,7 +296,7 @@
                     const opt = document.createElement('option');
                     opt.value = doc.id;
                     opt.textContent = `⭐ ${doc.name} (${doc.room_number}) • Ca: ${doc.today_shifts_text} • Phí: ${doc.consultation_fee}`;
-                    if (keepSelectedId && keepSelectedId == doc.id) opt.selected = true;
+                    if (validSelectedId && validSelectedId == doc.id) opt.selected = true;
                     grp.appendChild(opt);
                 });
                 doctorSelect.appendChild(grp);
@@ -305,15 +309,21 @@
                     const opt = document.createElement('option');
                     opt.value = doc.id;
                     opt.textContent = `👤 ${doc.name} (${doc.room_number}) • Khám: ${doc.all_days_text}`;
-                    if (keepSelectedId && keepSelectedId == doc.id) opt.selected = true;
+                    if (validSelectedId && validSelectedId == doc.id) opt.selected = true;
                     grp.appendChild(opt);
                 });
                 doctorSelect.appendChild(grp);
             }
 
-            // Auto-select first on-duty doctor if nothing selected
-            if (!doctorSelect.value && onDutyDocs.length > 0) {
-                doctorSelect.value = onDutyDocs[0].id;
+            // Auto-select: if keepSelectedId is invalid or not in list, auto-select first on-duty doctor!
+            if (!validSelectedId) {
+                if (onDutyDocs.length > 0) {
+                    doctorSelect.value = onDutyDocs[0].id;
+                } else if (otherDocs.length > 0) {
+                    doctorSelect.value = otherDocs[0].id;
+                }
+            } else {
+                doctorSelect.value = validSelectedId;
             }
 
             checkSlots();
@@ -334,7 +344,7 @@
             fetch(`{{ url('/booking/doctors-by-specialty') }}/${specialtyId}?date=${dateVal}`)
                 .then(res => res.json())
                 .then(data => {
-                    updateDoctorDropdown(data, keepSelectedId || doctorSelect.value);
+                    updateDoctorDropdown(data, keepSelectedId);
                 })
                 .catch(err => {
                     console.error(err);
@@ -343,7 +353,8 @@
         }
 
         specialtySelect.addEventListener('change', function () {
-            loadDoctors();
+            // When user changes specialty, ALWAYS reset doctor and auto-select on-duty doctor of that specialty!
+            loadDoctors(null);
         });
 
         appointmentDate.addEventListener('change', function () {
@@ -368,6 +379,14 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.slots && data.slots.length > 0) {
+                        // Auto-select first available shift if none selected or if selected is unavailable
+                        const availableSlots = data.slots.filter(s => s.available);
+                        if (availableSlots.length > 0) {
+                            const currentShiftStillAvailable = availableSlots.some(s => s.shift === shiftSelect.value);
+                            if (!shiftSelect.value || !currentShiftStillAvailable) {
+                                shiftSelect.value = availableSlots[0].shift;
+                            }
+                        }
                         let html = `
                             <div class="card border border-primary border-opacity-25 bg-light p-3 mt-2 shadow-sm rounded-3">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
@@ -452,7 +471,9 @@
         shiftSelect.addEventListener('change', checkSlots);
 
         // Initial slot check on page load if doctor already chosen
-        if (doctorSelect.value) {
+        if (specialtySelect.value) {
+            loadDoctors(doctorSelect.value);
+        } else if (doctorSelect.value) {
             checkSlots();
         }
 
