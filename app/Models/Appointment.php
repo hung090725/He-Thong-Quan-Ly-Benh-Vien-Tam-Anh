@@ -216,7 +216,15 @@ class Appointment extends Model
         if ($this->status !== self::STATUS_CONFIRMED) {
             return 0;
         }
-        return (int) Carbon::now()->diffInMinutes($this->updated_at);
+
+        $checkinTime = $this->triaged_at ?? $this->updated_at ?? $this->created_at;
+        if (!$checkinTime) {
+            return 0;
+        }
+
+        // Tính số phút từ lúc tiếp nhận / check-in đến thời điểm hiện tại
+        $diff = (int) $checkinTime->diffInMinutes(Carbon::now());
+        return max(0, $diff);
     }
 
     public function getIsPriorityAttribute(): bool

@@ -69,8 +69,23 @@ class ReceptionAppointmentController extends Controller
             'cancelled' => Appointment::whereDate('appointment_date', $date)->where('status', Appointment::STATUS_CANCELLED)->count(),
         ];
 
-        $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
-        $doctors = Doctor::with(['user', 'specialty'])->where('is_available', true)->get();
+        $specialties = Specialty::where('is_active', true)
+            ->where('name', 'NOT LIKE', '%Test%')
+            ->where('name', 'NOT LIKE', '%Wave%')
+            ->where('name', 'NOT REGEXP', '[0-9_]{3,}$')
+            ->orderBy('name')
+            ->get();
+
+        $doctors = Doctor::with(['user', 'specialty'])
+            ->where('is_available', true)
+            ->whereHas('specialty', function ($sq) {
+                $sq->where('name', 'NOT LIKE', '%Test%')
+                   ->where('name', 'NOT LIKE', '%Wave%');
+            })
+            ->whereHas('user', function ($uq) {
+                $uq->where('name', 'NOT LIKE', '%Test%');
+            })
+            ->get();
 
         // Chart Analytics for reception dashboard
         $shiftChartData = [
@@ -104,8 +119,23 @@ class ReceptionAppointmentController extends Controller
      */
     public function createWalkin(Request $request): View
     {
-        $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
-        $doctors = Doctor::with(['user', 'specialty'])->where('is_available', true)->get();
+        $specialties = Specialty::where('is_active', true)
+            ->where('name', 'NOT LIKE', '%Test%')
+            ->where('name', 'NOT LIKE', '%Wave%')
+            ->where('name', 'NOT REGEXP', '[0-9_]{3,}$')
+            ->orderBy('name')
+            ->get();
+
+        $doctors = Doctor::with(['user', 'specialty'])
+            ->where('is_available', true)
+            ->whereHas('specialty', function ($sq) {
+                $sq->where('name', 'NOT LIKE', '%Test%')
+                   ->where('name', 'NOT LIKE', '%Wave%');
+            })
+            ->whereHas('user', function ($uq) {
+                $uq->where('name', 'NOT LIKE', '%Test%');
+            })
+            ->get();
 
         $selectedPatient = null;
         if ($request->filled('patient_id')) {

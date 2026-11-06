@@ -49,8 +49,8 @@ class PatientPortalController extends Controller
         $user = Auth::user();
         $patientProfile = PatientProfile::where('user_id', $user->id)->first();
 
-        // Patients can only view their own appointments; admins may review any appointment.
-        if (!$user->isAdmin() && (!$patientProfile || $appointment->patient_profile_id !== $patientProfile->id)) {
+        // Patients can only view their own appointments; admins, receptionists, and doctors may review any appointment.
+        if (!$user->isAdmin() && !$user->isReceptionist() && !$user->isDoctor() && (!$patientProfile || $appointment->patient_profile_id !== $patientProfile->id)) {
             abort(403, 'Bạn không có quyền xem thông tin lịch khám này.');
         }
 
@@ -60,20 +60,25 @@ class PatientPortalController extends Controller
             'medicalRecord.prescriptions',
             'medicalRecord.attachments',
             'medicalRecord.sickLeaveCertificate',
+            'patientProfile',
         ]);
+
+        if (!$patientProfile) {
+            $patientProfile = $appointment->patientProfile;
+        }
 
         return view('patient.appointment-detail', compact('appointment', 'patientProfile'));
     }
 
     /**
-     * Patient prints their official prescription.
+     * Patient or hospital staff prints official prescription.
      */
     public function printPrescription(Appointment $appointment): View
     {
         $user = Auth::user();
         $patientProfile = PatientProfile::where('user_id', $user->id)->first();
 
-        if (!$patientProfile || $appointment->patient_profile_id !== $patientProfile->id) {
+        if (!$user->isAdmin() && !$user->isReceptionist() && !$user->isDoctor() && (!$patientProfile || $appointment->patient_profile_id !== $patientProfile->id)) {
             abort(403, 'Bạn không có quyền in đơn thuốc này.');
         }
 

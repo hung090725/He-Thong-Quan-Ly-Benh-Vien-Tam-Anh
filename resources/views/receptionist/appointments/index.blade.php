@@ -262,7 +262,16 @@
                                 <x-status-badge :status="$app->status" />
                                 @if($app->status === 'confirmed')
                                     <small class="text-muted d-block mt-1 font-monospace" title="Thời gian chờ từ lúc tiếp nhận">
-                                        <i class="bi bi-clock-history text-primary"></i> Chờ {{ $app->waiting_minutes }}p
+                                        <i class="bi bi-clock-history text-primary"></i> 
+                                        @if($app->waiting_minutes <= 0)
+                                            <span class="text-success fw-semibold">Vừa tiếp nhận</span>
+                                        @elseif($app->waiting_minutes < 60)
+                                            <span class="text-primary fw-semibold">Chờ {{ $app->waiting_minutes }}p</span>
+                                        @elseif($app->waiting_minutes < 480)
+                                            <span class="text-warning-emphasis fw-semibold">Chờ {{ floor($app->waiting_minutes / 60) }}h {{ $app->waiting_minutes % 60 }}p</span>
+                                        @else
+                                            <span class="text-muted">Chờ khám</span>
+                                        @endif
                                     </small>
                                 @endif
                             </td>
@@ -272,7 +281,7 @@
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <button type="button" class="btn btn-outline-info" title="Gọi loa phát thanh mời vào phòng khám"
-                                        onclick="callPatientVoice('{{ addslashes($app->patientProfile->full_name) }}', '{{ $app->queue_number }}', '{{ addslashes($app->doctor ? ($app->doctor->room_number ?? '1') : '1') }}', '{{ addslashes($app->doctor ? $app->doctor->full_name_with_title : '') }}')">
+                                        onclick="callPatientVoice('{{ addslashes($app->patientProfile->full_name) }}', '{{ $app->queue_number }}', '{{ addslashes($app->doctor ? ($app->doctor->room_number ?? '1') : '1') }}', '{{ addslashes($app->doctor ? $app->doctor->full_name_with_title : '') }}', {{ $app->id }})">
                                         <i class="bi bi-megaphone-fill text-primary"></i>
                                     </button>
                                     <form action="{{ route('reception.notifications.alert', $app) }}" method="POST" class="d-inline">
@@ -286,6 +295,9 @@
                                     </a>
                                     <a href="{{ route('reception.appointments.print', $app) }}" target="_blank" class="btn btn-outline-dark" title="In phiếu tiếp nhận / khám bệnh">
                                         <i class="bi bi-printer"></i>
+                                    </a>
+                                    <a href="{{ route('reception.patients.print-wristband', $app->patient_profile_id) }}" target="_blank" class="btn btn-outline-secondary" title="In vòng đeo tay người bệnh an toàn (Wristband)">
+                                        <i class="bi bi-person-badge"></i>
                                     </a>
                                     <form action="{{ route('reception.invoices.create-from-appointment', $app) }}" method="POST" class="d-inline">
                                         @csrf
@@ -446,6 +458,9 @@
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
             const ctx = new AudioContext();
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
 
             // Tone 1: D5 (587.33 Hz)
             const osc1 = ctx.createOscillator();
@@ -476,9 +491,21 @@
     }
 
     /**
-     * Voice Call Patient using Web Speech API (Tiếng Việt)
+     * Voice Call Patient using Web Speech API (Tiếng Việt) & Sync Database
      */
-    function callPatientVoice(patientName, queueNumber, roomNumber, doctorName) {
+    function callPatientVoice(patientName, queueNumber, roomNumber, doctorName, appId) {
+        // Backend record audio call
+        if (appId) {
+            fetch(`/reception/appointments/${appId}/call-audio`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ counter_number: 'Quầy Tiếp Nhận' })
+            }).catch(() => {});
+        }
+
         // Broadcast event to connected Waiting Room TV displays (queue-display)
         try {
             localStorage.setItem('tam_anh_queue_call', JSON.stringify({
