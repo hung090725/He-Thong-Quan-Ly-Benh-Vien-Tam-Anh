@@ -48,7 +48,7 @@ class EhrVitalsTrackerTest extends TestCase
             ]);
 
         $this->patient = PatientProfile::create([
-            'patient_code' => 'BN-EHR-' . rand(10000, 99999),
+            'patient_code' => 'BN-EHR-' . uniqid() . '-' . rand(1000, 9999),
             'full_name' => 'Hoàng Minh Tuấn ' . rand(100, 999),
             'dob' => '1985-08-20',
             'gender' => 'male',

@@ -217,6 +217,25 @@ class PatientProfile extends Model
         return "{$years} tuổi";
     }
 
+    public function getMaskedNameAttribute(): string
+    {
+        $words = explode(' ', trim($this->full_name ?? ''));
+        if (count($words) <= 1) {
+            return $this->full_name ? mb_substr($this->full_name, 0, 1) . '***' : 'N/A';
+        }
+        $masked = [];
+        foreach ($words as $idx => $w) {
+            if ($idx === 0) {
+                $masked[] = $w;
+            } elseif ($idx === count($words) - 1) {
+                $masked[] = mb_substr($w, 0, 1) . '***';
+            } else {
+                $masked[] = mb_substr($w, 0, 1) . '*';
+            }
+        }
+        return implode(' ', $masked);
+    }
+
     public function getFormattedDobAttribute(): string
     {
         return $this->dob ? $this->dob->format('d/m/Y') : 'Chưa cập nhật';

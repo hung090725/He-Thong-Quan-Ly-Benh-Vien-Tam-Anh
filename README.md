@@ -12,7 +12,7 @@
 | :---: | :--- | :--- | :--- |
 | 1 | **Nguyễn Thành Quý** | **Technical Lead & System Core** | Kiến trúc hệ thống, Khởi tạo dự án, Auth & RBAC Middleware, Master Layouts, Engine Đặt lịch khám, Mail thông báo & Điều phối tích hợp Git |
 | 2 | **Nguyễn Văn Đạt** | **Master Data & Public Portal** | Quản lý Chuyên khoa (CRUD), Hồ sơ Bác sĩ, Cấu hình Lịch trực ca trong tuần, Giao diện Trang chủ, Trang Giới thiệu Bệnh viện, Upload Avatar Bác sĩ, Bộ lọc Bác sĩ trực hôm nay & AJAX Live Search, Biểu đồ Chart.js thống kê, Trợ lý AI gợi ý Chuyên khoa & Bác sĩ (Symptom Matcher), Danh thiếp số vCard & Mã QR thông minh, Quản lý Nghỉ phép/Ủy quyền trực thay, Ma trận Phân ca trực Bệnh viện (Roster Matrix) & Mẫu in Hồ sơ Năng lực Bác sĩ chuẩn y khoa (23 Tests Passed 100% Green) |
-| 3 | **Nguyễn Văn Hưng** | **Patient Reception, Clinical Safety & Smart Hospital Suite** | Quản lý Hồ sơ BN, Bàn tiếp nhận, Kiosk sảnh, Thuốc độc TT20, Cấp cứu Triage ATS, Báo động đỏ, NEWS2 & RRT, Chuỗi lạnh IoT, CSSD, Smart OR, AI PACS, qSOFA, PGx, CMMS NĐ98, Dược lâm sàng TDM, Dinh dưỡng TPN, FIM, YHCT, ESG, AI Sepsis, CDSS Rules, Stroke Pathway, STEMI Cathlab, DRG Billing, Digital Twin 360, Telehealth & Bộ 120+ Phân hệ Y khoa Chuẩn JCI (270 Tests Passed 100% Green) |
+| 3 | **Nguyễn Văn Hưng** | **Patient Reception, Inpatient & Clinical Safety** | Quản lý Hồ sơ người bệnh, Bàn tiếp nhận & Check-in Kiosk sảnh, Viện phí VietQR, Quầy dược ngoại trú, An toàn truyền máu, Cảnh báo lâm sàng & Hệ thống phân hệ y tế nội viện |
 | 4 | **Võ Lê Gia Bảo** | **Consultation, Records & Analytics** | Màn hình hàng đợi khám của Bác sĩ, Lập bệnh án & Kê đơn thuốc lặp, Upload/Download tệp y tế bảo mật (Policy), Dashboard Quản trị viên, Bộ xuất Báo cáo thống kê Excel/PDF thông minh (XlsxReportWriter) & Cổng thông tin Bệnh nhân (10 Tests Passed 100% Green) |
 
 ---
@@ -23,9 +23,9 @@ Dự án được xây dựng và đóng góp chính thức qua Pull Requests tr
 
 | Thành viên | GitHub Username | Vai trò & Đóng góp chính | Trạng thái tích hợp |
 | :--- | :--- | :--- | :--- |
-| **Nguyễn Thành Quý** | [@quy0358](https://github.com/quy0358) | **Technical Lead & Core Architect**: Kiến trúc nền tảng Laravel 11, Master Layouts, Auth & RBAC, Booking Engine, Cùng **Bộ 10 Tính Năng Đột Phá Kiến Trúc & An Ninh Nâng Cao** (2FA TOTP RFC 6238, Smart Waitlist Engine FIFO, Calendar Sync RFC 5545, Family Health Profiles, Self-service Reschedule, Anti-Spam Honeypot, Security Audit Logging CSV, Active Device Sessions, Dynamic Settings & System Health Diagnostic Telemetry) - Toàn bộ 299 Tests đạt 100% Green! | [![Status](https://img.shields.io/badge/Status-Core%20Architect-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-299%2F299%20Green-brightgreen)]() |
-| **Nguyễn Văn Hưng** | [@hung090725](https://github.com/hung090725) | **Patient Reception, Clinical Safety & Smart Hospital Suite**: Bộ giải pháp bệnh viện thông minh chuẩn JCI (Smart OR, AI PACS, qSOFA Sepsis, Gen PGx, AI Sepsis, CDSS Rules, Stroke Pathway, STEMI Cathlab, DRG Billing, Digital Twin 360, Telehealth Video, 270 Unit/Feature Tests xanh 100% - 1.157 Assertions) | [![PR #4 & #6 Merged](https://img.shields.io/badge/PR%20%234%20%26%20%236-Merged-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-270%2F270%20Green-brightgreen)]() |
-| **Nguyễn Văn Đạt** | [@jtadd123](https://github.com/jtadd123) | **Master Data & Public Portal**: Quản lý Chuyên khoa, Bác sĩ, Lịch trực tuần, Trang giới thiệu viện, Avatar bác sĩ, Bác sĩ trực hôm nay, AJAX Live Search, Chart.js Analytics, Trợ lý AI Symptom Matcher, vCard QR thông minh, Nghỉ phép ủy quyền, Ma trận ca trực Roster, Mẫu in hồ sơ năng lực PDF | [![PR #1 & #7 Merged](https://img.shields.io/badge/PR%20%231%20%26%20%237-Merged-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-23%2F23%20Green-brightgreen)]() |
+| **Nguyễn Thành Quý** | [@quy0358](https://github.com/quy0358) | **Technical Lead & Core Architect**: Kiến trúc nền tảng Laravel 11, Master Layouts, Auth & RBAC, Booking Engine, Cùng **Bộ 10 Tính Năng Đột Phá Kiến Trúc & An Ninh Nâng Cao** (2FA TOTP RFC 6238, Smart Waitlist Engine FIFO, Calendar Sync RFC 5545, Family Health Profiles, Self-service Reschedule, Anti-Spam Honeypot, Security Audit Logging CSV, Active Device Sessions, Dynamic Settings & System Health Diagnostic Telemetry) | [![Status](https://img.shields.io/badge/Status-Core%20Architect-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-415%2F415%20Green-brightgreen)]() |
+| **Nguyễn Văn Đạt** | [@jtadd123](https://github.com/jtadd123) | **Master Data & Public Portal**: Quản lý Chuyên khoa, Bác sĩ, Lịch trực tuần, Trang giới thiệu viện, Avatar bác sĩ, Bác sĩ trực hôm nay, AJAX Live Search, Chart.js Analytics, Trợ lý AI Symptom Matcher, vCard QR thông minh, Nghỉ phép ủy quyền, Ma trận ca trực Roster, Mẫu in hồ sơ năng lực PDF | [![PR #1, #7 & #9 Merged](https://img.shields.io/badge/PR%20%231%2C%20%237%20%26%20%239-Merged-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-23%2F23%20Green-brightgreen)]() |
+| **Nguyễn Văn Hưng** | [@hung090725](https://github.com/hung090725) | **Patient Reception, Inpatient & Clinical Safety**: Quản lý hồ sơ người bệnh, tiếp đón sảnh, Kiosk tự phục vụ, viện phí VietQR, an toàn dược & lâm sàng, Spotlight Search toàn viện và các phân hệ hỗ trợ y tế chuyên sâu | [![PR #4, #6 & #10 Merged](https://img.shields.io/badge/PR%20%234%2C%20%236%20%26%20%2310-Merged-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-100%25-brightgreen)]() |
 | **Võ Lê Gia Bảo** | [@gbao289](https://github.com/gbao289) | **Consultation, Records & Analytics**: Bàn khám bác sĩ, Bệnh án điện tử, Đơn thuốc lặp, File y tế bảo mật qua Policy, Dashboard thống kê, Xuất báo cáo Excel/PDF (XlsxReportWriter) & Lịch sử bệnh nhân | [![PR #5 & #8 Merged](https://img.shields.io/badge/PR%20%235%20%26%20%238-Merged-success)]() [![Tests](https://img.shields.io/badge/PHPUnit-10%2F10%20Green-brightgreen)]() |
 
 ---
@@ -96,13 +96,13 @@ erDiagram
     8. Bộ lọc chống Spam Bot đa tầng (Invisible Honeypot + Velocity Check + IP Rate Limiter).
     9. Bảng điều khiển tham số động & Chế độ bảo trì bệnh viện (`SystemSetting` & 503 Maintenance).
     10. Giám sát sức khỏe hạ tầng toàn diện thời gian thực (DB Latency, Storage Write, Cache, Mail Ping, Memory Telemetry).
-- **Tiêu chí hoàn thành:** Toàn bộ 10 phân hệ kiến trúc đã hoạt động mượt mà, 11/11 automated tests trong `TechLeadInnovationSuiteTest` đạt 100% Green, nâng tổng số test suite toàn dự án lên **299/299 tests Green (1.281 assertions)**.
+- **Tiêu chí hoàn thành:** Toàn bộ 10 phân hệ kiến trúc đã hoạt động mượt mà, 11/11 automated tests trong `TechLeadInnovationSuiteTest` đạt 100% Green.
 
 ### 2. NGUYỄN VĂN ĐẠT (Chuyên khoa, Đội ngũ Bác sĩ & Smart Clinical Portal)
 - **Tài liệu báo cáo chuyên môn chi tiết:** [bao_cao_nang_cap_module_chuyen_khoa_bac_si.md](./bao_cao_nang_cap_module_chuyen_khoa_bac_si.md)
 - **Chi nhánh phát triển:** `feature/doctors-and-specialties` (Pull Request #1 & Pull Request #7 - Đã Merge 100% vào `main`)
 - **Kiểm thử tự động:** **23/23 tests pass 100% Green** (62 assertions, 0 errors)
-- **Phạm vi phụ trách mở rộng & Đóng góp toàn diện (20 Chức năng xuất sắc đạt mốc 10 điểm tuyệt đối):**
+- **Phạm vi phụ trách mở rộng & Đóng góp toàn diện (20 Chức năng xuất sắc):**
   1. **Nền tảng Quản trị Dữ liệu & Phân công Lịch trực (Master Data & Scheduling Core):**
      - Thiết kế Migration & Seeder cho các bảng: `specialties`, `doctors`, `doctor_schedules`, `doctor_leaves`.
      - Xây dựng chức năng Admin quản lý Chuyên khoa (`SpecialtyController`): Thêm mới, chỉnh sửa, xem danh sách, phân trang, tự động sinh slug SEO thân thiện, chống trùng lặp tên, toggle kích hoạt/tạm dừng chuyên khoa, ràng buộc toàn vẹn dữ liệu chặn xóa chuyên khoa nếu đang có bác sĩ trực thuộc.
@@ -127,22 +127,19 @@ erDiagram
      - **Dashboard Thống kê & 2 Biểu đồ Chart.js Trực quan:** 4 thẻ KPI tóm tắt, Biểu đồ cột phân bố bác sĩ theo từng khoa, Biểu đồ tròn thể hiện tỷ lệ chuyên khoa hoạt động vs tạm dừng tiếp nhận.
 - **Tiêu chí hoàn thành:** Hoàn thành toàn diện 20/20 tính năng, 23/23 tests tự động trong `DoctorSpecialtyTest` đạt 100% Green (62 assertions), PR #1 và PR #7 đã được Technical Lead merge sạch 100% vào nhánh `main`.
 
-### 3. NGUYỄN VĂN HƯNG (Tiếp đón, An toàn người bệnh, Viện phí & Smart Hospital Suite)
-- **Tài liệu báo cáo chuyên môn chi tiết:** [docs/DONG_GOP_CHUYEN_MON_NGUYEN_VAN_HUNG.md](./docs/DONG_GOP_CHUYEN_MON_NGUYEN_VAN_HUNG.md)
-- **Chi nhánh phát triển:** `feature/patients-and-reception` (Pull Request #4)
-- **Kiểm thử tự động:** **214/214 tests pass 100%** (874 assertions, 0 errors)
-- **Phạm vi phụ trách mở rộng & Đóng góp cốt lõi (42+ Phân hệ):**
-  1. **Tiếp đón & Kiosk Thông minh:** Hồ sơ bệnh nhân (`patient_profiles`, mã `BN-YYYYMMDD-XXXX`), Check-in ca hẹn & Khám vãng lai (walk-in), Kiosk cảm ứng tự phục vụ tại sảnh (`KioskController`), Gọi loa phát thanh AI số thứ tự (`QueueAudioCaller`), In vòng đeo tay mã vạch 128 (JCI IPSG.1), Theo dõi thời gian thực hành trình người bệnh.
-  2. **Cấp cứu & An toàn lâm sàng:** Phân luồng Cấp cứu Triage ATS 5 cấp, Kích hoạt Báo động đỏ toàn viện (Code Red), Cảnh báo sớm suy sụp NEWS2 & Đội phản ứng nhanh RRT (`news2_vital_alerts`, `rrt_activations`), Thang đo Morse ngã & Braden loét tì đè, Giám sát tai nạn kim tiêm & Phơi nhiễm nghề nghiệp PEP 72h.
-  3. **Quản lý Dược & An toàn dùng thuốc:** Quầy dược ngoại trú & Kho dược tồn kho GPP, Tem nhãn phụ cảnh báo tương tác Smart Label, Hệ thống CDSS phát hiện dị ứng chéo thuốc (Penicillin, Cephalosporin, NSAIDs), Tủ thuốc trực cấp cứu & Thuốc độc/gây nghiện TT 20/2017/TT-BYT ký nhận kép 2 người.
-  4. **Cận lâm sàng & Ngân hàng máu:** Quản lý chỉ định xét nghiệm & Cảnh báo giá trị nguy kịch (Panic Alert), An toàn truyền máu tại giường đối chiếu chéo 2 điều dưỡng.
-  5. **Chuỗi cung ứng lạnh & Tiệt khuẩn:** Giám sát chuỗi lạnh IoT vắc-xin 2-8°C tự động khóa tủ khi lệch nhiệt độ, Quản lý tiệt khuẩn dụng cụ mổ trung tâm CSSD Autoclave/Plasma & Chứng chỉ mẻ hấp.
-  6. **Vận hành giường bệnh & Lọc máu:** Sơ đồ buồng bệnh trực quan & Giường khử khuẩn Cloramin B, Quản lý ca lọc máu thận nhân tạo chu kỳ & tái dùng màng lọc UF.
-  7. **Tài chính, BHYT & Chuyển viện:** Giấy chuyển tuyến BHYT Mẫu số 40/BYT, Giám định hồ sơ BHYT thời gian thực chống xuất toán & Cổng XML 4210, Ví ký quỹ viện phí & Tạm ứng hạch toán kép, Bảo lãnh viện phí bảo hiểm tư nhân VIP (TPA GOP), Hóa đơn thanh toán VietQR Napas247 động.
-  8. **Pháp lý y tế & Bảo mật quyền người bệnh:** Cổng sao lục bệnh án điện tử (Điều 69 Luật KCB 2023), Niêm phong tài sản cấp cứu & Đồ thất lạc, Thẻ thăm bệnh điện tử JCI (giới hạn tối đa 2 người/giường), Báo cáo sự cố y khoa Near-Miss & Phân tích nguyên nhân gốc rễ RCA 5 Whys (TT 43/2018/TT-BYT), Đăng ký hiến mô tạng nhân đạo & Di chúc y tế giảm nhẹ DNR.
-  9. **Ngoại viện & Phẫu thuật trong ngày:** Điều phối đội xe cấp cứu cơ động Mobile ICU tính cước km tự động, Khám sức khỏe đoàn doanh nghiệp Thông tư 32/2023/TT-BYT, Quy trình phẫu thuật trong ngày (Day Surgery) tích hợp WHO Surgical Safety Checklist, Tự động nhắc lịch tái khám bệnh mãn tính qua Zalo ZNS.
-  10. **Hỗ trợ & Tiện ích sảnh:** Bản đồ dẫn đường trong nhà 3D SVG từng bước, Cổng tự khai báo triệu chứng từ xa Pre-Visit đồng bộ EMR, Đơn vị lưu viện ban ngày (Day-Bed Unit), Mượn trả xe lăn tại sảnh, Khoa Dinh dưỡng & thực đơn bệnh lý A4, Quỹ trợ giúp bệnh nhân nghèo Tâm Anh Heart & Thông dịch viên y tế, Khảo sát hài lòng người bệnh CSAT 83 tiêu chí Bộ Y Tế.
-- **Tiêu chí hoàn thành:** Toàn bộ 42+ phân hệ vận hành trơn tru, logic liên thông hoàn chỉnh, chuẩn hóa mô hình dữ liệu, 100% kịch bản kiểm thử tự động xanh. Mọi thay đổi đều được cập nhật thường xuyên trên PR #4 để Thầy và Hội đồng kiểm tra.
+### 3. NGUYỄN VĂN HƯNG (Tiếp đón, Hồ sơ người bệnh, Viện phí & Nghiệp vụ lâm sàng)
+- **Tài liệu đặc tả nghiệp vụ y tế:** [docs/TAILIEU_NGHIEP_VU_VA_KIEN_TRUC_Y_TE.md](./docs/TAILIEU_NGHIEP_VU_VA_KIEN_TRUC_Y_TE.md)
+- **Chi nhánh phát triển:** `feature/patients-and-reception`
+- **Phạm vi phụ trách chính:**
+  - Quản lý Hồ sơ người bệnh (`patient_profiles`), sinh mã BN duy nhất, in vòng đeo tay y tế mã vạch 128 (chuẩn JCI).
+  - Tiếp đón & Hàng đợi khám bệnh (`AppointmentReceptionController`), tiếp đón vãng lai, in phiếu khám nhiệt 80mm.
+  - Kiosk cảm ứng tự phục vụ tại sảnh (`KioskController`) quét CCCD/BHYT, lấy số tự động.
+  - Hóa đơn & Thu phí viện phí (`PatientInvoiceController`) tích hợp VietQR Napas247, ví tạm ứng hạch toán kép.
+  - Quầy dược ngoại trú & Kho dược tồn kho theo hạn dùng FEFO, kiểm tra tương tác và dị ứng chéo thuốc.
+  - An toàn lâm sàng: Phân luồng Cấp cứu Triage ATS 5 cấp, Báo động đỏ Code Red, Cảnh báo sớm NEWS2 & Đội phản ứng nhanh RRT, An toàn truyền máu đối chiếu kép ABO/Rh tại giường.
+  - Quản trị buồng bệnh & sơ đồ giường nội trú, trạng thái khử khuẩn Cloramin B.
+  - Tìm kiếm toàn viện Universal Spotlight Search (`Ctrl + K`) thông minh hỗ trợ tiếng Việt có dấu và không dấu.
+- **Tiêu chí hoàn thành:** Quy trình tiếp đón vận hành thông suốt, dữ liệu toàn vẹn có ràng buộc chặt chẽ, 100% kịch bản kiểm thử tự động đạt yêu cầu.
 
 ### 4. VÕ LÊ GIA BẢO (Khám bệnh, Bệnh án & Thống kê)
 - **Phạm vi phụ trách:**
@@ -154,7 +151,8 @@ erDiagram
     - Kiểm duyệt định dạng (`pdf, jpg, png`) và kích thước (<3MB).
     - Viết `AttachmentPolicy` ngăn chặn người ngoài hoặc bệnh nhân khác tải trộm tài liệu y tế (HTTP 403).
   - Lập trình Dashboard trung tâm Admin: Thống kê số lượng bệnh nhân, bác sĩ, lịch hẹn, tỷ lệ khám hoàn thành (`AdminDashboardController`).
-- **Tiêu chí hoàn thành:** Bác sĩ lập bệnh án trơn tru, file lưu private an toàn có phân quyền, số liệu Dashboard phản ánh chuẩn từ database.
+  - Bộ xuất Báo cáo thống kê Excel/PDF thông minh (`XlsxReportWriter`) & Cổng thông tin Bệnh nhân.
+- **Tiêu chí hoàn thành:** Bác sĩ lập bệnh án trơn tru, file lưu private an toàn có phân quyền, số liệu Dashboard phản ánh chuẩn từ database, 10/10 tests pass 100% Green.
 
 ---
 
@@ -266,19 +264,7 @@ Mật khẩu mặc định cho tất cả các tài khoản thử nghiệm: **`1
 
 ---
 
-## 🏆 10. BẢNG TỔNG HỢP TIẾN ĐỘ & 222 KIỂM THỬ TỰ ĐỘNG (NGUYỄN VĂN HƯNG)
-
-Nhằm đảm bảo tính minh bạch cao nhất phục vụ Thầy và Hội đồng chấm đồ án, toàn bộ mã nguồn của thành viên **Nguyễn Văn Hưng** đều được kiểm thử tự động đạt 100% tỷ lệ pass:
-
-- **Chi nhánh Git:** `feature/patients-and-reception` (Luôn được đồng bộ và push liên tục).
-- **Pull Request chính thức:** [GitHub PR #4 (quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4)](https://github.com/quy0358/He-Thong-Quan-Ly-Benh-Vien-Tam-Anh/pull/4).
-- **Kết quả kiểm thử tự động:** `222 passed (914 assertions)` - 0 failures, 0 errors.
-- **Tài liệu thẩm định chuyên sâu:** Xem tại [docs/DONG_GOP_CHUYEN_MON_NGUYEN_VAN_HUNG.md](./docs/DONG_GOP_CHUYEN_MON_NGUYEN_VAN_HUNG.md).
-- **Công cụ đồng bộ tự động 1-click:** File `push_progress.bat` tại thư mục gốc tự động chạy kiểm thử trước khi push lên GitHub.
-
----
-
-## 🛡️ 11. BỘ 10 TÍNH NĂNG KIẾN TRÚC & AN NINH NÂNG CAO (TECHNICAL LEAD - NGUYỄN THÀNH QUÝ)
+## 🛡️ 10. BỘ 10 TÍNH NĂNG KIẾN TRÚC & AN NINH NÂNG CAO (TECHNICAL LEAD - NGUYỄN THÀNH QUÝ)
 
 Nhằm nâng cao chất lượng đồ án đạt cấp độ sản phẩm triển khai thực tế (Enterprise Grade), Technical Lead **Nguyễn Thành Quý** đã hoàn thành tích hợp trọn vẹn 10 phân hệ kiến trúc nền tảng và bảo mật nâng cao:
 
@@ -296,7 +282,7 @@ Nhằm nâng cao chất lượng đồ án đạt cấp độ sản phẩm tri�
 | **10** | **Giám Sát Sức Khỏe Toàn Diện (System Health)** | Bộ đo đạc vi mô thời gian thực: Độ trễ MySQL/MariaDB (ms), dung lượng ổ cứng, quyền ghi Storage, Cache read/write, Ping máy chủ Email, RAM usage | `SystemHealthCheckService.php`, `SystemHealthController.php`, `admin/system_health/` |
 
 - **Kết quả kiểm thử tự động toàn diện:** `tests/Feature/TechLeadInnovationSuiteTest.php` với **11/11 tests PASSED 100% Green (68 assertions)**.
-- **Tổng kiểm thử toàn dự án sau tích hợp:** **299 tests PASSED 100% Green (1.281 assertions)**.
+- **Tổng kiểm thử toàn dự án sau tích hợp PR #10:** **415 tests PASSED 100% Green (1.820 assertions)**.
 
 ---
 *Dự án phục vụ mục đích học tập và nghiên cứu môn học Phát triển ứng dụng Web.*

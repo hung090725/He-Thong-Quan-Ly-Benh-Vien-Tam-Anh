@@ -83,6 +83,22 @@ use App\Http\Controllers\AdvancedSpecialtyController;
 use App\Http\Controllers\HospitalOperationsController;
 use App\Http\Controllers\FinanceHrController;
 use App\Http\Controllers\PatientExperienceController;
+use App\Http\Controllers\CriticalCareResuscitationController;
+use App\Http\Controllers\TransplantRoboticsHybridController;
+use App\Http\Controllers\EmergencyMaternityCardioController;
+use App\Http\Controllers\GenomicsHospitalAtHomeController;
+use App\Http\Controllers\OncologyAdvancedTherapyController;
+use App\Http\Controllers\CriticalExtracorporealLifeController;
+use App\Http\Controllers\AdvancedInterventionSafetyController;
+use App\Http\Controllers\CriticalResuscitationSafetyController;
+use App\Http\Controllers\SurgicalChemoDeviceController;
+use App\Http\Controllers\PatientSafetyTrialPediatricController;
+use App\Http\Controllers\SmartInpatientWardFacilityController;
+use App\Http\Controllers\SpecialtyHighRiskRoomController;
+use App\Http\Controllers\FacilityAutomationLoungeController;
+use App\Http\Controllers\AutonomousLogisticsEsgController;
+use App\Http\Controllers\AssetEngineeringHaccpLinenController;
+use App\Http\Controllers\DisasterSafetyFatigueDischargeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -148,6 +164,9 @@ Route::prefix('kiosk')->name('kiosk.')->group(function () {
 
 // Cổng Tra Cứu Viện Phí Điện Tử & Thanh Toán VietQR Tự Động (Public Smart Billing Lookup)
 Route::get('/billing/lookup', [PatientInvoiceController::class, 'publicLookup'])->name('public.billing.lookup');
+
+// Cổng Tìm Kiếm Toàn Diện Bệnh Viện (Universal Hospital Spotlight Search)
+Route::middleware(['auth'])->get('/universal-search', [\App\Http\Controllers\UniversalSearchController::class, 'search'])->name('universal.search');
 
 // Cổng Theo Dõi Hành Trình Khám Trực Tuyến Thời Gian Thực (Smart Patient Journey Live Tracker)
 Route::get('/journey/{code}', [PatientJourneyController::class, 'show'])->name('public.journey.show');
@@ -583,6 +602,169 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
     Route::post('/patient-experience/screening-campaign', [PatientExperienceController::class, 'storeScreeningCampaign'])->name('patient-experience.screening-campaign');
     Route::post('/patient-experience/loyalty-points', [PatientExperienceController::class, 'storeLoyaltyPoints'])->name('patient-experience.loyalty-points');
     Route::post('/patient-experience/chronic-cohort', [PatientExperienceController::class, 'storeChronicCohort'])->name('patient-experience.chronic-cohort');
+
+    // =========================================================================
+    // ====== WAVE 6: 20 PHÂN HỆ ĐỘT PHÁ CÔNG NGHỆ & Y KHOA CHUYÊN SÂU ========
+    // ====== Phụ trách: NGUYỄN VĂN HƯNG =======================================
+    // =========================================================================
+
+    // 3.53. Hồi Sức Tích Cực, Bơm Tiêm DERS, Ma Trận Tương Kỵ Y-Site, MTP Truyền Máu Tối Cấp & PBM
+    Route::get('/critical-resuscitation', [CriticalCareResuscitationController::class, 'index'])->name('critical-resuscitation.index');
+    Route::post('/critical-resuscitation/ders', [CriticalCareResuscitationController::class, 'storeDers'])->name('critical-resuscitation.ders');
+    Route::post('/critical-resuscitation/ysite-check', [CriticalCareResuscitationController::class, 'checkYsite'])->name('critical-resuscitation.ysite-check');
+    Route::post('/critical-resuscitation/mtp', [CriticalCareResuscitationController::class, 'storeMtp'])->name('critical-resuscitation.mtp');
+    Route::post('/critical-resuscitation/pbm', [CriticalCareResuscitationController::class, 'storePbm'])->name('critical-resuscitation.pbm');
+
+    // 3.54. Điều Phối Ghép Tạng HLA, Phẫu Thuật Robot Da Vinci & Phòng Mổ Hybrid Navigation
+    Route::get('/transplant-robotics', [TransplantRoboticsHybridController::class, 'index'])->name('transplant-robotics.index');
+    Route::post('/transplant-robotics/transplant', [TransplantRoboticsHybridController::class, 'storeTransplant'])->name('transplant-robotics.transplant');
+    Route::post('/transplant-robotics/robotic', [TransplantRoboticsHybridController::class, 'storeRobotic'])->name('transplant-robotics.robotic');
+    Route::post('/transplant-robotics/hybrid-or', [TransplantRoboticsHybridController::class, 'storeHybridOr'])->name('transplant-robotics.hybrid-or');
+
+    // 3.55. Cấp Cứu Ngoại Viện 5G, Thảm Họa START, Tim Thai CTG AI, IVF Phôi Học, PEWS, FFR/IVUS & Đột Quỵ 24h
+    Route::get('/emergency-maternity-cardio', [EmergencyMaternityCardioController::class, 'index'])->name('emergency-maternity-cardio.index');
+    Route::post('/emergency-maternity-cardio/tele-ems', [EmergencyMaternityCardioController::class, 'storeTeleEms'])->name('emergency-maternity-cardio.tele-ems');
+    Route::post('/emergency-maternity-cardio/mci-triage', [EmergencyMaternityCardioController::class, 'storeMciTriage'])->name('emergency-maternity-cardio.mci-triage');
+    Route::post('/emergency-maternity-cardio/ctg', [EmergencyMaternityCardioController::class, 'storeCtg'])->name('emergency-maternity-cardio.ctg');
+    Route::post('/emergency-maternity-cardio/ivf', [EmergencyMaternityCardioController::class, 'storeIvf'])->name('emergency-maternity-cardio.ivf');
+    Route::post('/emergency-maternity-cardio/pews', [EmergencyMaternityCardioController::class, 'storePews'])->name('emergency-maternity-cardio.pews');
+    Route::post('/emergency-maternity-cardio/coronary', [EmergencyMaternityCardioController::class, 'storeCoronary'])->name('emergency-maternity-cardio.coronary');
+    Route::post('/emergency-maternity-cardio/stroke-extended', [EmergencyMaternityCardioController::class, 'storeStrokeExtended'])->name('emergency-maternity-cardio.stroke-extended');
+
+    // 3.56. Di Truyền NIPT/Onco, Biobank Tế Bào Gốc, Command Center Giường Bệnh, Chuẩn JCI/83 Tiêu Chí, Antidote & HAH
+    Route::get('/genomics-hospital-at-home', [GenomicsHospitalAtHomeController::class, 'index'])->name('genomics-hospital-at-home.index');
+    Route::post('/genomics-hospital-at-home/genomics', [GenomicsHospitalAtHomeController::class, 'storeGenomics'])->name('genomics-hospital-at-home.genomics');
+    Route::post('/genomics-hospital-at-home/biobank', [GenomicsHospitalAtHomeController::class, 'storeBiobank'])->name('genomics-hospital-at-home.biobank');
+    Route::post('/genomics-hospital-at-home/bed-command', [GenomicsHospitalAtHomeController::class, 'storeBedCommand'])->name('genomics-hospital-at-home.bed-command');
+    Route::post('/genomics-hospital-at-home/kpi', [GenomicsHospitalAtHomeController::class, 'storeKpi'])->name('genomics-hospital-at-home.kpi');
+    Route::post('/genomics-hospital-at-home/antidote', [GenomicsHospitalAtHomeController::class, 'storeAntidote'])->name('genomics-hospital-at-home.antidote');
+    Route::post('/genomics-hospital-at-home/virtual-ward', [GenomicsHospitalAtHomeController::class, 'storeVirtualWard'])->name('genomics-hospital-at-home.virtual-ward');
+
+    // =========================================================================
+    // ====== WAVE 7: 15 PHÂN HỆ ĐỘT PHÁ CÔNG NGHỆ Y KHOA ĐẲNG CẤP QUỐC TẾ ====
+    // ====== Phụ trách: NGUYỄN VĂN HƯNG =======================================
+    // =========================================================================
+
+    // 3.57. Ung Thư Chính Xác, Xạ Trị 4D Linac, CAR-T Bão Cytokine, MTB & Mổ Não Khi Tỉnh Thức
+    Route::get('/oncology-advanced', [OncologyAdvancedTherapyController::class, 'index'])->name('oncology-advanced.index');
+    Route::post('/oncology-advanced/radiation-plan', [OncologyAdvancedTherapyController::class, 'storeRadiationPlan'])->name('oncology-advanced.radiation-plan');
+    Route::post('/oncology-advanced/cart', [OncologyAdvancedTherapyController::class, 'storeCarT'])->name('oncology-advanced.cart');
+    Route::post('/oncology-advanced/mtb', [OncologyAdvancedTherapyController::class, 'storeMtb'])->name('oncology-advanced.mtb');
+    Route::post('/oncology-advanced/awake-craniotomy', [OncologyAdvancedTherapyController::class, 'storeAwakeCraniotomy'])->name('oncology-advanced.awake-craniotomy');
+    Route::post('/oncology-advanced/pkpd', [OncologyAdvancedTherapyController::class, 'storePkPd'])->name('oncology-advanced.pkpd');
+
+    // 3.58. Hồi Sức Tuần Hoàn Sống Còn, ECMO & TTM, Buồng Áp Lực Âm AIIR, Cai Máy Thở, Đa Chấn Thương ISS & CRRT
+    Route::get('/critical-extracorporeal', [CriticalExtracorporealLifeController::class, 'index'])->name('critical-extracorporeal.index');
+    Route::post('/critical-extracorporeal/ecmo', [CriticalExtracorporealLifeController::class, 'storeEcmo'])->name('critical-extracorporeal.ecmo');
+    Route::post('/critical-extracorporeal/aiir', [CriticalExtracorporealLifeController::class, 'storeAiir'])->name('critical-extracorporeal.aiir');
+    Route::post('/critical-extracorporeal/sbt', [CriticalExtracorporealLifeController::class, 'storeSbt'])->name('critical-extracorporeal.sbt');
+    Route::post('/critical-extracorporeal/trauma-iss', [CriticalExtracorporealLifeController::class, 'storeTraumaIss'])->name('critical-extracorporeal.trauma-iss');
+    Route::post('/critical-extracorporeal/crrt', [CriticalExtracorporealLifeController::class, 'storeCrrt'])->name('critical-extracorporeal.crrt');
+    Route::post('/critical-extracorporeal/bundle', [CriticalExtracorporealLifeController::class, 'storeBundle'])->name('critical-extracorporeal.bundle');
+
+    // 3.59. Can Thiệp Chuyên Sâu, Nội Soi ESD/POEM, Tim Mạch Từ Xa CIED, Robot Phục Hồi Chức Năng & Radar Kháng Sinh
+    Route::get('/advanced-intervention', [AdvancedInterventionSafetyController::class, 'index'])->name('advanced-intervention.index');
+    Route::post('/advanced-intervention/endoscopy', [AdvancedInterventionSafetyController::class, 'storeEndoscopy'])->name('advanced-intervention.endoscopy');
+    Route::post('/advanced-intervention/cied', [AdvancedInterventionSafetyController::class, 'storeCied'])->name('advanced-intervention.cied');
+    Route::post('/advanced-intervention/antibiogram', [AdvancedInterventionSafetyController::class, 'storeAntibiogram'])->name('advanced-intervention.antibiogram');
+    Route::post('/advanced-intervention/exoskeleton', [AdvancedInterventionSafetyController::class, 'storeExoskeleton'])->name('advanced-intervention.exoskeleton');
+
+    // =========================================================================
+    // ====== WAVE 8: HỒI SỨC SỐNG CÒN, THIẾT BỊ NÂNG CAO & AN TOÀN SƠ SINH ====
+    // =========================================================================
+
+    // 3.60. Hồi Sức Ngừng Tim Code Blue, Khí Y Tế MGPS, Ngộ Độc Cấp, ROTEM & Helipad
+    Route::get('/critical-resuscitation-safety', [CriticalResuscitationSafetyController::class, 'index'])->name('critical-resuscitation-safety.index');
+    Route::post('/critical-resuscitation-safety/code-blue', [CriticalResuscitationSafetyController::class, 'storeCodeBlue'])->name('critical-resuscitation-safety.code-blue');
+    Route::post('/critical-resuscitation-safety/medical-gas', [CriticalResuscitationSafetyController::class, 'storeMedicalGas'])->name('critical-resuscitation-safety.medical-gas');
+    Route::post('/critical-resuscitation-safety/toxicology', [CriticalResuscitationSafetyController::class, 'storeToxicology'])->name('critical-resuscitation-safety.toxicology');
+    Route::post('/critical-resuscitation-safety/rotem', [CriticalResuscitationSafetyController::class, 'storeRotem'])->name('critical-resuscitation-safety.rotem');
+    Route::post('/critical-resuscitation-safety/helipad', [CriticalResuscitationSafetyController::class, 'storeHelipad'])->name('critical-resuscitation-safety.helipad');
+
+    // 3.61. Digital Twin Tiệt Trùng CSSD, Giảm Đau PCA, Hóa Trị Gravimetric, Thần Kinh IONM & LVAD
+    Route::get('/surgical-chemo-device', [SurgicalChemoDeviceController::class, 'index'])->name('surgical-chemo-device.index');
+    Route::post('/surgical-chemo-device/cssd', [SurgicalChemoDeviceController::class, 'storeCssd'])->name('surgical-chemo-device.cssd');
+    Route::post('/surgical-chemo-device/pca', [SurgicalChemoDeviceController::class, 'storePca'])->name('surgical-chemo-device.pca');
+    Route::post('/surgical-chemo-device/chemo', [SurgicalChemoDeviceController::class, 'storeChemo'])->name('surgical-chemo-device.chemo');
+    Route::post('/surgical-chemo-device/ionm', [SurgicalChemoDeviceController::class, 'storeIonm'])->name('surgical-chemo-device.ionm');
+    Route::post('/surgical-chemo-device/lvad', [SurgicalChemoDeviceController::class, 'storeLvad'])->name('surgical-chemo-device.lvad');
+
+    // 3.62. An Ninh Sơ Sinh RTLS, Nệm Thông Minh Braden, Ngân Hàng Sữa Mẹ, Bức Xạ Hạt Nhân & Thử Nghiệm Lâm Sàng
+    Route::get('/patient-safety-pediatric', [PatientSafetyTrialPediatricController::class, 'index'])->name('patient-safety-pediatric.index');
+    Route::post('/patient-safety-pediatric/rtls', [PatientSafetyTrialPediatricController::class, 'storeRtls'])->name('patient-safety-pediatric.rtls');
+    Route::post('/patient-safety-pediatric/braden', [PatientSafetyTrialPediatricController::class, 'storeBraden'])->name('patient-safety-pediatric.braden');
+    Route::post('/patient-safety-pediatric/milk-bank', [PatientSafetyTrialPediatricController::class, 'storeMilkBank'])->name('patient-safety-pediatric.milk-bank');
+    Route::post('/patient-safety-pediatric/nuclear', [PatientSafetyTrialPediatricController::class, 'storeNuclear'])->name('patient-safety-pediatric.nuclear');
+    Route::post('/patient-safety-pediatric/trial', [PatientSafetyTrialPediatricController::class, 'storeTrial'])->name('patient-safety-pediatric.trial');
+
+    // =========================================================================
+    // ====== WAVE 9: QUẢN TRỊ KHOA PHÒNG, TÒA NHÀ & CƠ SỞ VẬT CHẤT 5 SAO ======
+    // =========================================================================
+
+    // 3.63. Buồng Bệnh Nội Trú Thông Minh IoT, Phân Bổ Phòng Khám E-Paper, Khử Trùng UV-C, Phòng Sinh LDRP & Trạm Điều Dưỡng
+    Route::get('/smart-inpatient-ward-facility', [SmartInpatientWardFacilityController::class, 'index'])->name('smart-inpatient-ward-facility.index');
+    Route::post('/smart-inpatient-ward-facility/console', [SmartInpatientWardFacilityController::class, 'storeInpatientConsole'])->name('smart-inpatient-ward-facility.console');
+    Route::post('/smart-inpatient-ward-facility/nurse-call/{id}', [SmartInpatientWardFacilityController::class, 'triggerNurseCall'])->name('smart-inpatient-ward-facility.nurse-call');
+    Route::post('/smart-inpatient-ward-facility/opd-allocator', [SmartInpatientWardFacilityController::class, 'storeOpdAllocator'])->name('smart-inpatient-ward-facility.opd-allocator');
+    Route::post('/smart-inpatient-ward-facility/opd-advance/{id}', [SmartInpatientWardFacilityController::class, 'advanceOpdQueue'])->name('smart-inpatient-ward-facility.opd-advance');
+    Route::post('/smart-inpatient-ward-facility/disinfection', [SmartInpatientWardFacilityController::class, 'storeTerminalDisinfection'])->name('smart-inpatient-ward-facility.disinfection');
+    Route::post('/smart-inpatient-ward-facility/ldrp', [SmartInpatientWardFacilityController::class, 'storeDeliverySuiteLdrp'])->name('smart-inpatient-ward-facility.ldrp');
+    Route::post('/smart-inpatient-ward-facility/nurse-hub', [SmartInpatientWardFacilityController::class, 'storeNurseStationHub'])->name('smart-inpatient-ward-facility.nurse-hub');
+
+    // 3.64. Phòng Cách Ly Áp Lực Dương PE Ghép Tủy, An Toàn X-Ray/MRI Bọc Chì, Nhà Đại Thể, Phòng Nội Soi AER & Phòng Sạch TPN
+    Route::get('/specialty-high-risk-room', [SpecialtyHighRiskRoomController::class, 'index'])->name('specialty-high-risk-room.index');
+    Route::post('/specialty-high-risk-room/pe-cleanroom', [SpecialtyHighRiskRoomController::class, 'storeProtectiveCleanroomPe'])->name('specialty-high-risk-room.pe-cleanroom');
+    Route::post('/specialty-high-risk-room/radiology-lead', [SpecialtyHighRiskRoomController::class, 'storeLeadLinedRadiology'])->name('specialty-high-risk-room.radiology-lead');
+    Route::post('/specialty-high-risk-room/beam-emission/{id}', [SpecialtyHighRiskRoomController::class, 'triggerBeamEmission'])->name('specialty-high-risk-room.beam-emission');
+    Route::post('/specialty-high-risk-room/mortuary', [SpecialtyHighRiskRoomController::class, 'storePathologyMortuary'])->name('specialty-high-risk-room.mortuary');
+    Route::post('/specialty-high-risk-room/endoscopy-turnover', [SpecialtyHighRiskRoomController::class, 'storeEndoscopyTurnover'])->name('specialty-high-risk-room.endoscopy-turnover');
+    Route::post('/specialty-high-risk-room/cleanroom-pharmacy', [SpecialtyHighRiskRoomController::class, 'storeCleanroomPharmacy'])->name('specialty-high-risk-room.cleanroom-pharmacy');
+
+    // 3.65. Phòng Rác Lây Nhiễm Sluice, Cửa Liên Động Thẻ Từ/FaceID, Chất Lượng Không Khí IAQ & HVAC, Lưu Trữ Bệnh Án FM-200, Truyền Ban Ngày Lounge
+    Route::get('/facility-automation-lounge', [FacilityAutomationLoungeController::class, 'index'])->name('facility-automation-lounge.index');
+    Route::post('/facility-automation-lounge/biohazard-sluice', [FacilityAutomationLoungeController::class, 'storeBiohazardSluice'])->name('facility-automation-lounge.biohazard-sluice');
+    Route::post('/facility-automation-lounge/access-interlock', [FacilityAutomationLoungeController::class, 'storeSterileAreaInterlock'])->name('facility-automation-lounge.access-interlock');
+    Route::post('/facility-automation-lounge/iaq-hvac', [FacilityAutomationLoungeController::class, 'storeIaqHvac'])->name('facility-automation-lounge.iaq-hvac');
+    Route::post('/facility-automation-lounge/medical-archive', [FacilityAutomationLoungeController::class, 'storeMedicalRecordsArchive'])->name('facility-automation-lounge.medical-archive');
+    Route::post('/facility-automation-lounge/daycare-infusion', [FacilityAutomationLoungeController::class, 'storeDayCareInfusion'])->name('facility-automation-lounge.daycare-infusion');
+    Route::post('/facility-automation-lounge/infusion-emergency/{id}', [FacilityAutomationLoungeController::class, 'triggerInfusionEmergency'])->name('facility-automation-lounge.infusion-emergency');
+    Route::post('/facility-automation-lounge/infusion-complete/{id}', [FacilityAutomationLoungeController::class, 'completeInfusion'])->name('facility-automation-lounge.infusion-complete');
+
+    // =========================================================================
+    // ====== WAVE 10: SIÊU TRUNG TÂM LOGISTICS Y TẾ, ESG & QUẢN TRỊ 5 SAO =====
+    // =========================================================================
+
+    // 3.66. Robot AGV Vận Chuyển, Ống Khí Nén PTS, Microgrid ESG, Nghiền Hấp Vi Sóng & Nước Lọc Thận RO
+    Route::get('/autonomous-logistics-esg', [AutonomousLogisticsEsgController::class, 'index'])->name('autonomous-logistics-esg.index');
+    Route::post('/autonomous-logistics-esg/agv-robot', [AutonomousLogisticsEsgController::class, 'storeAgvRobot'])->name('autonomous-logistics-esg.agv-robot');
+    Route::post('/autonomous-logistics-esg/agv-dispatch/{id}', [AutonomousLogisticsEsgController::class, 'dispatchAgvDelivery'])->name('autonomous-logistics-esg.agv-dispatch');
+    Route::post('/autonomous-logistics-esg/pneumatic-tube', [AutonomousLogisticsEsgController::class, 'storePneumaticTube'])->name('autonomous-logistics-esg.pneumatic-tube');
+    Route::post('/autonomous-logistics-esg/microgrid', [AutonomousLogisticsEsgController::class, 'storeMicrogridEsg'])->name('autonomous-logistics-esg.microgrid');
+    Route::post('/autonomous-logistics-esg/microwave-shredder', [AutonomousLogisticsEsgController::class, 'storeMicrowaveShredder'])->name('autonomous-logistics-esg.microwave-shredder');
+    Route::post('/autonomous-logistics-esg/ro-water', [AutonomousLogisticsEsgController::class, 'storeRoWater'])->name('autonomous-logistics-esg.ro-water');
+
+    // 3.67. Định Vị Thiết Bị BLE, Bảo Trì CMMS IEC 62353, Barie Bãi Xe ALPR, Bếp Ăn HACCP & Đồ Vải RFID
+    Route::get('/asset-engineering-haccp-linen', [AssetEngineeringHaccpLinenController::class, 'index'])->name('asset-engineering-haccp-linen.index');
+    Route::post('/asset-engineering-haccp-linen/asset-ble', [AssetEngineeringHaccpLinenController::class, 'storeAssetBle'])->name('asset-engineering-haccp-linen.asset-ble');
+    Route::post('/asset-engineering-haccp-linen/asset-alarm/{id}', [AssetEngineeringHaccpLinenController::class, 'triggerTheftAlarm'])->name('asset-engineering-haccp-linen.asset-alarm');
+    Route::post('/asset-engineering-haccp-linen/biomedical-cmms', [AssetEngineeringHaccpLinenController::class, 'storeBiomedicalCmms'])->name('asset-engineering-haccp-linen.biomedical-cmms');
+    Route::post('/asset-engineering-haccp-linen/parking-gate', [AssetEngineeringHaccpLinenController::class, 'storeParkingGate'])->name('asset-engineering-haccp-linen.parking-gate');
+    Route::post('/asset-engineering-haccp-linen/parking-fasttrack/{id}', [AssetEngineeringHaccpLinenController::class, 'fastTrackAmbulance'])->name('asset-engineering-haccp-linen.parking-fasttrack');
+    Route::post('/asset-engineering-haccp-linen/kitchen-haccp', [AssetEngineeringHaccpLinenController::class, 'storeKitchenHaccp'])->name('asset-engineering-haccp-linen.kitchen-haccp');
+    Route::post('/asset-engineering-haccp-linen/linen-rfid', [AssetEngineeringHaccpLinenController::class, 'storeLinenRfid'])->name('asset-engineering-haccp-linen.linen-rfid');
+    Route::post('/asset-engineering-haccp-linen/linen-wash/{id}', [AssetEngineeringHaccpLinenController::class, 'recordWashCycle'])->name('asset-engineering-haccp-linen.linen-wash');
+
+    // 3.68. Chỉ Huy Thảm Họa HICS, Két Bảo Mật Kép, Sinh Thiết Lạnh Frozen Section, Chống Mệt Mỏi Ca Trực & Meds-to-Beds
+    Route::get('/disaster-safety-fatigue-discharge', [DisasterSafetyFatigueDischargeController::class, 'index'])->name('disaster-safety-fatigue-discharge.index');
+    Route::post('/disaster-safety-fatigue-discharge/hics', [DisasterSafetyFatigueDischargeController::class, 'storeHicsDisaster'])->name('disaster-safety-fatigue-discharge.hics');
+    Route::post('/disaster-safety-fatigue-discharge/hics-deescalate/{id}', [DisasterSafetyFatigueDischargeController::class, 'deEscalateHics'])->name('disaster-safety-fatigue-discharge.hics-deescalate');
+    Route::post('/disaster-safety-fatigue-discharge/biometric-vault', [DisasterSafetyFatigueDischargeController::class, 'storeBiometricVault'])->name('disaster-safety-fatigue-discharge.biometric-vault');
+    Route::post('/disaster-safety-fatigue-discharge/vault-release/{id}', [DisasterSafetyFatigueDischargeController::class, 'releaseVaultItems'])->name('disaster-safety-fatigue-discharge.vault-release');
+    Route::post('/disaster-safety-fatigue-discharge/frozen-section', [DisasterSafetyFatigueDischargeController::class, 'storeFrozenSection'])->name('disaster-safety-fatigue-discharge.frozen-section');
+    Route::post('/disaster-safety-fatigue-discharge/clinician-fatigue', [DisasterSafetyFatigueDischargeController::class, 'storeClinicianFatigue'])->name('disaster-safety-fatigue-discharge.clinician-fatigue');
+    Route::post('/disaster-safety-fatigue-discharge/discharge-lounge', [DisasterSafetyFatigueDischargeController::class, 'storeDischargeLounge'])->name('disaster-safety-fatigue-discharge.discharge-lounge');
+    Route::post('/disaster-safety-fatigue-discharge/meds-deliver/{id}', [DisasterSafetyFatigueDischargeController::class, 'completeMedsToBeds'])->name('disaster-safety-fatigue-discharge.meds-deliver');
+    Route::post('/disaster-safety-fatigue-discharge/discharge-home/{id}', [DisasterSafetyFatigueDischargeController::class, 'dispatchPatientHome'])->name('disaster-safety-fatigue-discharge.discharge-home');
 });
 
 // Cổng Công Khai Theo Dõi Trạng Thái Phẫu Thuật Cho Người Thân Tại Sảnh Chờ
@@ -622,7 +804,7 @@ Route::middleware(['auth'])->group(function () {
 // =========================================================================
 // ====== MODULE 5: IN-HOSPITAL CLINICAL CONSULTATION =======================
 // =========================================================================
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:doctor,admin'])->group(function () {
     Route::post('/consultations/{consultation}/respond', [ClinicalConsultationController::class, 'respond'])->name('consultations.respond');
     Route::get('/consultations/{consultation}/print', [ClinicalConsultationController::class, 'print'])->name('consultations.print');
     Route::resource('consultations', ClinicalConsultationController::class);

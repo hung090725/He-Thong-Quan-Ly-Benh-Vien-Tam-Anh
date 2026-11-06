@@ -186,7 +186,7 @@ class SmartBillingVietQrTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('CỔNG TRA CỨU VIỆN PHÍ');
-        $response->assertSee($this->patient->full_name);
+        $response->assertSee($this->patient->masked_name);
         $response->assertSee($invoice->invoice_code);
         $response->assertSee('Quét Mã VietQR');
     }

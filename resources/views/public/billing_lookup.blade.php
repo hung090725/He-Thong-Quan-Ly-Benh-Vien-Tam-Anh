@@ -55,8 +55,8 @@
                             <div class="row g-3 mb-4 pb-3 border-bottom">
                                 <div class="col-sm-6">
                                     <span class="text-muted small">Người bệnh:</span>
-                                    <h5 class="fw-bold text-dark mb-0">{{ $invoice->patientProfile->full_name }}</h5>
-                                    <div class="text-muted small">Mã BN: <strong class="text-primary font-monospace">{{ $invoice->patientProfile->patient_code }}</strong></div>
+                                    <h5 class="fw-bold text-dark mb-0">{{ $invoice->patientProfile->masked_name }}</h5>
+                                    <div class="text-muted small">Mã BN: <strong class="text-primary font-monospace">{{ substr($invoice->patientProfile->patient_code, 0, 7) . '****' }}</strong></div>
                                 </div>
                                 <div class="col-sm-6 text-sm-end">
                                     <span class="text-muted small">Bác sĩ khám:</span>
