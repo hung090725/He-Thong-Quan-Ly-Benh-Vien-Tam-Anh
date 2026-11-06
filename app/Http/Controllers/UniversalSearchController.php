@@ -144,7 +144,7 @@ class UniversalSearchController extends Controller
                 ];
             });
 
-        // 5. Tìm kiếm Buồng bệnh & Giường nội trú (Hospital Beds & Rooms)
+        // 5. Tìm kiếm Buồng bệnh & Giường nội trú / Ngoại trú lưu ngày
         $beds = HospitalBed::query()
             ->with(['room', 'currentPatient'])
             ->where(function ($bQ) use ($query) {
@@ -158,7 +158,7 @@ class UniversalSearchController extends Controller
                         $pQ->where('full_name', 'like', $query);
                     });
             })
-            ->limit(5)
+            ->limit(4)
             ->get()
             ->map(function (HospitalBed $b) {
                 $roomNum = $b->room->room_number ?? 'Chưa xếp phòng';
@@ -182,6 +182,39 @@ class UniversalSearchController extends Controller
                     'url' => route('reception.bed-board.index'),
                 ];
             });
+
+        // Bổ sung Giường Ngoại Trú & Lưu Bệnh Ban Ngày (DayBed)
+        $dayBeds = \App\Models\DayBed::query()
+            ->with('currentAdmission.patientProfile')
+            ->where(function ($dbQ) use ($query) {
+                $dbQ->where('bed_code', 'like', $query)
+                    ->orWhere('room_name', 'like', $query)
+                    ->orWhereHas('currentAdmission.patientProfile', function ($pQ) use ($query) {
+                        $pQ->where('full_name', 'like', $query);
+                    });
+            })
+            ->limit(4)
+            ->get()
+            ->map(function (\App\Models\DayBed $db) {
+                $patientName = $db->currentAdmission?->patientProfile?->full_name;
+                $statusMap = [
+                    'available' => ['text' => 'Sẵn sàng', 'class' => 'bg-success'],
+                    'occupied' => ['text' => 'Có người', 'class' => 'bg-danger'],
+                    'cleaning' => ['text' => 'Khử khuẩn', 'class' => 'bg-warning text-dark'],
+                ];
+                $bedStatus = $statusMap[$db->status] ?? ['text' => $db->status, 'class' => 'bg-secondary'];
+
+                return [
+                    'title' => 'Giường ' . $db->bed_code . ' - ' . $db->room_name,
+                    'subtitle' => $db->bed_type_label . ($patientName ? ' • Đang lưu: ' . $patientName : ' • Giường ngoại trú lưu ngày'),
+                    'badge' => $bedStatus['text'],
+                    'badge_class' => $bedStatus['class'],
+                    'icon' => 'bi-hospital',
+                    'url' => route('reception.day-beds.index', ['search' => $db->bed_code]),
+                ];
+            });
+
+        $beds = $beds->concat($dayBeds);
 
         // 6. Tìm kiếm Phiếu Cận Lâm Sàng & Xét nghiệm (Lab Orders)
         $labs = LabOrder::query()

@@ -93,7 +93,13 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3">
             <form action="{{ route('reception.day-beds.index') }}" method="GET" class="row g-2 align-items-center">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Mã giường, tên bệnh nhân..." value="{{ request('search') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <select name="room" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">-- Tất cả khu vực / phòng bệnh --</option>
                         @foreach($rooms as $r)
@@ -101,7 +107,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">-- Loại giường --</option>
                         <option value="general" {{ request('type') == 'general' ? 'selected' : '' }}>Giường lưu thông thường</option>
@@ -110,7 +116,7 @@
                         <option value="observation" {{ request('type') == 'observation' ? 'selected' : '' }}>Giường theo dõi cấp cứu</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">-- Trạng thái giường --</option>
                         <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Sẵn sàng tiếp nhận</option>
@@ -118,8 +124,9 @@
                         <option value="cleaning" {{ request('status') == 'cleaning' ? 'selected' : '' }}>Đang khử khuẩn / dọn</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <a href="{{ route('reception.day-beds.index') }}" class="btn btn-sm btn-outline-secondary w-100">Làm mới</a>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary flex-grow-1"><i class="bi bi-funnel-fill me-1"></i>Lọc</button>
+                    <a href="{{ route('reception.day-beds.index') }}" class="btn btn-sm btn-outline-secondary" title="Xóa bộ lọc"><i class="bi bi-arrow-clockwise"></i></a>
                 </div>
             </form>
         </div>

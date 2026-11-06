@@ -37,6 +37,19 @@ class DayBedController extends Controller
             $roomQuery->where('status', $request->status);
         }
 
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $roomQuery->where(function ($q) use ($search) {
+                $q->where('bed_code', 'LIKE', "%{$search}%")
+                  ->orWhere('room_name', 'LIKE', "%{$search}%")
+                  ->orWhereHas('currentAdmission.patientProfile', function ($pq) use ($search) {
+                      $pq->where('full_name', 'LIKE', "%{$search}%")
+                         ->orWhere('patient_code', 'LIKE', "%{$search}%")
+                         ->orWhere('phone', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
         $beds = $roomQuery->with(['currentAdmission.patientProfile', 'currentAdmission.ivInfusions'])->orderBy('room_name')->orderBy('bed_code')->get();
 
         // Thống kê công suất giường
