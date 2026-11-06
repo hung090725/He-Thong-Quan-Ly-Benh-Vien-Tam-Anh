@@ -1,42 +1,37 @@
 @echo off
-chcp 65001 >nul
-title HỆ THỐNG QUẢN LÝ BỆNH VIỆN ĐA KHOA TÂM ANH
-color 0B
 cls
+title BENH VIEN TAM ANH - KHOI DONG HE THONG
 
-echo ===============================================================================
-echo     🏥 HỆ THỐNG QUẢN LÝ BỆNH VIỆN ĐA KHOA TÂM ANH
-echo     Khởi động máy chủ và mở ứng dụng trên trình duyệt
-echo ===============================================================================
+echo =======================================================
+echo    HE THONG QUAN LY BENH VIEN DA KHOA TAM ANH
+echo    Dang khoi dong may chu...
+echo =======================================================
 echo.
 
-:: 1. Kiểm tra MySQL, nếu chưa chạy thì khởi động
+:: 1. Kiem tra va khoi dong MySQL
 tasklist /FI "IMAGENAME eq mysqld.exe" 2>NUL | find /I /N "mysqld.exe">NUL
 if "%ERRORLEVEL%"=="0" (
-    echo  [✓] Cơ sở dữ liệu MySQL/MariaDB đang hoạt động.
+    echo [OK] MySQL da san sang.
 ) else (
-    echo  [!] Đang khởi động MySQL/MariaDB...
+    echo [..] Dang bat MySQL...
     if exist "C:\xampp\mysql\bin\mysqld.exe" (
         start /B "" "C:\xampp\mysql\bin\mysqld.exe" --defaults-file=C:\xampp\mysql\bin\my.ini --console
         timeout /t 2 /nobreak >nul
-        echo  [✓] Khởi động MySQL thành công!
-    ) else (
-        echo  [!] Không tìm thấy MySQL tại C:\xampp\mysql. Vui lòng bật XAMPP Control Panel.
+        echo [OK] MySQL da bat thanh cong!
     )
 )
 
 echo.
-echo  [+] Đang mở trang web Bệnh viện Tâm Anh trên trình duyệt...
-start "" "http://127.0.0.1:8000/login"
+echo [..] Dang mo trinh duyet web...
+timeout /t 1 /nobreak >nul
+start http://127.0.0.1:8000/login
 
 echo.
-echo ===============================================================================
-echo   - Máy của bạn truy cập tại:  http://127.0.0.1:8000
-echo   - Máy khác cùng mạng Wi-Fi:  http://10.3.1.119:8000
-echo   - Tài khoản Lễ tân:          receptionist@tamanh.vn  ^|  Mật khẩu: 123456
-echo   (Vui lòng GIỮ cửa sổ này trong suốt quá trình demo, KHÔNG tắt cửa sổ này)
-echo ===============================================================================
+echo =======================================================
+echo   May chu dang chay tai: http://127.0.0.1:8000
+echo   Tai khoan Le tan: receptionist@tamanh.vn ^| 123456
+echo   (KHONG TAT cua so nay khi dang su dung web)
+echo =======================================================
 echo.
 
 php artisan serve --host=0.0.0.0 --port=8000
-pause
