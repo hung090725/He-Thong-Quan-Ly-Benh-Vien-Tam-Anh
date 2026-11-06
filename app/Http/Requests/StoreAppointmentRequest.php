@@ -129,8 +129,19 @@ class StoreAppointmentRequest extends FormRequest
             if ($carbonDate->isToday()) {
                 $nowTime = Carbon::now()->format('H:i');
                 if ($shift === 'morning' && $nowTime >= '11:00') {
-                    $validator->errors()->add('shift', 'Ca sáng ngày hôm nay đã kết thúc thời gian tiếp nhận đăng ký trực tuyến (sau 11:00). Vui lòng chọn ca chiều hoặc ngày làm việc tiếp theo.');
-                    return;
+                    // Check if afternoon shift is available for this doctor today
+                    $afternoonSchedule = DoctorSchedule::where('doctor_id', $doctorId)
+                        ->where('day_of_week', strtolower($carbonDate->englishDayOfWeek))
+                        ->where('shift', 'afternoon')
+                        ->where('is_active', true)
+                        ->first();
+                    if ($afternoonSchedule && $nowTime < '16:30') {
+                        $this->merge(['shift' => 'afternoon']);
+                        $shift = 'afternoon';
+                    } else {
+                        $validator->errors()->add('shift', 'Ca sáng ngày hôm nay đã kết thúc thời gian tiếp nhận đăng ký trực tuyến (sau 11:00). Vui lòng chọn ca chiều hoặc ngày làm việc tiếp theo.');
+                        return;
+                    }
                 }
                 if ($shift === 'afternoon' && $nowTime >= '16:30') {
                     $validator->errors()->add('shift', 'Ca chiều ngày hôm nay đã kết thúc thời gian tiếp nhận đăng ký trực tuyến (sau 16:30). Vui lòng chọn ngày làm việc tiếp theo.');
@@ -148,15 +159,46 @@ class StoreAppointmentRequest extends FormRequest
                 ->first();
 
             if (!$schedule) {
-                $dayNameMap = [
-                    'monday' => 'Thứ Hai', 'tuesday' => 'Thứ Ba', 'wednesday' => 'Thứ Tư',
-                    'thursday' => 'Thứ Năm', 'friday' => 'Thứ Sáu', 'saturday' => 'Thứ Bảy', 'sunday' => 'Chủ Nhật'
-                ];
-                $dayVn = $dayNameMap[$dayOfWeek] ?? $dayOfWeek;
-                $shiftVn = $shift === 'morning' ? 'buổi sáng' : 'buổi chiều';
+                // If doctor does not work this shift, check if they work the other shift today
+                $otherShift = $shift === 'morning' ? 'afternoon' : 'morning';
+                $otherSchedule = DoctorSchedule::where('doctor_id', $doctorId)
+                    ->where('day_of_week', $dayOfWeek)
+                    ->where('shift', $otherShift)
+                    ->where('is_active', true)
+                    ->first();
+                if ($otherSchedule && (!$carbonDate->isToday() || ($otherShift === 'afternoon' && Carbon::now()->format('H:i') < '16:30'))) {
+                    $this->merge(['shift' => $otherShift]);
+                    $shift = $otherShift;
+                    $schedule = $otherSchedule;
+                } else {
+                    // Find an on-duty doctor of the same specialty who works this shift
+                    $colleague = Doctor::where('specialty_id', $specialtyId)
+                        ->where('is_available', true)
+                        ->whereHas('schedules', function ($q) use ($dayOfWeek, $shift) {
+                            $q->where('day_of_week', $dayOfWeek)->where('shift', $shift)->where('is_active', true);
+                        })
+                        ->first();
+                    if ($colleague) {
+                        $this->merge(['doctor_id' => $colleague->id]);
+                        $doctorId = $colleague->id;
+                        $doctor = $colleague;
+                        $schedule = DoctorSchedule::where('doctor_id', $doctorId)
+                            ->where('day_of_week', $dayOfWeek)
+                            ->where('shift', $shift)
+                            ->where('is_active', true)
+                            ->first();
+                    } else {
+                        $dayNameMap = [
+                            'monday' => 'Thứ Hai', 'tuesday' => 'Thứ Ba', 'wednesday' => 'Thứ Tư',
+                            'thursday' => 'Thứ Năm', 'friday' => 'Thứ Sáu', 'saturday' => 'Thứ Bảy', 'sunday' => 'Chủ Nhật'
+                        ];
+                        $dayVn = $dayNameMap[$dayOfWeek] ?? $dayOfWeek;
+                        $shiftVn = $shift === 'morning' ? 'buổi sáng' : 'buổi chiều';
 
-                $validator->errors()->add('shift', "Bác sĩ {$doctor->full_name_with_title} không có lịch trực vào {$dayVn} ({$shiftVn}). Vui lòng chọn ca hoặc ngày khác.");
-                return;
+                        $validator->errors()->add('shift', "Bác sĩ {$doctor->full_name_with_title} không có lịch trực vào {$dayVn} ({$shiftVn}). Vui lòng chọn ca hoặc ngày khác.");
+                        return;
+                    }
+                }
             }
 
             // 3. Overbooking Prevention Algorithm

@@ -134,7 +134,7 @@ class DatabaseSeeder extends Seeder
                 ], [
                     'start_time' => '07:30:00',
                     'end_time' => '11:30:00',
-                    'max_patients' => 15,
+                    'max_patients' => 50,
                     'is_active' => true,
                 ]);
 
@@ -147,7 +147,7 @@ class DatabaseSeeder extends Seeder
                     ], [
                         'start_time' => '13:30:00',
                         'end_time' => '17:00:00',
-                        'max_patients' => 15,
+                        'max_patients' => 50,
                         'is_active' => true,
                     ]);
                 }

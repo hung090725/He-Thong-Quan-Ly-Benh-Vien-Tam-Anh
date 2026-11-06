@@ -289,6 +289,15 @@ class TechLeadInnovationSuiteTest extends TestCase
         $this->assertEquals(Appointment::STATUS_PENDING, $promoted->status);
         $this->assertNull($promoted->waitlist_position);
         $this->assertNotNull($promoted->promoted_at);
+
+        // Cleanup test data to prevent database pollution
+        $appointment1->delete();
+        $waitlistAppointment->delete();
+        $patient1->delete();
+        $patient2->delete();
+        $doctor->schedules()->delete();
+        $doctor->delete();
+        $doctorUser->delete();
     }
 
     /**

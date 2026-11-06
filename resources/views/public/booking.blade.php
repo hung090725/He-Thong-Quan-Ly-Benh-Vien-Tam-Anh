@@ -379,6 +379,22 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.slots && data.slots.length > 0) {
+                        // Sync native shift select options with real-time slot state
+                        Array.from(shiftSelect.options).forEach(opt => {
+                            if (!opt.value) return;
+                            const slot = data.slots.find(s => s.shift === opt.value);
+                            if (!slot) {
+                                opt.disabled = true;
+                                opt.text = (opt.value === 'morning' ? 'Ca Sáng (07:30 - 11:30)' : 'Ca Chiều (13:30 - 17:00)') + ' - [Bác sĩ không trực ca này]';
+                            } else if (!slot.available) {
+                                opt.disabled = true;
+                                opt.text = (opt.value === 'morning' ? 'Ca Sáng (07:30 - 11:30)' : 'Ca Chiều (13:30 - 17:00)') + ' - [' + (slot.is_past_cutoff ? 'Hết giờ đăng ký' : 'Đã đủ số lượng') + ']';
+                            } else {
+                                opt.disabled = false;
+                                opt.text = (opt.value === 'morning' ? 'Ca Sáng (07:30 - 11:30)' : 'Ca Chiều (13:30 - 17:00)') + ' - [Còn ' + slot.remaining + ' chỗ]';
+                            }
+                        });
+
                         // Auto-select first available shift if none selected or if selected is unavailable
                         const availableSlots = data.slots.filter(s => s.available);
                         if (availableSlots.length > 0) {
@@ -394,7 +410,9 @@
                                         <i class="bi bi-calendar-check text-primary me-1"></i>
                                         Tình trạng ca khám ngày ${data.date} (${data.day_name}):
                                     </span>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Có lịch tiếp nhận</span>
+                                    <span class="badge ${availableSlots.length > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning border border-warning-subtle'}">
+                                        ${availableSlots.length > 0 ? 'Có lịch tiếp nhận' : 'Tạm hết chỗ trực tuyến'}
+                                    </span>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
                         `;
@@ -411,12 +429,13 @@
                                     </button>
                                 `;
                             } else {
+                                const note = s.is_past_cutoff ? 'HẾT GIỜ TIẾP NHẬN' : `ĐÃ ĐẦY (${s.booked_count}/${s.max_patients})`;
                                 html += `
                                     <button type="button" class="btn btn-sm btn-outline-secondary disabled d-flex align-items-center gap-2 px-3 py-2 text-start bg-light opacity-50" disabled>
                                         <i class="bi bi-x-circle text-danger fs-5"></i>
                                         <div>
                                             <div class="fw-bold">${s.shift_name}</div>
-                                            <small class="text-danger fw-semibold">ĐÃ ĐẦY (${s.booked_count}/${s.max_patients})</small>
+                                            <small class="text-danger fw-semibold">${note}</small>
                                         </div>
                                     </button>
                                 `;
@@ -428,7 +447,7 @@
                         `;
                         slotNotice.innerHTML = html;
                     } else {
-                        const availableAlt = currentDoctorsData.find(d => d.is_on_duty_selected_date);
+                        const availableAlt = currentDoctorsData.find(d => d.id != doctorId && d.is_on_duty_selected_date);
                         let altBtn = '';
                         if (availableAlt) {
                             altBtn = `
@@ -464,6 +483,7 @@
 
         window.switchDoctor = function (docId) {
             doctorSelect.value = docId;
+            shiftSelect.value = '';
             checkSlots();
         };
 

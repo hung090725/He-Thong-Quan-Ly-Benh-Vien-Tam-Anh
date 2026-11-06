@@ -370,6 +370,10 @@ class BookingController extends Controller
             ->whereHas('schedules', function ($q) {
                 $q->where('is_active', true);
             })
+            ->whereHas('user', function ($uq) {
+                $uq->where('name', 'NOT LIKE', '%Test%')
+                   ->where('name', 'NOT LIKE', '%Tester%');
+            })
             ->get()
             ->map(function ($doc) use ($dayOfWeek) {
                 $daySchedules = $doc->schedules->where('day_of_week', $dayOfWeek);
@@ -416,13 +420,28 @@ class BookingController extends Controller
             ->where('is_active', true)
             ->get();
 
+        $isToday = $date->isToday();
+        $nowTime = Carbon::now()->format('H:i');
+
         $slots = [];
         foreach ($schedules as $sched) {
+            $isPastCutoff = false;
+            if ($isToday) {
+                if ($sched->shift === 'morning' && $nowTime >= '11:00') {
+                    $isPastCutoff = true;
+                }
+                if ($sched->shift === 'afternoon' && $nowTime >= '16:30') {
+                    $isPastCutoff = true;
+                }
+            }
+
             $bookedCount = Appointment::where('doctor_id', $doctorId)
                 ->whereDate('appointment_date', $date->toDateString())
                 ->where('shift', $sched->shift)
                 ->where('status', '!=', Appointment::STATUS_CANCELLED)
                 ->count();
+
+            $isAvailable = !$isPastCutoff && ($bookedCount < $sched->max_patients);
 
             $slots[] = [
                 'shift' => $sched->shift,
@@ -431,7 +450,9 @@ class BookingController extends Controller
                 'end_time' => substr($sched->end_time, 0, 5),
                 'max_patients' => $sched->max_patients,
                 'booked_count' => $bookedCount,
-                'available' => $bookedCount < $sched->max_patients,
+                'available' => $isAvailable,
+                'is_past_cutoff' => $isPastCutoff,
+                'status_note' => $isPastCutoff ? 'Đã hết giờ tiếp nhận trực tuyến hôm nay' : ($isAvailable ? 'Còn chỗ' : 'Đã đủ số lượng'),
                 'remaining' => max(0, $sched->max_patients - $bookedCount),
             ];
         }
