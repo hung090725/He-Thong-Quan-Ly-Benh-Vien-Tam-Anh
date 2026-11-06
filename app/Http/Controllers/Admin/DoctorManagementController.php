@@ -558,81 +558,139 @@ class DoctorManagementController extends Controller
     }
 
     /**
-     * ADVANCED 2 (Import): Nhập danh bạ bác sĩ hàng loạt từ file CSV hoặc Excel (.xls).
+     * ADVANCED 2 (Import): Nhập danh bạ bác sĩ hàng loạt từ file CSV hoặc Excel (.xls, .xlsx).
      */
     public function importCsv(Request $request): RedirectResponse
     {
         $request->validate([
-            'csv_file' => 'required|file|max:5120',
+            'csv_file' => 'required|file|max:10240',
         ]);
 
         $file = $request->file('csv_file');
         $content = file_get_contents($file->getRealPath());
+        $extension = strtolower($file->getClientOriginalExtension());
         
         $importedCount = 0;
         $rows = [];
 
-        // Check if file is HTML/Excel table (.xls)
-        if (str_contains($content, '<table') || str_contains($content, '<tr')) {
+        // Check if file is OpenXML Excel (.xlsx)
+        if (($extension === 'xlsx' || str_starts_with($content, "PK\x03\x04")) && class_exists('ZipArchive')) {
+            $zip = new \ZipArchive();
+            if ($zip->open($file->getRealPath()) === true) {
+                $strings = [];
+                $sharedXml = $zip->getFromName('xl/sharedStrings.xml');
+                if ($sharedXml) {
+                    $xml = @simplexml_load_string($sharedXml);
+                    if ($xml && isset($xml->si)) {
+                        foreach ($xml->si as $si) {
+                            $strings[] = (string)($si->t ?? $si->r->t ?? '');
+                        }
+                    }
+                }
+
+                $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+                if ($sheetXml) {
+                    $xml = @simplexml_load_string($sheetXml);
+                    if ($xml && isset($xml->sheetData->row)) {
+                        foreach ($xml->sheetData->row as $r) {
+                            $rowCols = [];
+                            foreach ($r->c as $c) {
+                                $val = (string)$c->v;
+                                $type = (string)$c['t'];
+                                if ($type === 's' && isset($strings[(int)$val])) {
+                                    $rowCols[] = trim($strings[(int)$val]);
+                                } else {
+                                    $rowCols[] = trim($val);
+                                }
+                            }
+                            if (count($rowCols) >= 2) {
+                                $rows[] = $rowCols;
+                            }
+                        }
+                    }
+                }
+                $zip->close();
+            }
+        } elseif (str_contains($content, '<table') || str_contains($content, '<tr')) {
+            // HTML / XLS table format
             preg_match_all('/<tr[^>]*>(.*?)<\/tr>/is', $content, $trMatches);
-            foreach ($trMatches[1] as $trIndex => $trHtml) {
-                if (str_contains($trHtml, '<th') || $trIndex < 2) continue;
+            foreach ($trMatches[1] as $trHtml) {
+                if (str_contains($trHtml, '<th')) continue;
                 preg_match_all('/<td[^>]*>(.*?)<\/td>/is', $trHtml, $tdMatches);
                 $cols = array_map(function ($val) {
                     return trim(strip_tags(html_entity_decode($val, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
                 }, $tdMatches[1]);
 
-                if (count($cols) >= 7 && !empty($cols[1])) {
+                if (count($cols) >= 2 && !empty($cols[0]) && !empty($cols[1])) {
                     $rows[] = $cols;
                 }
             }
         } else {
-            // Standard CSV or TXT
+            // Standard CSV or TXT format
             if (str_starts_with($content, "\xEF\xBB\xBF")) {
                 $content = substr($content, 3);
             }
-            if (preg_match('/^sep=[,;\t]\r?\n/', $content, $sepMatch)) {
-                $content = substr($content, strlen($sepMatch[0]));
-            }
+            $content = preg_replace('/^sep=[,;\t]\r?\n/i', '', $content);
 
             $lines = explode("\n", str_replace("\r", "", $content));
             if (empty($lines)) {
                 return back()->with('error', 'File dữ liệu rỗng!');
             }
 
-            $firstLine = $lines[0];
-            $delimiter = ',';
-            if (substr_count($firstLine, ';') > substr_count($firstLine, ',')) {
-                $delimiter = ';';
-            } elseif (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) {
-                $delimiter = "\t";
+            // Detect delimiter by scanning data lines
+            $delimiters = [',', ';', "\t"];
+            $counts = [',' => 0, ';' => 0, "\t" => 0];
+            foreach (array_slice($lines, 0, 5) as $line) {
+                foreach ($delimiters as $d) {
+                    $counts[$d] += substr_count($line, $d);
+                }
             }
+            arsort($counts);
+            $delimiter = key($counts) ?: ',';
 
-            $isFirst = true;
             foreach ($lines as $line) {
                 $line = trim($line);
                 if (empty($line)) continue;
                 $cols = str_getcsv($line, $delimiter);
-                if ($isFirst) {
-                    $isFirst = false;
-                    continue;
-                }
-                if (count($cols) >= 7 && !empty(trim($cols[1]))) {
+                if (count($cols) >= 2 && !empty($cols[0]) && !empty($cols[1])) {
                     $rows[] = $cols;
                 }
             }
         }
 
         foreach ($rows as $row) {
-            $name = trim($row[0]);
-            $email = trim($row[1]);
-            $password = trim($row[2]) ?: '123456';
-            $specialtyId = (int)trim($row[3]);
-            $qualification = trim($row[4]) ?: 'BS';
-            $roomNumber = trim($row[5]) ?: 'Phòng Khám';
-            $fee = (float)str_replace(['.', ',', ' '], '', trim($row[6])) ?: 300000;
+            $name = trim($row[0] ?? '');
+            $email = trim($row[1] ?? '');
 
-            if (!Specialty::where('id', $specialtyId)->exists()) continue;
+            // Skip headers or lines without valid email
+            if (empty($name) || empty($email) || !str_contains($email, '@')) {
+                continue;
+            }
+            if (str_contains(mb_strtolower($name), 'họ và tên') || str_contains(mb_strtolower($email), 'email')) {
+                continue;
+            }
+
+            $password = !empty($row[2]) ? trim($row[2]) : '123456';
+            $specialtyRaw = trim($row[3] ?? '');
+            $qualification = !empty($row[4]) ? trim($row[4]) : 'BS.CKI';
+            $roomNumber = !empty($row[5]) ? trim($row[5]) : 'Phòng 201 - Tòa A';
+            $feeRaw = !empty($row[6]) ? str_replace(['.', ',', ' ', 'đ', 'VND'], '', trim($row[6])) : '350000';
+            $fee = is_numeric($feeRaw) ? (float)$feeRaw : 350000;
+
+            // Smart resolve specialty by ID, Name or Slug
+            $specialty = null;
+            if (is_numeric($specialtyRaw)) {
+                $specialty = Specialty::find((int)$specialtyRaw);
+            }
+            if (!$specialty && !empty($specialtyRaw)) {
+                $specialty = Specialty::where('name', 'LIKE', "%{$specialtyRaw}%")
+                    ->orWhere('slug', 'LIKE', "%{$specialtyRaw}%")
+                    ->first();
+            }
+            if (!$specialty) {
+                $specialty = Specialty::where('is_active', true)->first() ?: Specialty::first();
+            }
+            $specialtyId = $specialty ? $specialty->id : 1;
 
             $user = User::firstOrCreate(
                 ['email' => $email],
@@ -643,7 +701,11 @@ class DoctorManagementController extends Controller
                 ]
             );
 
-            Doctor::updateOrCreate(
+            $cchnNumber = '00' . rand(1000, 9999) . '/BYT-CCHN';
+            $cchnIssuedDate = now()->subYears(1)->toDateString();
+            $cchnExpiryDate = now()->addYears(4)->toDateString();
+
+            $doctor = Doctor::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'specialty_id' => $specialtyId,
@@ -651,8 +713,38 @@ class DoctorManagementController extends Controller
                     'consultation_fee' => $fee,
                     'room_number' => $roomNumber,
                     'is_available' => true,
+                    'cchn_number' => $cchnNumber,
+                    'cchn_issuer' => 'Bộ Y Tế',
+                    'cchn_issued_date' => $cchnIssuedDate,
+                    'cchn_expiry_date' => $cchnExpiryDate,
+                    'cme_hours' => 48,
                 ]
             );
+
+            // Automatically initialize weekly schedules if not yet created
+            if ($doctor->schedules()->count() === 0) {
+                $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                foreach ($days as $day) {
+                    DoctorSchedule::create([
+                        'doctor_id' => $doctor->id,
+                        'day_of_week' => $day,
+                        'shift' => 'morning',
+                        'start_time' => '07:30:00',
+                        'end_time' => '11:30:00',
+                        'max_patients' => 25,
+                        'is_active' => true,
+                    ]);
+                    DoctorSchedule::create([
+                        'doctor_id' => $doctor->id,
+                        'day_of_week' => $day,
+                        'shift' => 'afternoon',
+                        'start_time' => '13:30:00',
+                        'end_time' => '17:30:00',
+                        'max_patients' => 25,
+                        'is_active' => true,
+                    ]);
+                }
+            }
 
             $importedCount++;
         }

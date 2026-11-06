@@ -571,6 +571,22 @@ class DoctorSpecialtyTest extends TestCase
         $response->assertHeader('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
     }
 
+    public function test_admin_can_import_doctors_from_csv_or_excel(): void
+    {
+        $this->actingAs($this->admin);
+        $csvContent = "\xEF\xBB\xBFsep=,\r\n\"Họ và Tên\",Email,\"Mật Khẩu\",\"Mã Chuyên Khoa\",\"Học Vị\",\"Phòng Khám\",\"Giá Khám\"\r\n\"BS Bác Sĩ Mới Import\",bs.moiimport@tamanh.vn,123456,1,TS.BS,\"Phòng 101 - Tòa A\",400000\r\n";
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('mau_bac_si.csv', $csvContent);
+
+        $response = $this->post(route('admin.doctors.import.csv'), [
+            'csv_file' => $file,
+        ]);
+        $response->assertRedirect(route('admin.doctors.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('users', [
+            'email' => 'bs.moiimport@tamanh.vn',
+        ]);
+    }
+
     public function test_admin_can_renew_doctor_cchn_license(): void
     {
         $this->actingAs($this->admin);
