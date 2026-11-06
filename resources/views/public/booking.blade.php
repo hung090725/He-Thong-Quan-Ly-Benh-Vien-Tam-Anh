@@ -93,7 +93,7 @@
 
                         <div class="col-md-4">
                             <label for="appointment_date" class="form-label fw-semibold">Ngày khám dự kiến <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('appointment_date') is-invalid @enderror" id="appointment_date" name="appointment_date" value="{{ old('appointment_date', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
+                            <input type="date" class="form-control @error('appointment_date') is-invalid @enderror" id="appointment_date" name="appointment_date" value="{{ old('appointment_date', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" max="{{ now()->addDays(max(1, (int) \App\Models\SystemSetting::get('max_booking_days_ahead', 30)))->format('Y-m-d') }}" required>
                             @error('appointment_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

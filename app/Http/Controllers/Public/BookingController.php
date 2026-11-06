@@ -213,8 +213,12 @@ class BookingController extends Controller
                 $appointment = null;
                 for ($attempt = 1; $attempt <= 3; $attempt++) {
                     try {
+                        $appointmentCode = $isWaitlist
+                            ? ('WL-' . Carbon::now()->format('Ymd') . '-' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 4)))
+                            : Appointment::generateAppointmentCode();
+
                         $appointment = Appointment::create([
-                            'appointment_code' => Appointment::generateAppointmentCode(),
+                            'appointment_code' => $appointmentCode,
                             'patient_profile_id' => $patientProfile->id,
                             'doctor_id' => $validated['doctor_id'],
                             'specialty_id' => $validated['specialty_id'],
@@ -366,6 +370,7 @@ class BookingController extends Controller
                 ->whereDate('appointment_date', $date->toDateString())
                 ->where('shift', $sched->shift)
                 ->where('status', '!=', Appointment::STATUS_CANCELLED)
+                ->where('status', '!=', 'waitlist')
                 ->count();
 
             $slots[] = [

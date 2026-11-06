@@ -126,6 +126,27 @@ class BookingTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('shift');
+
+        // Booking with join_waitlist = 1 when slot is full should succeed and place patient on Smart Waitlist
+        $waitlistPhone = '0977' . rand(100000, 999999);
+        $waitlistResponse = $this->from('/booking')->post('/booking', [
+            'full_name' => 'Bệnh Nhân Hàng Đợi Thông Minh',
+            'phone' => $waitlistPhone,
+            'dob' => '1991-02-02',
+            'gender' => 'female',
+            'specialty_id' => $doctor->specialty_id,
+            'doctor_id' => $doctor->id,
+            'appointment_date' => $date,
+            'shift' => 'morning',
+            'symptom_description' => 'Đăng ký vào danh sách chờ thông minh khi hết chỗ',
+            'join_waitlist' => '1',
+        ]);
+
+        $waitlistResponse->assertSessionHas('warning');
+        $waitlistAppt = Appointment::where('symptom_description', 'Đăng ký vào danh sách chờ thông minh khi hết chỗ')->latest('id')->first();
+        $this->assertNotNull($waitlistAppt);
+        $this->assertEquals('waitlist', $waitlistAppt->status);
+        $this->assertStringStartsWith('WL-', $waitlistAppt->appointment_code);
     }
 
     public function test_lookup_appointment_by_code(): void
@@ -232,8 +253,9 @@ class BookingTest extends TestCase
     public function test_cannot_book_duplicate_appointment_in_same_shift(): void
     {
         $doctor = Doctor::first();
-        $targetDate = Carbon::tomorrow()->addDays(120);
+        $targetDate = Carbon::tomorrow()->addDays(15);
         $dayOfWeek = strtolower($targetDate->englishDayOfWeek);
+        Appointment::where('doctor_id', $doctor->id)->where('appointment_date', $targetDate->toDateString())->where('shift', 'morning')->delete();
 
         DoctorSchedule::updateOrCreate([
             'doctor_id' => $doctor->id,

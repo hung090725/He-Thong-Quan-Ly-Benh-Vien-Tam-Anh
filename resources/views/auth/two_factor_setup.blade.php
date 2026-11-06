@@ -41,23 +41,6 @@
                 </div>
 
                 <div class="card-body p-4">
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    @if($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-octagon-fill me-2"></i>
-                            @foreach($errors->all() as $err)
-                                <div>{{ $err }}</div>
-                            @endforeach
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
                     @if(!$isEnabled)
                         <div class="alert alert-info border-start border-4 border-info">
                             <h6 class="fw-bold mb-1"><i class="bi bi-info-circle-fill me-1"></i>Hướng dẫn kích hoạt bảo mật 2 lớp:</h6>
