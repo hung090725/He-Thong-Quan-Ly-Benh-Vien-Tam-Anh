@@ -22,7 +22,7 @@ class DoctorManagementController extends Controller
     /**
      * Display a listing of the doctors.
      */
-    public function index(Request $request): View|\Illuminate\Http\JsonResponse
+    public function index(Request $request): View
     {
         $query = Doctor::query()->with(['user', 'specialty', 'schedules']);
 
@@ -47,25 +47,6 @@ class DoctorManagementController extends Controller
         }
 
         $doctors = $query->latest()->paginate(10)->withQueryString();
-
-        if ($request->wantsJson() || $request->input('format') === 'json') {
-            return response()->json([
-                'data' => $doctors->map(function ($doc) {
-                    return [
-                        'id' => $doc->id,
-                        'name' => $doc->full_name_with_title,
-                        'email' => $doc->user ? $doc->user->email : '',
-                        'specialty' => $doc->specialty ? $doc->specialty->name : 'Chưa phân khoa',
-                        'room' => $doc->room_number,
-                        'fee' => number_format($doc->consultation_fee, 0, ',', '.') . ' đ',
-                        'avatar' => $doc->avatar_url,
-                        'is_available' => (bool)$doc->is_available,
-                        'url' => route('admin.doctors.show', $doc),
-                    ];
-                }),
-                'total' => $doctors->total(),
-            ]);
-        }
         $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
 
         $stats = [

@@ -17,7 +17,7 @@ class SpecialtyController extends Controller
     /**
      * Display a listing of the specialties.
      */
-    public function index(Request $request): View|\Illuminate\Http\JsonResponse
+    public function index(Request $request): View
     {
         $query = Specialty::query()->withCount('doctors');
 
@@ -25,7 +25,11 @@ class SpecialtyController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('description', 'LIKE', "%{$search}%");
-            });
+            })->orderByRaw("CASE 
+                WHEN name LIKE ? THEN 1 
+                WHEN name LIKE ? THEN 2 
+                ELSE 3 
+            END", ["{$search}%", "% {$search}%"]);
         }
 
         if ($request->filled('status')) {
@@ -33,24 +37,6 @@ class SpecialtyController extends Controller
         }
 
         $specialties = $query->latest()->paginate(10)->withQueryString();
-
-        if ($request->wantsJson() || $request->input('format') === 'json') {
-            return response()->json([
-                'data' => $specialties->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'slug' => $item->slug,
-                        'description' => $item->description,
-                        'icon' => $item->icon ?: 'bi bi-heart-pulse',
-                        'doctors_count' => $item->doctors_count,
-                        'is_active' => (bool)$item->is_active,
-                        'url' => route('admin.specialties.show', $item),
-                    ];
-                }),
-                'total' => $specialties->total(),
-            ]);
-        }
 
         $stats = [
             'total' => Specialty::count(),

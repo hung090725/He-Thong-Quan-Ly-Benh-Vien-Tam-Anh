@@ -250,7 +250,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         fetch(targetUrl, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
         })
         .then(response => response.text())
         .then(html => {
