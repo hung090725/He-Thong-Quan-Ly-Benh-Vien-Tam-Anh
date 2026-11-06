@@ -31,20 +31,28 @@ class DoctorManagementController extends Controller
 
         if ($search = trim($request->input('search', ''))) {
             $numOnly = preg_replace('/[^0-9]/', '', $search);
-            $query->where(function ($q) use ($search, $numOnly) {
-                $q->where('qualification', 'LIKE', "%{$search}%")
-                  ->orWhere('room_number', 'LIKE', "%{$search}%")
-                  ->orWhere('building', 'LIKE', "%{$search}%")
-                  ->orWhere('floor', 'LIKE', "%{$search}%")
-                  ->orWhereHas('specialty', function ($sq) use ($search) {
-                      $sq->where('name', 'LIKE', "%{$search}%")
-                         ->orWhere('description', 'LIKE', "%{$search}%");
-                  })
-                  ->orWhereHas('user', function ($uq) use ($search) {
-                      $uq->where('name', 'LIKE', "%{$search}%")
-                         ->orWhere('email', 'LIKE', "%{$search}%")
-                         ->orWhere('phone', 'LIKE', "%{$search}%");
-                  });
+            $slugTerm = \Illuminate\Support\Str::slug($search);
+            $withD = str_replace(['d', 'D'], ['đ', 'Đ'], $search);
+            $withoutD = str_replace(['đ', 'Đ'], ['d', 'D'], $search);
+            $terms = array_unique(array_filter([$search, $withD, $withoutD, $slugTerm]));
+
+            $query->where(function ($q) use ($terms, $numOnly) {
+                foreach ($terms as $term) {
+                    $q->orWhere('qualification', 'LIKE', "%{$term}%")
+                      ->orWhere('room_number', 'LIKE', "%{$term}%")
+                      ->orWhere('building', 'LIKE', "%{$term}%")
+                      ->orWhere('floor', 'LIKE', "%{$term}%")
+                      ->orWhereHas('specialty', function ($sq) use ($term) {
+                          $sq->where('name', 'LIKE', "%{$term}%")
+                             ->orWhere('slug', 'LIKE', "%{$term}%")
+                             ->orWhere('description', 'LIKE', "%{$term}%");
+                      })
+                      ->orWhereHas('user', function ($uq) use ($term) {
+                          $uq->where('name', 'LIKE', "%{$term}%")
+                             ->orWhere('email', 'LIKE', "%{$term}%")
+                             ->orWhere('phone', 'LIKE', "%{$term}%");
+                      });
+                }
 
                 if (!empty($numOnly)) {
                     $q->orWhere('room_number', 'LIKE', "%{$numOnly}%");

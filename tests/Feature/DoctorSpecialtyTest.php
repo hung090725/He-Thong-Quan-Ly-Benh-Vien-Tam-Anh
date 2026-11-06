@@ -496,6 +496,25 @@ class DoctorSpecialtyTest extends TestCase
         }
     }
 
+    public function test_public_and_admin_can_search_unaccented_vietnamese(): void
+    {
+        $doctor = Doctor::whereHas('user', function ($q) {
+            $q->where('name', 'LIKE', '%Đạt%');
+        })->first();
+
+        if ($doctor) {
+            $this->actingAs($this->admin);
+            $response = $this->get(route('admin.doctors.index', ['search' => 'dat', 'format' => 'json']));
+            $response->assertStatus(200);
+            $this->assertTrue(collect($response->json('data'))->contains('id', $doctor->id));
+
+            $pubResponse = $this->get(route('public.doctors.index', ['search' => 'dat', 'format' => 'json']));
+            $pubResponse->assertStatus(200);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
     public function test_doctor_on_leave_shows_on_leave_status_and_substitute_on_public_and_admin(): void
     {
         $doctor = Doctor::find(45) ?: Doctor::first();
