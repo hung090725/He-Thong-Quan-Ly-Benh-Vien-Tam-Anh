@@ -5,8 +5,40 @@
 @section('content')
 <x-page-header title="Quản lý Bác sĩ" subtitle="Danh sách đội ngũ bác sĩ, chuyên khoa phân công và lịch khám bệnh">
     <x-slot:actions>
+        <div class="dropdown d-inline-block">
+            <button class="btn btn-outline-primary dropdown-toggle d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-gear-wide-connected"></i> Quản Trị Nâng Cao
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                <li><a class="dropdown-item py-2" href="{{ route('admin.doctors.kpi') }}"><i class="bi bi-trophy-fill text-warning me-2"></i> Bảng Điểm KPI & Năng Suất</a></li>
+                <li><a class="dropdown-item py-2" href="{{ route('admin.doctors.licenses') }}"><i class="bi bi-patch-check-fill text-success me-2"></i> Giấy Phép CCHN & Hạn CME</a></li>
+                <li><a class="dropdown-item py-2" href="{{ route('admin.doctors.workload-balancer') }}"><i class="bi bi-cpu-fill text-primary me-2"></i> Bản Đồ Nhiệt Cân Bằng Tải</a></li>
+                <li><a class="dropdown-item py-2" href="{{ route('admin.doctors.reviews') }}"><i class="bi bi-star-fill text-warning me-2"></i> Đánh Giá Từ Bệnh Nhân</a></li>
+                <li><a class="dropdown-item py-2" href="{{ route('admin.doctors.audit-logs') }}"><i class="bi bi-shield-lock-fill text-secondary me-2"></i> Nhật Ký Kiểm Toán Y Tế</a></li>
+            </ul>
+        </div>
+        <div class="dropdown d-inline-block">
+            <button class="btn btn-outline-success dropdown-toggle d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Danh Bạ
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                <li>
+                    <a class="dropdown-item py-2 fw-semibold text-success" href="{{ route('admin.doctors.export.excel') }}">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Xuất Bảng Tính Excel (.xls định dạng bảng đẹp)
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item py-2 text-dark" href="{{ route('admin.doctors.export.csv') }}">
+                        <i class="bi bi-filetype-csv me-2"></i> Xuất File CSV (UTF-8 BOM chia cột chuẩn)
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#importDoctorCsvModal">
+            <i class="bi bi-file-earmark-arrow-up"></i> Nhập Excel / CSV
+        </button>
         <a href="{{ route('admin.roster') }}" class="btn btn-outline-info d-inline-flex align-items-center gap-1">
-            <i class="bi bi-grid-3x3-gap-fill"></i> Ma trận ca trực tuần
+            <i class="bi bi-grid-3x3-gap-fill"></i> Ma trận ca trực
         </a>
         <a href="{{ route('admin.doctors.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1">
             <i class="bi bi-person-plus-fill"></i> Thêm bác sĩ mới
@@ -71,17 +103,31 @@
 </div>
 
 <!-- Filter Card -->
-<div class="card shadow-sm border-0 mb-4">
+<div class="card shadow-sm border-0 mb-4 rounded-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('admin.doctors.index') }}" class="row g-2 align-items-center">
+        <form id="doctorFilterForm" method="GET" action="{{ route('admin.doctors.index') }}" class="row g-2 align-items-center">
             <div class="col-md-5 col-lg-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm tên bác sĩ, phòng khám, email...">
+                <div class="position-relative">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="doctorSearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm tên bác sĩ, chuyên khoa, phòng khám..." autocomplete="off">
+                        <button type="button" id="doctorClearBtn" class="btn btn-outline-light text-muted border-start-0 border {{ request('search') ? '' : 'd-none' }}" title="Xóa tìm kiếm">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+
+                    <!-- Instant Dropdown Suggestions List -->
+                    <div id="doctorSuggestionsBox" class="position-absolute start-0 w-100 bg-white border rounded-3 shadow-lg mt-1 p-2 d-none" style="z-index: 1060; max-height: 340px; overflow-y: auto;">
+                        <div class="small fw-semibold text-muted px-2 py-1 border-bottom mb-1 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-person-check text-primary me-1"></i> Bác sĩ phù hợp</span>
+                            <span class="badge bg-light text-muted" id="doctorSuggestCount">0 bác sĩ</span>
+                        </div>
+                        <div id="doctorSuggestionsList" class="list-group list-group-flush"></div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 col-lg-3">
-                <select name="specialty_id" class="form-select">
+                <select id="doctorSpecialtySelect" name="specialty_id" class="form-select">
                     <option value="">-- Tất cả chuyên khoa --</option>
                     @foreach($specialties as $sp)
                         <option value="{{ $sp->id }}" {{ request('specialty_id') == $sp->id ? 'selected' : '' }}>
@@ -91,7 +137,7 @@
                 </select>
             </div>
             <div class="col-md-2 col-lg-2">
-                <select name="is_available" class="form-select">
+                <select id="doctorAvailabilitySelect" name="is_available" class="form-select">
                     <option value="">-- Trạng thái khám --</option>
                     <option value="1" {{ request('is_available') === '1' ? 'selected' : '' }}>Sẵn sàng nhận khám</option>
                     <option value="0" {{ request('is_available') === '0' ? 'selected' : '' }}>Tạm dừng nhận khám</option>
@@ -112,7 +158,7 @@
 </div>
 
 <!-- Doctors Table Card -->
-<div class="card shadow-sm border-0">
+<div class="card shadow-sm border-0 rounded-4" id="doctorsTableContainer">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -167,21 +213,36 @@
                                 {{ number_format($doctor->consultation_fee, 0, ',', '.') }} đ
                             </td>
                             <td class="text-center">
-                                <form method="POST" action="{{ route('admin.doctors.toggle-availability', $doctor) }}" class="d-inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái nhận khám">
-                                        @if($doctor->is_available)
+                                @if($doctor->current_leave)
+                                    <span class="badge bg-warning text-dark border border-warning px-2 py-1 rounded-pill" title="Đang trong kỳ nghỉ phép: {{ $doctor->current_leave->reason }}">
+                                        <i class="bi bi-calendar2-x-fill me-1"></i> Nghỉ phép
+                                    </span>
+                                    @if($doctor->current_leave->substituteDoctor)
+                                        <small class="d-block text-muted" style="font-size: 0.68rem;">
+                                            BS thay: {{ $doctor->current_leave->substituteDoctor->clean_name }}
+                                        </small>
+                                    @endif
+                                @elseif($doctor->is_available)
+                                    <form method="POST" action="{{ route('admin.doctors.toggle-availability', $doctor) }}" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái nhận khám">
                                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
                                                 <i class="bi bi-check-circle me-1"></i> Sẵn sàng
                                             </span>
-                                        @else
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('admin.doctors.toggle-availability', $doctor) }}" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái nhận khám">
                                             <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded-pill">
                                                 <i class="bi bi-slash-circle me-1"></i> Tạm dừng
                                             </span>
-                                        @endif
-                                    </button>
-                                </form>
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                             <td class="text-end pe-3">
                                 <div class="btn-group btn-group-sm">
@@ -194,7 +255,7 @@
                                     <a href="{{ route('admin.doctors.edit', $doctor) }}" class="btn btn-outline-primary" title="Chỉnh sửa">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.doctors.destroy', $doctor) }}" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa hồ sơ bác sĩ này?');">
+                                    <form method="POST" action="{{ route('admin.doctors.destroy', $doctor) }}" class="d-inline" data-confirm="Bạn có chắc chắn muốn xóa hồ sơ bác sĩ này? Thao tác không thể hoàn tác!">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline-danger" title="Xóa bác sĩ">
@@ -223,4 +284,212 @@
         @endif
     </div>
 </div>
+
+<!-- Modal Import Excel / CSV -->
+<div class="modal fade" id="importDoctorCsvModal" tabindex="-1" aria-labelledby="importDoctorCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <form action="{{ route('admin.doctors.import.csv') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="importDoctorCsvModalLabel">
+                        <i class="bi bi-file-earmark-arrow-up me-2"></i> Nhập Dữ Liệu Bác Sĩ Từ File Excel / CSV
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">
+                        Hệ thống hỗ trợ nhập hàng loạt danh sách bác sĩ, tự động phân khoa và tạo tài khoản đăng nhập. Tải file mẫu có sẵn bảng kẻ ô bên dưới để điền dữ liệu chính xác:
+                    </p>
+
+                    <!-- Template Download Options -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <a href="{{ route('admin.doctors.import.template.excel') }}" class="btn btn-outline-success btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-excel fs-4 text-success"></i>
+                                <div>
+                                    <strong class="d-block text-dark" style="font-size: 0.78rem;">File Excel (.xls)</strong>
+                                    <span class="text-muted" style="font-size: 0.68rem;">Có bảng kẻ ô đẹp</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ route('admin.doctors.import.template') }}" class="btn btn-outline-primary btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center gap-2">
+                                <i class="bi bi-filetype-csv fs-4 text-primary"></i>
+                                <div>
+                                    <strong class="d-block text-dark" style="font-size: 0.78rem;">File CSV (.csv)</strong>
+                                    <span class="text-muted" style="font-size: 0.68rem;">Tự chia cột chuẩn</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="csv_file" class="form-label fw-semibold small text-dark">Chọn file từ máy tính (.xls, .csv, .txt) <span class="text-danger">*</span></label>
+                        <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv,.xls,.xlsx,.txt,text/csv,application/vnd.ms-excel" required>
+                        <small class="text-muted" style="font-size: 0.72rem;">* Dung lượng tối đa: 5MB. Hệ thống tự động khớp chuyên khoa và bóc tách dữ liệu thông minh.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="bi bi-cloud-upload me-1"></i> Bắt đầu Nhập dữ liệu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filterForm = document.getElementById('doctorFilterForm');
+    const searchInput = document.getElementById('doctorSearchInput');
+    const specialtySelect = document.getElementById('doctorSpecialtySelect');
+    const availabilitySelect = document.getElementById('doctorAvailabilitySelect');
+    const tableContainer = document.getElementById('doctorsTableContainer');
+    const clearBtn = document.getElementById('doctorClearBtn');
+    const suggestionsBox = document.getElementById('doctorSuggestionsBox');
+    const suggestionsList = document.getElementById('doctorSuggestionsList');
+    const suggestCount = document.getElementById('doctorSuggestCount');
+    let debounceTimer = null;
+
+    function fetchDoctorSuggestions(query) {
+        if (!suggestionsBox || !suggestionsList) return;
+        if (!query || query.trim().length === 0) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+
+        const url = `${filterForm.action}?format=json&search=${encodeURIComponent(query)}`;
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(res => res.json())
+            .then(res => {
+                const items = res.data || [];
+                if (suggestCount) suggestCount.textContent = `${items.length} bác sĩ`;
+
+                if (items.length === 0) {
+                    suggestionsList.innerHTML = `
+                        <div class="p-3 text-center text-muted small">
+                            <i class="bi bi-search me-1"></i> Không tìm thấy bác sĩ nào khớp với "<strong>${query}</strong>"
+                        </div>`;
+                } else {
+                    suggestionsList.innerHTML = items.map(item => `
+                        <div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 border-0 rounded-2 mb-1 doctor-suggestion-item" style="cursor: pointer;" data-name="${item.name}">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center overflow-hidden fw-bold" style="width: 36px; height: 36px; border: 1px solid #e2e8f0;">
+                                    ${item.avatar ? `<img src="${item.avatar}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="bi bi-person-fill"></i>'}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark small">${item.name}</div>
+                                    <small class="text-muted">${item.specialty} &bull; ${item.room} &bull; <span class="text-primary">${item.fee}</span></small>
+                                </div>
+                            </div>
+                            <span class="badge ${item.is_on_leave ? 'bg-warning text-dark border border-warning' : (item.is_available ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary')} small">
+                                ${item.is_on_leave ? '<i class="bi bi-calendar2-x me-1"></i>Nghỉ phép' : (item.is_available ? 'Sẵn sàng' : 'Tạm dừng')}
+                            </span>
+                        </div>
+                    `).join('');
+
+                    suggestionsList.querySelectorAll('.doctor-suggestion-item').forEach(el => {
+                        el.addEventListener('click', function () {
+                            searchInput.value = this.dataset.name;
+                            suggestionsBox.classList.add('d-none');
+                            if (clearBtn) clearBtn.classList.remove('d-none');
+                            executeLiveSearch();
+                        });
+                    });
+                }
+                suggestionsBox.classList.remove('d-none');
+            })
+            .catch(() => {
+                suggestionsBox.classList.add('d-none');
+            });
+    }
+
+    function executeLiveSearch() {
+        if (!filterForm || !tableContainer) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        const targetUrl = filterForm.action + '?' + params.toString();
+
+        if (clearBtn) {
+            clearBtn.classList.toggle('d-none', !searchInput.value);
+        }
+
+        fetch(targetUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('doctorsTableContainer');
+            if (newTable) {
+                tableContainer.innerHTML = newTable.innerHTML;
+            }
+            window.history.replaceState({}, '', targetUrl);
+        })
+        .catch(() => {
+            filterForm.submit();
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchDoctorSuggestions(query);
+                executeLiveSearch();
+            }, 180);
+        });
+
+        searchInput.addEventListener('focus', function () {
+            if (this.value.trim().length > 0) {
+                fetchDoctorSuggestions(this.value.trim());
+            }
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            clearBtn.classList.add('d-none');
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            executeLiveSearch();
+            searchInput.focus();
+        });
+    }
+
+    if (specialtySelect) {
+        specialtySelect.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            executeLiveSearch();
+        });
+    }
+
+    if (availabilitySelect) {
+        availabilitySelect.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            executeLiveSearch();
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#doctorFilterForm')) {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && suggestionsBox) {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
+});
+</script>
+@endpush
 @endsection

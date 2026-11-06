@@ -20,7 +20,16 @@
                             <h5 class="fw-bold text-dark mb-0 lh-sm">{{ $doctor->full_name_with_title }}</h5>
                             <small class="text-muted"><i class="bi bi-geo-alt me-1"></i> {{ $doctor->room_number }}</small>
                             <div class="mt-1">
-                                @if($doctor->is_on_duty_today)
+                                @if($doctor->current_leave)
+                                    <span class="badge bg-warning text-dark border border-warning rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                        <i class="bi bi-calendar2-x-fill me-1"></i> Nghỉ phép hôm nay
+                                    </span>
+                                    @if($doctor->current_leave->substituteDoctor)
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-1 ms-1" style="font-size: 0.7rem;">
+                                            <i class="bi bi-arrow-repeat me-1"></i> BS {{ $doctor->current_leave->substituteDoctor->clean_name }} trực thay
+                                        </span>
+                                    @endif
+                                @elseif($doctor->is_on_duty_today)
                                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
                                         <i class="bi bi-calendar2-check-fill me-1"></i> Trực hôm nay: {{ $doctor->today_shifts_text }}
                                     </span>
@@ -43,9 +52,15 @@
                             <span class="fw-bold text-primary fs-6">{{ number_format($doctor->consultation_fee, 0, ',', '.') }} đ</span>
                         </div>
                         <div class="d-grid gap-2">
-                            <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->id }}&specialty_id={{ $doctor->specialty_id }}" class="btn btn-primary rounded-pill fw-semibold">
-                                <i class="bi bi-calendar-plus me-1"></i> Đặt lịch khám
-                            </a>
+                            @if($doctor->current_leave && $doctor->current_leave->substituteDoctor)
+                                <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->current_leave->substitute_doctor_id }}&specialty_id={{ $doctor->specialty_id }}" class="btn btn-warning rounded-pill fw-semibold text-dark shadow-xs">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Đặt khám BS trực thay
+                                </a>
+                            @else
+                                <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->id }}&specialty_id={{ $doctor->specialty_id }}" class="btn btn-primary rounded-pill fw-semibold">
+                                    <i class="bi bi-calendar-plus me-1"></i> Đặt lịch khám
+                                </a>
+                            @endif
                             <a href="{{ route('public.doctors.show', $doctor) }}" class="btn btn-outline-secondary btn-sm rounded-pill">
                                 Xem lý lịch chi tiết
                             </a>

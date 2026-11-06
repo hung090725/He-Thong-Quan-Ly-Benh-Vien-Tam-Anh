@@ -16,6 +16,7 @@ class BookingTest extends TestCase
     {
         parent::setUp();
         Doctor::where('is_available', false)->update(['is_available' => true]);
+        \Illuminate\Support\Facades\RateLimiter::clear('booking_throttle:127.0.0.1');
     }
 
     public function test_booking_page_renders_successfully(): void
@@ -128,6 +129,7 @@ class BookingTest extends TestCase
         $response->assertSessionHasErrors('shift');
 
         // Booking with join_waitlist = 1 when slot is full should succeed and place patient on Smart Waitlist
+        \App\Models\SystemSetting::set('enable_smart_waitlist', '1');
         $waitlistPhone = '0977' . rand(100000, 999999);
         $waitlistResponse = $this->from('/booking')->post('/booking', [
             'full_name' => 'Bệnh Nhân Hàng Đợi Thông Minh',

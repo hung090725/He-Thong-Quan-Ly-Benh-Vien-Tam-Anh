@@ -1106,6 +1106,7 @@
 
     <!-- Bootstrap 5.3.3 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1117,6 +1118,56 @@
                     sidebar.classList.toggle('show');
                 });
             }
+
+            // Global SweetAlert2 delete / action confirmation
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!form || form.tagName !== 'FORM') return;
+
+                if (form.dataset.swalConfirmed === 'true') {
+                    return;
+                }
+
+                let confirmMsg = form.getAttribute('data-confirm') || form.dataset.confirm;
+
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                if (!confirmMsg && onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                    const match = onsubmitAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    if (match && match[1]) {
+                        confirmMsg = match[1];
+                        form.removeAttribute('onsubmit');
+                    }
+                }
+
+                if (confirmMsg) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+
+                    Swal.fire({
+                        title: 'Xác nhận thao tác',
+                        text: confirmMsg,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: '<i class="bi bi-check-circle me-1"></i> Đồng ý',
+                        cancelButtonText: 'Hủy bỏ',
+                        reverseButtons: true,
+                        focusCancel: true,
+                        customClass: {
+                            confirmButton: 'btn btn-danger px-4 py-2 me-2 rounded-3',
+                            cancelButton: 'btn btn-secondary px-4 py-2 rounded-3',
+                            popup: 'rounded-4 shadow-lg border-0'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.dataset.swalConfirmed = 'true';
+                            form.submit();
+                        }
+                    });
+                }
+            }, true);
 
             // Hàm chuẩn hóa tiếng Việt không dấu
             function removeVietnameseTones(str) {

@@ -213,12 +213,27 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/reports/export', [ReportExportController::class, 'export'])->name('reports.export');
 
-    // Quản lý Chuyên khoa (CRUD & toggle status)
+    // Quản lý Chuyên khoa (CRUD & toggle status & Emergency Readiness)
+    Route::get('/specialties/emergency-readiness', [SpecialtyController::class, 'emergencyReadiness'])->name('specialties.emergency-readiness');
+    Route::patch('/specialties/{specialty}/emergency-toggle', [SpecialtyController::class, 'toggleEmergencyReadiness'])->name('specialties.emergency-toggle');
     Route::patch('/specialties/{specialty}/toggle-status', [SpecialtyController::class, 'toggleStatus'])->name('specialties.toggle-status');
     Route::resource('specialties', SpecialtyController::class);
 
-    // Quản lý Bác sĩ & Lịch trực tuần & Nghỉ phép
+    // Quản lý Bác sĩ - Tính năng Cốt lõi & Nâng cao (Phụ trách: ĐẠT)
     Route::get('/roster', [DoctorRosterController::class, 'index'])->name('roster');
+    Route::get('/doctors/kpi', [DoctorManagementController::class, 'kpi'])->name('doctors.kpi');
+    Route::get('/doctors/export/excel', [DoctorManagementController::class, 'exportExcel'])->name('doctors.export.excel');
+    Route::get('/doctors/export/csv', [DoctorManagementController::class, 'exportCsv'])->name('doctors.export.csv');
+    Route::get('/doctors/import/template', [DoctorManagementController::class, 'downloadTemplate'])->name('doctors.import.template');
+    Route::get('/doctors/import/template-excel', [DoctorManagementController::class, 'downloadTemplateExcel'])->name('doctors.import.template.excel');
+    Route::post('/doctors/import/csv', [DoctorManagementController::class, 'importCsv'])->name('doctors.import.csv');
+    Route::get('/doctors/licenses', [DoctorManagementController::class, 'licenses'])->name('doctors.licenses');
+    Route::patch('/doctors/{doctor}/licenses', [DoctorManagementController::class, 'updateLicense'])->name('doctors.licenses.update');
+    Route::get('/doctors/workload-balancer', [DoctorManagementController::class, 'workloadBalancer'])->name('doctors.workload-balancer');
+    Route::get('/doctors/reviews', [DoctorManagementController::class, 'reviews'])->name('doctors.reviews');
+    Route::patch('/doctors/reviews/{review}/toggle', [DoctorManagementController::class, 'toggleReviewApproval'])->name('doctors.reviews.toggle');
+    Route::get('/doctors/audit-logs', [DoctorManagementController::class, 'auditLogs'])->name('doctors.audit-logs');
+
     Route::get('/doctors/{doctor}/schedule', [DoctorManagementController::class, 'schedule'])->name('doctors.schedule');
     Route::put('/doctors/{doctor}/schedule', [DoctorManagementController::class, 'updateSchedule'])->name('doctors.schedule.update');
     Route::get('/doctors/{doctor}/leaves', [DoctorManagementController::class, 'leaves'])->name('doctors.leaves');
@@ -244,6 +259,9 @@ Route::prefix('doctors')->name('public.doctors.')->group(function () {
     Route::get('/{doctor}/vcard', [DoctorPublicController::class, 'downloadVcard'])->name('vcard');
     Route::get('/{doctor}/desk-card', [DoctorPublicController::class, 'deskCard'])->name('desk_card');
     Route::get('/{doctor}/print', [DoctorPublicController::class, 'printProfile'])->name('print');
+    Route::get('/{doctor}/qr-code', [DoctorPublicController::class, 'qrCode'])->name('qr_code');
+    Route::get('/{doctor}/wayfinding', [DoctorPublicController::class, 'wayfinding'])->name('wayfinding');
+    Route::post('/{doctor}/reviews', [DoctorPublicController::class, 'storeReview'])->name('reviews.store');
     Route::get('/{doctor}', [DoctorPublicController::class, 'show'])->name('show');
 });
 

@@ -80,7 +80,7 @@
                             <button type="button" class="btn btn-outline-info text-dark btn-quick-login" data-email="receptionist@tamanh.vn" data-role="Lễ tân">
                                 <i class="bi bi-person-badge"></i> Lễ tân
                             </button>
-                            <button type="button" class="btn btn-outline-primary btn-quick-login" data-email="doctor@tamanh.vn" data-role="Bác sĩ">
+                            <button type="button" class="btn btn-outline-primary btn-quick-login" data-email="vandat271205@gmail.com" data-role="Bác sĩ">
                                 <i class="bi bi-heart-pulse"></i> Bác sĩ
                             </button>
                             <button type="button" class="btn btn-outline-success btn-quick-login" data-email="patient@gmail.com" data-role="Bệnh nhân">

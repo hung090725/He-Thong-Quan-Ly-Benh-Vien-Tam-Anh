@@ -166,7 +166,7 @@
                                         @endif
                                     </td>
                                     <td class="text-end pe-3">
-                                        <form action="{{ route('admin.doctors.leaves.destroy', $leave) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn hủy bỏ lịch nghỉ phép này?');">
+                                        <form action="{{ route('admin.doctors.leaves.destroy', $leave) }}" method="POST" class="d-inline" data-confirm="Bạn có chắc chắn muốn hủy bỏ lịch nghỉ phép này?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill" title="Xóa lịch nghỉ">
