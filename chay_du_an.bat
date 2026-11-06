@@ -1,6 +1,6 @@
 @echo off
 cls
-title BENH VIEN TAM ANH - KHOI DONG HE THONG
+title HE THONG QUAN LY BENH VIEN DA KHOA TAM ANH
 
 echo =======================================================
 echo    HE THONG QUAN LY BENH VIEN DA KHOA TAM ANH
@@ -9,21 +9,21 @@ echo =======================================================
 echo.
 
 :: 1. Kiem tra va khoi dong MySQL
-tasklist /FI "IMAGENAME eq mysqld.exe" 2>NUL | find /I /N "mysqld.exe">NUL
+tasklist /FI "IMAGENAME eq mysqld.exe" 2>NUL | find /I /N "mysqld.exe" >NUL
 if "%ERRORLEVEL%"=="0" (
-    echo [OK] MySQL da san sang.
+    echo [OK] Co so du lieu MySQL da san sang.
 ) else (
     echo [..] Dang bat MySQL...
     if exist "C:\xampp\mysql\bin\mysqld.exe" (
         start /B "" "C:\xampp\mysql\bin\mysqld.exe" --defaults-file=C:\xampp\mysql\bin\my.ini --console
-        timeout /t 2 /nobreak >nul
+        ping -n 3 127.0.0.1 >nul
         echo [OK] MySQL da bat thanh cong!
     )
 )
 
 echo.
 echo [..] Dang mo trinh duyet web...
-timeout /t 1 /nobreak >nul
+ping -n 2 127.0.0.1 >nul
 start http://127.0.0.1:8000/login
 
 echo.

@@ -105,9 +105,11 @@
                                     <a href="{{ route('reception.certificates.print', $cert) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm" title="In giấy chứng nhận C65-HD">
                                         <i class="bi bi-printer-fill"></i> In bản C65-HD
                                     </a>
-                                    <a href="{{ route('reception.certificates.create', $cert->medicalRecord) }}" class="btn btn-sm btn-outline-secondary" title="Chỉnh sửa">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    @if($cert->medicalRecord)
+                                        <a href="{{ route('reception.certificates.create', $cert->medicalRecord) }}" class="btn btn-sm btn-outline-secondary" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    @endif
                                     <form action="{{ route('reception.certificates.destroy', $cert) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn hủy giấy chứng nhận này?');">
                                         @csrf
                                         @method('DELETE')

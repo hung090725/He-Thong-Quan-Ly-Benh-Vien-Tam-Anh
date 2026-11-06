@@ -496,6 +496,7 @@ Route::middleware(['auth', 'role:receptionist,admin'])->prefix('reception')->nam
 
     // 3.37. Quản Lý Buồng Bệnh, Khử Khuẩn & Điều Phối Giường Trống (Smart Bed Board)
     Route::get('/bed-board', [SmartBedBoardController::class, 'index'])->name('bed-board.index');
+    Route::post('/bed-board', [SmartBedBoardController::class, 'assignDirect'])->name('bed-board.assign-direct');
     Route::post('/bed-board/assign/{bed}', [SmartBedBoardController::class, 'assignPatient'])->name('bed-board.assign');
     Route::post('/bed-board/discharge/{bed}', [SmartBedBoardController::class, 'dischargePatient'])->name('bed-board.discharge');
     Route::post('/bed-board/clean/{bed}', [SmartBedBoardController::class, 'cleanBed'])->name('bed-board.clean');

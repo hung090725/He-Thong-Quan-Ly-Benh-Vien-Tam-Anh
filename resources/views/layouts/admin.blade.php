@@ -42,6 +42,74 @@
             display: inline-block !important;
         }
 
+        /* Compatibility Helper for Interactive Action Buttons & Modals */
+        .hidden { display: none !important; }
+        .rounded-xl { border-radius: 0.75rem !important; }
+        .rounded-2xl { border-radius: 1rem !important; }
+        .space-y-6 > * + * { margin-top: 1.5rem !important; }
+        .space-y-4 > * + * { margin-top: 1rem !important; }
+        .space-y-3 > * + * { margin-top: 0.75rem !important; }
+        .space-y-2 > * + * { margin-top: 0.5rem !important; }
+        .space-y-1 > * + * { margin-top: 0.25rem !important; }
+
+        /* Custom Action Buttons Styling across Reception views */
+        button[class*="rounded-xl"], a[class*="rounded-xl"] {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0.5rem 1.15rem !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem !important;
+            border: none !important;
+            cursor: pointer !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+            transition: all 0.2s ease-in-out !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        button[class*="rounded-xl"]:hover, a[class*="rounded-xl"]:hover {
+            filter: brightness(1.1) !important;
+            transform: translateY(-1px) !important;
+            color: #ffffff !important;
+        }
+        button[class*="bg-sky-"] { background-color: #0284c7 !important; }
+        button[class*="bg-teal-"] { background-color: #0d9488 !important; }
+        button[class*="bg-indigo-"] { background-color: #4f46e5 !important; }
+        button[class*="bg-red-"] { background-color: #dc2626 !important; }
+        button[class*="bg-purple-"] { background-color: #9333ea !important; }
+        button[class*="bg-pink-"] { background-color: #db2777 !important; }
+        button[class*="bg-emerald-"] { background-color: #059669 !important; }
+        button[class*="bg-amber-"] { background-color: #d97706 !important; color: #ffffff !important; }
+
+        /* Unified Modal Backdrop & Container for Tailwind-styled dialogs */
+        div[id^="modal-"][class*="fixed"] {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: rgba(15, 23, 42, 0.65) !important;
+            backdrop-filter: blur(4px) !important;
+            z-index: 1055 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 1rem !important;
+        }
+        div[id^="modal-"].hidden {
+            display: none !important;
+        }
+        div[id^="modal-"] > div {
+            background: #ffffff !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+            max-width: 34rem !important;
+            width: 100% !important;
+            padding: 1.5rem !important;
+            color: #1e293b !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
         .sidebar {
             width: 270px;
             background-color: var(--tam-sidebar-bg);

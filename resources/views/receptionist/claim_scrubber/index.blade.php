@@ -1,167 +1,205 @@
 @extends('layouts.admin')
 
-@section('title', 'Giám Định BHYT Thời Gian Thực & Xuất XML 4210/BYT')
+@section('title', 'Giám Định BHYT Thời Gian Thực & Xuất XML 4210/BYT - BV Tâm Anh')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                <span>⚖️</span> GIÁM ĐỊNH BHYT THỜI GIAN THỰC & CỔNG XML 4210/QĐ-BYT
-            </h1>
-            <p class="text-sm text-slate-500 mt-1">
-                Bộ lọc kiểm soát lỗi chỉ định thuốc, xét nghiệm, chẩn đoán ICD-10 chống cơ quan BHXH xuất toán tiền tỷ.
-            </p>
-        </div>
-        <button onclick="document.getElementById('modal-scrub-claim').classList.remove('hidden')" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow hover:bg-indigo-500 transition flex items-center gap-2">
-            <span>🔍</span> Thẩm Định Hồ Sơ Chi Phí BHYT
+<x-page-header title="GIÁM ĐỊNH BHYT THỜI GIAN THỰC & CỔNG XML 4210/QĐ-BYT" subtitle="Bộ lọc kiểm soát lỗi chỉ định thuốc, xét nghiệm, chẩn đoán ICD-10 chống cơ quan BHXH xuất toán tiền tỷ.">
+    <x-slot:actions>
+        <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modal-scrub-claim">
+            <i class="bi bi-shield-check"></i> Thẩm Định Hồ Sơ Chi Phí BHYT
         </button>
-    </div>
+    </x-slot:actions>
+</x-page-header>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border shadow-sm">
-            <span class="text-xs font-bold text-slate-400 uppercase">Tổng Hồ Sơ Giám Định</span>
-            <div class="text-2xl font-black text-slate-800 dark:text-white mt-1">{{ $stats['total_claims'] }}</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 shadow-sm">
-            <span class="text-xs font-bold text-emerald-600 uppercase">Hồ Sơ Chuẩn (Clean Claim)</span>
-            <div class="text-2xl font-black text-emerald-600 mt-1">{{ $stats['clean_pass'] }}</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 shadow-sm">
-            <span class="text-xs font-bold text-red-600 uppercase">Nguy Cơ Bị Từ Chối (Xuất Toán)</span>
-            <div class="text-2xl font-black text-red-600 mt-1">{{ $stats['rejected_risk'] }}</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/30 shadow-sm">
-            <span class="text-xs font-bold text-sky-600 uppercase">Đã Xuất XML Cổng 4210</span>
-            <div class="text-2xl font-black text-sky-600 mt-1">{{ $stats['xml_exported'] }}</div>
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-4 border-primary h-100">
+            <div class="card-body p-3">
+                <div class="text-muted small fw-bold text-uppercase">Tổng Hồ Sơ Giám Định</div>
+                <div class="fs-3 fw-bold text-primary mt-1">{{ $stats['total_claims'] }}</div>
+            </div>
         </div>
     </div>
-
-    <!-- Claims Table -->
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
-        <div class="p-4 border-b">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-white">DANH SÁCH HỒ SƠ GIÁM ĐỊNH BHYT ĐIỆN TỬ</h3>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-4 border-success h-100">
+            <div class="card-body p-3">
+                <div class="text-success small fw-bold text-uppercase">Hồ Sơ Chuẩn (Clean Claim)</div>
+                <div class="fs-3 fw-bold text-success mt-1">{{ $stats['clean_pass'] }}</div>
+            </div>
         </div>
-        <div class="overflow-x-auto text-xs">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 uppercase border-b">
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
+            <div class="card-body p-3">
+                <div class="text-danger small fw-bold text-uppercase">Nguy Cơ Bị Từ Chối (Xuất Toán)</div>
+                <div class="fs-3 fw-bold text-danger mt-1">{{ $stats['rejected_risk'] }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-4 border-info h-100">
+            <div class="card-body p-3">
+                <div class="text-info small fw-bold text-uppercase">Đã Xuất XML Cổng 4210</div>
+                <div class="fs-3 fw-bold text-info mt-1">{{ $stats['xml_exported'] }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claims Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-check text-primary fs-5"></i> DANH SÁCH HỒ SƠ GIÁM ĐỊNH BHYT ĐIỆN TỬ
+        </h6>
+        <span class="badge bg-light text-muted border">Tổng số: {{ $claims->total() }} hồ sơ</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
                     <tr>
-                        <th class="p-3">Bệnh nhân</th>
-                        <th class="p-3">Chẩn đoán ICD-10</th>
-                        <th class="p-3 text-right">Chi phí đề nghị BHYT</th>
-                        <th class="p-3 text-center">Kết quả lọc vi phạm</th>
-                        <th class="p-3">Lỗi cảnh báo xuất toán phát hiện</th>
-                        <th class="p-3 text-center">Cổng XML 4210</th>
+                        <th class="ps-3">Bệnh nhân</th>
+                        <th>Chẩn đoán ICD-10</th>
+                        <th class="text-end">Chi phí đề nghị BHYT</th>
+                        <th class="text-center">Kết quả lọc vi phạm</th>
+                        <th>Lỗi cảnh báo xuất toán phát hiện</th>
+                        <th class="text-center">Cổng XML 4210</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tbody class="small">
                     @forelse($claims as $c)
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50">
-                        <td class="p-3">
-                            <strong class="text-slate-800 dark:text-white block">{{ $c->patientProfile->full_name }}</strong>
-                            <span class="text-[10px] text-slate-400">{{ $c->patientProfile->patient_code }}</span>
+                    <tr>
+                        <td class="ps-3">
+                            <strong class="text-dark d-block">{{ $c->patientProfile->full_name }}</strong>
+                            <span class="text-muted small">Mã BN: {{ $c->patientProfile->patient_code }}</span>
                         </td>
-                        <td class="p-3">
-                            <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">[{{ $c->icd10_code }}]</span>
-                            <span class="text-slate-700 dark:text-slate-300 block">{{ $c->icd10_name }}</span>
+                        <td>
+                            <span class="badge bg-primary-subtle text-primary font-monospace fw-bold">{{ $c->icd10_code }}</span>
+                            <div class="text-muted small mt-0.5">{{ $c->icd10_name }}</div>
                         </td>
-                        <td class="p-3 text-right font-mono font-bold text-slate-800 dark:text-white">
+                        <td class="text-end font-monospace fw-bold text-dark">
                             {{ number_format($c->claim_amount) }} đ
                         </td>
-                        <td class="p-3 text-center">
-                            @if($c->scrub_status === 'clean')
-                                <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase">✓ HỢP LỆ (CLEAN)</span>
-                            @elseif($c->scrub_status === 'rejected_high_risk')
-                                <span class="px-2.5 py-1 rounded-full bg-red-100 text-red-800 font-bold text-[10px] uppercase">🚨 NGUY CƠ CAO</span>
+                        <td class="text-center">
+                            @if($c->scrubbing_status === 'clean')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-check-circle-fill me-1"></i>HỢP LỆ (CLEAN)
+                                </span>
+                            @elseif($c->scrubbing_status === 'warning')
+                                <span class="badge bg-warning text-dark px-2 py-1">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>CẢNH BÁO
+                                </span>
                             @else
-                                <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px] uppercase">CẢNH BÁO NHẸ</span>
+                                <span class="badge bg-danger text-white px-2 py-1">
+                                    <i class="bi bi-x-circle-fill me-1"></i>VI PHẠM QUY TẮC
+                                </span>
                             @endif
                         </td>
-                        <td class="p-3">
-                            @if(!empty($c->scrub_violations))
-                                <div class="space-y-1">
-                                    @foreach($c->scrub_violations as $viol)
-                                        <div class="text-red-600 dark:text-red-400 font-semibold text-[11px] flex items-center gap-1">
-                                            <span>⚠️</span> {{ $viol }}
-                                        </div>
+                        <td>
+                            @if(count($c->flagged_errors ?? []) > 0)
+                                <div class="d-flex flex-column gap-1">
+                                    @foreach($c->flagged_errors as $err)
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle text-start text-wrap">
+                                            <i class="bi bi-exclamation-octagon me-1"></i>{{ $err }}
+                                        </span>
                                     @endforeach
                                 </div>
                             @else
-                                <span class="text-emerald-600 font-semibold text-[11px]">Không có lỗi quy tắc thanh toán</span>
+                                <span class="text-success small fw-semibold">
+                                    <i class="bi bi-check-all me-1"></i>Không có lỗi quy tắc thanh toán
+                                </span>
                             @endif
                         </td>
-                        <td class="p-3 text-center">
+                        <td class="text-center">
                             @if($c->xml_4210_exported)
-                                <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-mono font-bold text-[10px]">
+                                <span class="badge bg-info-subtle text-info border border-info-subtle font-monospace">
                                     XML1,2,3,4,5 READY
                                 </span>
                             @else
-                                <span class="text-slate-400 text-[10px]">Bị chặn do lỗi</span>
+                                <span class="text-muted small">Bị chặn do lỗi</span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-slate-400">Chưa có hồ sơ giám định BHYT nào.</td>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-shield-slash fs-1 text-secondary opacity-50 d-block mb-2"></i>
+                            Chưa có hồ sơ giám định BHYT nào.
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="p-3 border-t">
-            {{ $claims->links() }}
+        @if($claims->hasPages())
+        <div class="p-3 border-top">
+            {{ $claims->links('pagination::bootstrap-5') }}
         </div>
+        @endif
     </div>
 </div>
 
-<!-- Modal Giám Định BHYT -->
-<div id="modal-scrub-claim" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border space-y-4">
-        <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="font-bold text-base text-slate-800 dark:text-white">Giám Định Thời Gian Thực Hồ Sơ BHYT</h3>
-            <button onclick="document.getElementById('modal-scrub-claim').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">✕</button>
+<!-- Modal Giám Định BHYT (Bootstrap 5 Standard) -->
+<div class="modal fade" id="modal-scrub-claim" tabindex="-1" aria-labelledby="modalScrubClaimLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fw-bold" id="modalScrubClaimLabel">
+                    <i class="bi bi-shield-check me-2"></i>Giám Định Thời Gian Thực Hồ Sơ BHYT
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('reception.claim-scrubber.scrub') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Chọn Bệnh Nhân BHYT <span class="text-danger">*</span></label>
+                        <select name="patient_profile_id" required class="form-select">
+                            @foreach($patients as $p)
+                                <option value="{{ $p->id }}">{{ $p->full_name }} ({{ $p->patient_code }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Mã Bệnh ICD-10 <span class="text-danger">*</span></label>
+                            <input type="text" name="icd10_code" value="I10" required class="form-control font-monospace fw-bold">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Tổng Tiền Đề Nghị BHYT (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" name="claim_amount" value="1850000" required class="form-control font-monospace fw-bold">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tên Bệnh Theo Mã ICD-10 <span class="text-danger">*</span></label>
+                        <input type="text" name="icd10_name" value="Bệnh tăng huyết áp vô căn (nguyên phát)" required class="form-control">
+                    </div>
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <span class="fw-semibold small d-block mb-2 text-dark">Chọn Thuốc & Kỹ Thuật Chỉ Định Để Quét Lỗi BHYT:</span>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="designated_tests[]" value="mri_brain" id="test1">
+                            <label class="form-check-label text-danger small fw-semibold" for="test1">
+                                Chỉ định Chụp MRI Sọ Não (Thử nghiệm quét lỗi nếu ICD-10 không phải bệnh lý thần kinh)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="prescribed_drugs[]" value="meropenem" id="drug1">
+                            <label class="form-check-label text-warning-emphasis small fw-semibold" for="drug1">
+                                Kháng sinh Meropenem 1g (Thử nghiệm cảnh báo thiếu biên bản hội chẩn thuốc hạn chế)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-search"></i> Quét & Kiểm Tra BHYT
+                    </button>
+                </div>
+            </form>
         </div>
-        <form action="{{ route('reception.claim-scrubber.scrub') }}" method="POST" class="space-y-3 text-xs">
-            @csrf
-            <div>
-                <label class="font-bold block mb-1">Chọn Bệnh Nhân BHYT *</label>
-                <select name="patient_profile_id" required class="w-full border rounded-xl p-2.5 bg-slate-50 dark:bg-slate-700">
-                    @foreach($patients as $p)
-                        <option value="{{ $p->id }}">{{ $p->full_name }} ({{ $p->patient_code }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="font-bold block mb-1">Mã Bệnh ICD-10 *</label>
-                    <input type="text" name="icd10_code" value="I10" required class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700 font-mono font-bold">
-                </div>
-                <div>
-                    <label class="font-bold block mb-1">Tổng Số Tiền Đề Nghị BHYT (VNĐ) *</label>
-                    <input type="number" name="claim_amount" value="1850000" required class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700 font-bold">
-                </div>
-            </div>
-            <div>
-                <label class="font-bold block mb-1">Tên Bệnh Theo Mã ICD-10 *</label>
-                <input type="text" name="icd10_name" value="Bệnh tăng huyết áp vô căn (nguyên phát)" required class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700">
-            </div>
-            <div class="p-3 border rounded-xl bg-slate-50 dark:bg-slate-900 space-y-2">
-                <span class="font-bold text-slate-700 dark:text-slate-200 block">Chọn Thuốc & Kỹ Thuật Chỉ Định Để Quét Lỗi BHYT:</span>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="designated_tests[]" value="mri_brain">
-                    <span class="text-red-600 font-semibold">Chỉ định Chụp MRI Sọ Não (Thử nghiệm quét lỗi nếu ICD-10 không phải thần kinh)</span>
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="prescribed_drugs[]" value="meropenem">
-                    <span class="text-amber-600 font-semibold">Kháng sinh Meropenem 1g (Thử nghiệm cảnh báo thiếu biên bản hội chẩn)</span>
-                </label>
-            </div>
-            <div class="flex justify-end gap-2 pt-3 border-t">
-                <button type="button" onclick="document.getElementById('modal-scrub-claim').classList.add('hidden')" class="px-4 py-2 border rounded-xl font-bold">Hủy</button>
-                <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500">Quét & Kiểm Tra BHYT</button>
-            </div>
-        </form>
     </div>
 </div>
 @endsection

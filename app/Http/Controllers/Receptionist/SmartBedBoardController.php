@@ -79,4 +79,15 @@ class SmartBedBoardController extends Controller
 
         return redirect()->route('reception.bed-board.index')->with('success', "Giường {$bed->bed_code} đã được khử trùng vô khuẩn đạt chuẩn JCI và sẵn sàng nhận bệnh nhân mới!");
     }
+
+    public function assignDirect(Request $request)
+    {
+        $bedId = $request->input('bed_id');
+        if ($bedId) {
+            $bed = HospitalBed::findOrFail($bedId);
+            return $this->assignPatient($request, $bed);
+        }
+
+        return back()->with('error', 'Vui lòng chọn giường bệnh hợp lệ.');
+    }
 }

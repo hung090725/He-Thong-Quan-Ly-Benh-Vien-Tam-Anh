@@ -1,155 +1,217 @@
 @extends('layouts.admin')
 
-@section('title', 'Cổng Khai Báo Tiền Sử & Triệu Chứng Từ Xa Pre-Visit')
+@section('title', 'Cổng Khai Báo Tiền Sử & Triệu Chứng Từ Xa Pre-Visit - BV Tâm Anh')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                <span>📱</span> CỔNG TỰ KHAI BÁO TIỀN SỬ & TRIỆU CHỨNG TỪ XA (PRE-VISIT)
-            </h1>
-            <p class="text-sm text-slate-500 mt-1">
-                Bệnh nhân khai báo triệu chứng, thuốc tại nhà & tiền sử dị ứng qua Mobile trước ngày khám để tự động đồng bộ vào màn hình Bác sĩ.
-            </p>
-        </div>
-        <button onclick="document.getElementById('modal-previsit').classList.remove('hidden')" class="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-bold text-sm shadow hover:bg-teal-500 transition flex items-center gap-2">
-            <span>➕</span> Mô Phỏng Khai Báo Bệnh Nhân
+<x-page-header title="CỔNG TỰ KHAI BÁO TIỀN SỬ & TRIỆU CHỨNG TỪ XA (PRE-VISIT)" subtitle="Bệnh nhân khai báo triệu chứng, thuốc tại nhà & tiền sử dị ứng qua Mobile trước ngày khám để tự động đồng bộ vào màn hình Bác sĩ.">
+    <x-slot:actions>
+        <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modal-previsit">
+            <i class="bi bi-phone-fill"></i> Mô Phỏng Khai Báo Bệnh Nhân
         </button>
-    </div>
+    </x-slot:actions>
+</x-page-header>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border shadow-sm">
-            <span class="text-xs font-bold text-slate-400 uppercase">Tổng Lượt Khai Báo Trước Khám</span>
-            <div class="text-2xl font-black text-slate-800 dark:text-white mt-1">{{ $stats['total'] }}</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 shadow-sm">
-            <span class="text-xs font-bold text-red-600 uppercase">Cờ Đỏ Cấp Cứu Khẩn (Red Flag)</span>
-            <div class="text-2xl font-black text-red-600 mt-1">{{ $stats['urgent_red_flags'] }} ca</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 shadow-sm">
-            <span class="text-xs font-bold text-emerald-600 uppercase">Đã Tự Động Đồng Bộ EMR Bác Sĩ</span>
-            <div class="text-2xl font-black text-emerald-600 mt-1">{{ $stats['synced'] }} ca</div>
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-4 border-primary h-100">
+            <div class="card-body p-3">
+                <div class="text-muted small fw-bold text-uppercase">Tổng Lượt Khai Báo Trước Khám</div>
+                <div class="fs-3 fw-bold text-primary mt-1">{{ $stats['total'] }}</div>
+            </div>
         </div>
     </div>
-
-    <!-- Screenings Table -->
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
-        <div class="p-4 border-b">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-white">DANH SÁCH HỒ SƠ TỰ KHAI BÁO BỆNH TRƯỚC LỊCH HẸN</h3>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
+            <div class="card-body p-3">
+                <div class="text-danger small fw-bold text-uppercase">Cờ Đỏ Cấp Cứu Khẩn (Red Flag)</div>
+                <div class="fs-3 fw-bold text-danger mt-1">{{ $stats['urgent_red_flags'] }} ca</div>
+            </div>
         </div>
-        <div class="overflow-x-auto text-xs">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 uppercase border-b">
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-4 border-success h-100">
+            <div class="card-body p-3">
+                <div class="text-success small fw-bold text-uppercase">Đã Tự Động Đồng Bộ EMR Bác Sĩ</div>
+                <div class="fs-3 fw-bold text-success mt-1">{{ $stats['synced'] }} ca</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Screenings Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-card-checklist text-primary fs-5"></i> DANH SÁCH HỒ SƠ TỰ KHAI BÁO BỆNH TRƯỚC LỊCH HẸN
+        </h6>
+        <span class="badge bg-light text-muted border">Tổng cộng: {{ $screenings->total() }} hồ sơ</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
                     <tr>
-                        <th class="p-3">Mã lịch hẹn</th>
-                        <th class="p-3">Họ tên & SĐT</th>
-                        <th class="p-3">Triệu chứng tự khai</th>
-                        <th class="p-3">Thuốc đang uống tại nhà</th>
-                        <th class="p-3">Dị ứng ghi nhận</th>
-                        <th class="p-3 text-center">Phân tầng nguy cơ</th>
-                        <th class="p-3 text-center">Đồng bộ EMR</th>
+                        <th class="ps-3">Mã lịch hẹn</th>
+                        <th>Họ tên & SĐT</th>
+                        <th>Triệu chứng tự khai</th>
+                        <th>Thuốc đang uống tại nhà</th>
+                        <th>Dị ứng ghi nhận</th>
+                        <th class="text-center">Phân tầng nguy cơ</th>
+                        <th class="text-center">Đồng bộ EMR</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tbody class="small">
                     @forelse($screenings as $sc)
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50">
-                        <td class="p-3 font-mono font-bold text-teal-600">{{ $sc->appointment_code }}</td>
-                        <td class="p-3">
-                            <strong class="text-slate-800 dark:text-white block">{{ $sc->patient_name }}</strong>
-                            <span class="text-[10px] text-slate-400">{{ $sc->patient_phone }}</span>
+                    <tr>
+                        <td class="ps-3 font-monospace fw-bold text-primary">{{ $sc->appointment_code }}</td>
+                        <td>
+                            <strong class="text-dark d-block">{{ $sc->patient_name }}</strong>
+                            <span class="text-muted small">{{ $sc->patient_phone }}</span>
                         </td>
-                        <td class="p-3">
-                            <div class="flex flex-wrap gap-1">
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
                                 @foreach($sc->symptoms_declared as $sym)
-                                    <span class="px-2 py-0.5 rounded {{ str_contains($sym, 'cap') || str_contains($sym, 'du_doi') ? 'bg-red-100 text-red-800 font-bold' : 'bg-slate-100 text-slate-700' }} text-[10px]">
+                                    @php
+                                        $isRedFlag = str_contains($sym, 'cap') || str_contains($sym, 'du_doi');
+                                    @endphp
+                                    <span class="badge {{ $isRedFlag ? 'bg-danger text-white' : 'bg-secondary-subtle text-secondary' }}">
                                         {{ str_replace('_', ' ', $sym) }}
                                     </span>
                                 @endforeach
                             </div>
                         </td>
-                        <td class="p-3 text-slate-600 dark:text-slate-300">{{ $sc->home_medications ?? 'Không dùng' }}</td>
-                        <td class="p-3">
+                        <td class="text-muted">{{ $sc->home_medications ?? 'Không dùng' }}</td>
+                        <td>
                             @if($sc->known_allergies)
-                                <span class="px-2 py-0.5 rounded bg-red-100 text-red-800 font-bold text-[10px]">⚠️ {{ $sc->known_allergies }}</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ $sc->known_allergies }}
+                                </span>
                             @else
-                                <span class="text-slate-400 text-[11px]">Không dị ứng</span>
+                                <span class="text-muted small">Không dị ứng</span>
                             @endif
                         </td>
-                        <td class="p-3 text-center">
+                        <td class="text-center">
                             @if($sc->risk_stratification === 'urgent_red_flag')
-                                <span class="px-2.5 py-1 rounded-full bg-red-600 text-white font-black text-[10px] uppercase animate-pulse">CỜ ĐỎ KHẨN CẤP</span>
+                                <span class="badge bg-danger text-white px-2 py-1 text-uppercase shadow-sm">
+                                    <i class="bi bi-flag-fill me-1"></i>CỜ ĐỎ KHẨN CẤP
+                                </span>
                             @elseif($sc->risk_stratification === 'priority')
-                                <span class="px-2.5 py-1 rounded-full bg-amber-500 text-white font-bold text-[10px] uppercase">Ưu Tiên</span>
+                                <span class="badge bg-warning text-dark px-2 py-1 text-uppercase">
+                                    <i class="bi bi-star-fill me-1"></i>Ưu Tiên
+                                </span>
                             @else
-                                <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase">Thường Quy</span>
+                                <span class="badge bg-success-subtle text-success px-2 py-1 text-uppercase">
+                                    Thường Quy
+                                </span>
                             @endif
                         </td>
-                        <td class="p-3 text-center">
-                            <span class="text-emerald-600 font-bold text-xs">✓ Đã đồng bộ EMR</span>
+                        <td class="text-center">
+                            <span class="text-success fw-bold small">
+                                <i class="bi bi-check-circle-fill me-1"></i>Đã đồng bộ EMR
+                            </span>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="p-8 text-center text-slate-400">Chưa có hồ sơ tự khai báo nào trước khám.</td>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-phone fs-1 text-secondary opacity-50 d-block mb-2"></i>
+                            Chưa có hồ sơ tự khai báo nào trước khám.
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        @if($screenings->hasPages())
         <div class="p-3 border-t">
-            {{ $screenings->links() }}
+            {{ $screenings->links('pagination::bootstrap-5') }}
         </div>
+        @endif
     </div>
 </div>
 
-<!-- Modal Khai Báo Pre-Visit -->
-<div id="modal-previsit" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border space-y-4">
-        <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="font-bold text-base text-slate-800 dark:text-white">Mô Phỏng Cổng Bệnh Nhân Tự Khai Báo Pre-Visit</h3>
-            <button onclick="document.getElementById('modal-previsit').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">✕</button>
+<!-- Modal Khai Báo Pre-Visit (Bootstrap 5 Standard) -->
+<div class="modal fade" id="modal-previsit" tabindex="-1" aria-labelledby="modalPrevisitLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fw-bold" id="modalPrevisitLabel">
+                    <i class="bi bi-phone-fill me-2"></i>Mô Phỏng Cổng Bệnh Nhân Tự Khai Báo Pre-Visit
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('reception.pre-visit.store') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Mã Lịch Hẹn Khám <span class="text-danger">*</span></label>
+                            <input type="text" name="appointment_code" value="AP-{{ date('Ymd') }}-PRE1" required class="form-control font-monospace">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Họ Tên Bệnh Nhân <span class="text-danger">*</span></label>
+                            <input type="text" name="patient_name" value="Nguyễn Hoàng Minh" required class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Số Điện Thoại <span class="text-danger">*</span></label>
+                        <input type="text" name="patient_phone" value="0918765432" required class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Các Triệu Chứng Đang Gặp Phải (Tích Chọn) <span class="text-danger">*</span></label>
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms_declared[]" value="sot_nhe" id="sym1">
+                                        <label class="form-check-label small" for="sym1">Sốt nhẹ</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms_declared[]" value="ho_khan" id="sym2">
+                                        <label class="form-check-label small" for="sym2">Ho khan</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms_declared[]" value="dau_dau" id="sym3">
+                                        <label class="form-check-label small" for="sym3">Đau đầu</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms_declared[]" value="dau_nguc_du_doi" id="sym4">
+                                        <label class="form-check-label small text-danger fw-bold" for="sym4">Đau ngực dữ dội (CỜ ĐỎ)</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms_declared[]" value="kho_tho_cap" id="sym5">
+                                        <label class="form-check-label small text-danger fw-bold" for="sym5">Khó thở cấp (CỜ ĐỎ)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Thuốc Đang Uống Tại Nhà</label>
+                        <input type="text" name="home_medications" value="Amlodipine 5mg (1v/ngày), Glucophage 500mg (2v/ngày)" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tiền Sử Dị Ứng</label>
+                        <input type="text" name="known_allergies" value="Dị ứng tôm cua, kháng sinh Ampicillin" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-send-fill"></i> Gửi Hồ Sơ & Đồng Bộ EMR
+                    </button>
+                </div>
+            </form>
         </div>
-        <form action="{{ route('reception.pre-visit.store') }}" method="POST" class="space-y-3 text-xs">
-            @csrf
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="font-bold block mb-1">Mã Lịch Hẹn Khám *</label>
-                    <input type="text" name="appointment_code" value="AP-{{ date('Ymd') }}-PRE1" required class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700 font-mono">
-                </div>
-                <div>
-                    <label class="font-bold block mb-1">Họ Tên Bệnh Nhân *</label>
-                    <input type="text" name="patient_name" value="Nguyễn Hoàng Minh" required class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700">
-                </div>
-            </div>
-            <div>
-                <label class="font-bold block mb-1">Số Điện Thoại *</label>
-                <input type="text" name="patient_phone" value="0918765432" required class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700">
-            </div>
-            <div>
-                <label class="font-bold block mb-1">Các Triệu Chứng Đang Gặp Phải (Tích Chọn) *</label>
-                <div class="grid grid-cols-2 gap-2 p-3 border rounded-xl bg-slate-50 dark:bg-slate-900">
-                    <label class="flex items-center gap-1.5"><input type="checkbox" name="symptoms_declared[]" value="sot_nhe"> <span>Sốt nhẹ</span></label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" name="symptoms_declared[]" value="ho_khan"> <span>Ho khan</span></label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" name="symptoms_declared[]" value="dau_dau"> <span>Đau đầu</span></label>
-                    <label class="flex items-center gap-1.5 text-red-600 font-bold"><input type="checkbox" name="symptoms_declared[]" value="dau_nguc_du_doi"> <span>Đau ngực dữ dội (CỜ ĐỎ)</span></label>
-                    <label class="flex items-center gap-1.5 text-red-600 font-bold"><input type="checkbox" name="symptoms_declared[]" value="kho_tho_cap"> <span>Khó thở cấp (CỜ ĐỎ)</span></label>
-                </div>
-            </div>
-            <div>
-                <label class="font-bold block mb-1">Thuốc Đang Uống Tại Nhà</label>
-                <input type="text" name="home_medications" value="Amlodipine 5mg (1v/ngày), Glucophage 500mg (2v/ngày)" class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700">
-            </div>
-            <div>
-                <label class="font-bold block mb-1">Tiền Sử Dị Ứng</label>
-                <input type="text" name="known_allergies" value="Dị ứng tôm cua, kháng sinh Ampicillin" class="w-full border rounded-xl p-2 bg-slate-50 dark:bg-slate-700">
-            </div>
-            <div class="flex justify-end gap-2 pt-3 border-t">
-                <button type="button" onclick="document.getElementById('modal-previsit').classList.add('hidden')" class="px-4 py-2 border rounded-xl font-bold">Hủy</button>
-                <button type="submit" class="px-5 py-2 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-500">Gửi Hồ Sơ & Đồng Bộ EMR</button>
-            </div>
-        </form>
     </div>
 </div>
 @endsection
