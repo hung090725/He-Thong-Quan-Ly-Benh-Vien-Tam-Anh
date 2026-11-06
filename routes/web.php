@@ -185,10 +185,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // 1.4. Patient Portal (Lịch sử khám & Kết quả của Bệnh nhân)
-Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')->group(function () {
-    Route::get('/history', [PatientPortalController::class, 'history'])->name('history');
+Route::middleware(['auth', 'role:patient,admin,receptionist,doctor'])->prefix('patient')->name('patient.')->group(function () {
     Route::get('/appointments/{appointment}/prescription/print', [PatientPortalController::class, 'printPrescription'])->name('appointments.prescription.print');
     Route::get('/certificates/{certificate}/print', [SickLeaveCertificateController::class, 'print'])->name('certificates.print');
+});
+
+Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')->group(function () {
+    Route::get('/history', [PatientPortalController::class, 'history'])->name('history');
     Route::put('/appointments/{appointment}/cancel', [PatientPortalController::class, 'cancelAppointment'])->name('appointments.cancel');
 
     // Self-service appointment reschedule
@@ -202,7 +205,7 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')
 });
 
 Route::get('/patient/appointments/{appointment}', [PatientPortalController::class, 'showAppointment'])
-    ->middleware(['auth', 'role:patient,admin'])
+    ->middleware(['auth', 'role:patient,admin,receptionist,doctor'])
     ->name('patient.appointments.show');
 
 
