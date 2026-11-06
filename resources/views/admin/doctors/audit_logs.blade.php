@@ -58,10 +58,57 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="small text-dark">{{ $log->description ?: 'Thực hiện thao tác điều phối' }}</div>
-                                @if($log->old_values && $log->new_values)
-                                    <div class="text-muted small mt-1 font-monospace" style="font-size: 0.75rem;">
-                                        Trước: {{ json_encode($log->old_values, JSON_UNESCAPED_UNICODE) }} &rarr; Sau: {{ json_encode($log->new_values, JSON_UNESCAPED_UNICODE) }}
+                                <div class="fw-semibold text-dark">{{ $log->description ?: 'Thực hiện thao tác điều phối' }}</div>
+                                @php
+                                    $old = is_array($log->old_values) ? $log->old_values : json_decode($log->old_values, true);
+                                    $new = is_array($log->new_values) ? $log->new_values : json_decode($log->new_values, true);
+                                @endphp
+                                @if(!empty($old) || !empty($new))
+                                    <div class="mt-2 d-flex flex-column gap-1">
+                                        @if(!empty($old))
+                                            <div class="small text-muted d-flex flex-wrap align-items-center gap-1">
+                                                <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">Trước:</span>
+                                                @foreach($old as $k => $v)
+                                                    @if($v !== null && $v !== '')
+                                                        @php
+                                                            $lbl = match($k) {
+                                                                'cchn_number' => 'Số CCHN',
+                                                                'cchn_issuer' => 'Cơ quan',
+                                                                'cchn_expiry_date' => 'Ngày hết hạn',
+                                                                'cme_hours' => 'Giờ CME',
+                                                                default => $k
+                                                            };
+                                                            $val = is_string($v) ? str_replace('\\/', '/', $v) : json_encode($v, JSON_UNESCAPED_UNICODE);
+                                                        @endphp
+                                                        <span class="badge bg-light text-dark border px-2 py-1">
+                                                            {{ $lbl }}: <strong>{{ $val }}</strong>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if(!empty($new))
+                                            <div class="small text-dark d-flex flex-wrap align-items-center gap-1">
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Sau:</span>
+                                                @foreach($new as $k => $v)
+                                                    @if($v !== null && $v !== '')
+                                                        @php
+                                                            $lbl = match($k) {
+                                                                'cchn_number' => 'Số CCHN',
+                                                                'cchn_issuer' => 'Cơ quan',
+                                                                'cchn_expiry_date' => 'Ngày hết hạn mới',
+                                                                'cme_hours' => 'Tín chỉ CME',
+                                                                default => $k
+                                                            };
+                                                            $val = is_string($v) ? str_replace('\\/', '/', $v) : json_encode($v, JSON_UNESCAPED_UNICODE);
+                                                        @endphp
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                                            {{ $lbl }}: <strong>{{ $val }}{{ $k === 'cme_hours' ? ' giờ' : '' }}</strong>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             </td>
