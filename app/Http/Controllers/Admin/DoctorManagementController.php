@@ -147,6 +147,11 @@ class DoctorManagementController extends Controller
                 'avatar' => $avatarPath,
                 'bio' => $data['bio'] ?? null,
                 'is_available' => $request->has('is_available'),
+                'cchn_number' => $data['cchn_number'] ?? null,
+                'cchn_issuer' => $data['cchn_issuer'] ?? 'Bộ Y Tế',
+                'cchn_issued_date' => $data['cchn_issued_date'] ?? null,
+                'cchn_expiry_date' => $data['cchn_expiry_date'] ?? null,
+                'cme_hours' => $data['cme_hours'] ?? 0,
             ]);
 
             // Automatically initialize weekly schedules for the new doctor (Monday - Sunday, 2 shifts)
@@ -225,6 +230,11 @@ class DoctorManagementController extends Controller
                 'room_number' => $data['room_number'],
                 'bio' => $data['bio'] ?? null,
                 'is_available' => $request->has('is_available'),
+                'cchn_number' => $data['cchn_number'] ?? null,
+                'cchn_issuer' => $data['cchn_issuer'] ?? ($doctor->cchn_issuer ?? 'Bộ Y Tế'),
+                'cchn_issued_date' => $data['cchn_issued_date'] ?? null,
+                'cchn_expiry_date' => $data['cchn_expiry_date'] ?? null,
+                'cme_hours' => $data['cme_hours'] ?? ($doctor->cme_hours ?? 0),
             ];
 
             if ($request->hasFile('avatar')) {
@@ -428,7 +438,24 @@ class DoctorManagementController extends Controller
     }
 
     /**
-     * ADVANCED 2: Xuất Danh bạ Bác sĩ ra file CSV chuẩn UTF-8 BOM.
+     * ADVANCED 2: Xuất Danh bạ Bác sĩ ra file Excel (.xls) có định dạng bảng chuẩn, màu sắc và viền ô.
+     */
+    public function exportExcel(): \Illuminate\Http\Response
+    {
+        $doctors = Doctor::with(['user', 'specialty'])->get();
+
+        $html = view('admin.doctors.exports.excel_table', compact('doctors'))->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="danh_ba_bac_si_tam_anh_' . date('Ymd_His') . '.xls"',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
+    }
+
+    /**
+     * ADVANCED 2: Xuất Danh bạ Bác sĩ ra file CSV chuẩn UTF-8 BOM & sep=,.
      */
     public function exportCsv(): StreamedResponse
     {
@@ -441,8 +468,9 @@ class DoctorManagementController extends Controller
 
         return response()->stream(function () use ($doctors) {
             $handle = fopen('php://output', 'w');
-            // Write UTF-8 BOM so Excel opens Vietnamese characters without mojibake
+            // Write UTF-8 BOM and sep=, so Excel automatically splits columns without region issues
             fputs($handle, "\xEF\xBB\xBF");
+            fputs($handle, "sep=,\r\n");
 
             // CSV Header
             fputcsv($handle, [
@@ -488,7 +516,7 @@ class DoctorManagementController extends Controller
     }
 
     /**
-     * ADVANCED 2 (Template): Tải file mẫu CSV để import.
+     * ADVANCED 2 (Template): Tải file mẫu CSV để import (kèm sep=,).
      */
     public function downloadTemplate(): StreamedResponse
     {
@@ -500,6 +528,7 @@ class DoctorManagementController extends Controller
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
             fputs($handle, "\xEF\xBB\xBF");
+            fputs($handle, "sep=,\r\n");
             fputcsv($handle, ['Họ và Tên', 'Email', 'Mật Khẩu', 'Mã Chuyên Khoa', 'Học Vị', 'Phòng Khám', 'Giá Khám']);
             fputcsv($handle, ['Bác sĩ Mẫu A', 'bs.maua@tamanh.vn', '123456', '1', 'TS.BS', 'Phòng 101 - Tòa A', '400000']);
             fputcsv($handle, ['Bác sĩ Mẫu B', 'bs.maub@tamanh.vn', '123456', '2', 'ThS.BS', 'Phòng 202 - Tòa B', '350000']);
@@ -508,36 +537,92 @@ class DoctorManagementController extends Controller
     }
 
     /**
-     * ADVANCED 2 (Import): Nhập danh bạ bác sĩ hàng loạt từ file CSV.
+     * ADVANCED 2 (Template Excel): Tải file mẫu Excel (.xls) có bảng kẻ ô.
+     */
+    public function downloadTemplateExcel(): \Illuminate\Http\Response
+    {
+        $html = view('admin.doctors.exports.template_table')->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="mau_nhap_lieu_bac_si.xls"',
+        ]);
+    }
+
+    /**
+     * ADVANCED 2 (Import): Nhập danh bạ bác sĩ hàng loạt từ file CSV hoặc Excel (.xls).
      */
     public function importCsv(Request $request): RedirectResponse
     {
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+            'csv_file' => 'required|file|max:5120',
         ]);
 
         $file = $request->file('csv_file');
-        $handle = fopen($file->getRealPath(), 'r');
+        $content = file_get_contents($file->getRealPath());
         
-        // Skip BOM if present
-        $bom = fread($handle, 3);
-        if ($bom !== "\xEF\xBB\xBF") {
-            rewind($handle);
+        $importedCount = 0;
+        $rows = [];
+
+        // Check if file is HTML/Excel table (.xls)
+        if (str_contains($content, '<table') || str_contains($content, '<tr')) {
+            preg_match_all('/<tr[^>]*>(.*?)<\/tr>/is', $content, $trMatches);
+            foreach ($trMatches[1] as $trIndex => $trHtml) {
+                if (str_contains($trHtml, '<th') || $trIndex < 2) continue;
+                preg_match_all('/<td[^>]*>(.*?)<\/td>/is', $trHtml, $tdMatches);
+                $cols = array_map(function ($val) {
+                    return trim(strip_tags(html_entity_decode($val, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+                }, $tdMatches[1]);
+
+                if (count($cols) >= 7 && !empty($cols[1])) {
+                    $rows[] = $cols;
+                }
+            }
+        } else {
+            // Standard CSV or TXT
+            if (str_starts_with($content, "\xEF\xBB\xBF")) {
+                $content = substr($content, 3);
+            }
+            if (preg_match('/^sep=[,;\t]\r?\n/', $content, $sepMatch)) {
+                $content = substr($content, strlen($sepMatch[0]));
+            }
+
+            $lines = explode("\n", str_replace("\r", "", $content));
+            if (empty($lines)) {
+                return back()->with('error', 'File dữ liệu rỗng!');
+            }
+
+            $firstLine = $lines[0];
+            $delimiter = ',';
+            if (substr_count($firstLine, ';') > substr_count($firstLine, ',')) {
+                $delimiter = ';';
+            } elseif (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) {
+                $delimiter = "\t";
+            }
+
+            $isFirst = true;
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (empty($line)) continue;
+                $cols = str_getcsv($line, $delimiter);
+                if ($isFirst) {
+                    $isFirst = false;
+                    continue;
+                }
+                if (count($cols) >= 7 && !empty(trim($cols[1]))) {
+                    $rows[] = $cols;
+                }
+            }
         }
 
-        $header = fgetcsv($handle);
-        $importedCount = 0;
-
-        while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) < 7 || empty(trim($row[1]))) continue;
-
+        foreach ($rows as $row) {
             $name = trim($row[0]);
             $email = trim($row[1]);
             $password = trim($row[2]) ?: '123456';
             $specialtyId = (int)trim($row[3]);
             $qualification = trim($row[4]) ?: 'BS';
             $roomNumber = trim($row[5]) ?: 'Phòng Khám';
-            $fee = (float)trim($row[6]) ?: 300000;
+            $fee = (float)str_replace(['.', ',', ' '], '', trim($row[6])) ?: 300000;
 
             if (!Specialty::where('id', $specialtyId)->exists()) continue;
 
@@ -564,12 +649,10 @@ class DoctorManagementController extends Controller
             $importedCount++;
         }
 
-        fclose($handle);
-
         DoctorAuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'import_doctors_csv',
-            'description' => "Đã import thành công {$importedCount} bác sĩ từ file CSV",
+            'description' => "Đã import thành công {$importedCount} bác sĩ từ file dữ liệu",
             'ip_address' => $request->ip(),
         ]);
 
@@ -589,6 +672,51 @@ class DoctorManagementController extends Controller
         $validCount = $doctors->count() - $expiringSoon->count() - $expired->count();
 
         return view('admin.doctors.licenses', compact('doctors', 'expiringSoon', 'expired', 'validCount'));
+    }
+
+    /**
+     * ADVANCED 3 (Action): Cập nhật & Gia hạn Giấy phép CCHN / Tín chỉ CME.
+     */
+    public function updateLicense(Request $request, Doctor $doctor): RedirectResponse
+    {
+        $validated = $request->validate([
+            'cchn_number' => 'required|string|max:50',
+            'cchn_issuer' => 'required|string|max:100',
+            'cchn_issued_date' => 'required|date',
+            'cchn_expiry_date' => 'required|date|after_or_equal:cchn_issued_date',
+            'cme_hours' => 'nullable|integer|min:0|max:500',
+        ]);
+
+        $oldValues = [
+            'cchn_number' => $doctor->cchn_number,
+            'cchn_issuer' => $doctor->cchn_issuer,
+            'cchn_expiry_date' => $doctor->cchn_expiry_date ? $doctor->cchn_expiry_date->format('Y-m-d') : null,
+        ];
+
+        $doctor->update([
+            'cchn_number' => $validated['cchn_number'],
+            'cchn_issuer' => $validated['cchn_issuer'],
+            'cchn_issued_date' => $validated['cchn_issued_date'],
+            'cchn_expiry_date' => $validated['cchn_expiry_date'],
+        ]);
+
+        DoctorAuditLog::create([
+            'user_id' => auth()->id(),
+            'doctor_id' => $doctor->id,
+            'action' => 'renew_cchn_license',
+            'description' => "Gia hạn / Cập nhật chứng chỉ hành nghề CCHN cho Bác sĩ {$doctor->full_name_with_title}",
+            'old_values' => $oldValues,
+            'new_values' => [
+                'cchn_number' => $validated['cchn_number'],
+                'cchn_issuer' => $validated['cchn_issuer'],
+                'cchn_expiry_date' => $validated['cchn_expiry_date'],
+                'cme_hours' => $request->input('cme_hours', 48),
+            ],
+            'ip_address' => $request->ip(),
+        ]);
+
+        return redirect()->route('admin.doctors.licenses')
+            ->with('success', "Đã gia hạn chứng chỉ CCHN cho Bác sĩ {$doctor->full_name_with_title} thành công đến ngày " . date('d/m/Y', strtotime($validated['cchn_expiry_date'])) . "!");
     }
 
     /**

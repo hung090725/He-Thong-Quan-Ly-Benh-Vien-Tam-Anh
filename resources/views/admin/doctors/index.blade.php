@@ -17,11 +17,25 @@
                 <li><a class="dropdown-item py-2" href="{{ route('admin.doctors.audit-logs') }}"><i class="bi bi-shield-lock-fill text-secondary me-2"></i> Nhật Ký Kiểm Toán Y Tế</a></li>
             </ul>
         </div>
-        <a href="{{ route('admin.doctors.export.csv') }}" class="btn btn-outline-success d-inline-flex align-items-center gap-1" title="Xuất danh sách bác sĩ ra file CSV">
-            <i class="bi bi-file-earmark-excel"></i> Xuất CSV
-        </a>
+        <div class="dropdown d-inline-block">
+            <button class="btn btn-outline-success dropdown-toggle d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Danh Bạ
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                <li>
+                    <a class="dropdown-item py-2 fw-semibold text-success" href="{{ route('admin.doctors.export.excel') }}">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Xuất Bảng Tính Excel (.xls định dạng bảng đẹp)
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item py-2 text-dark" href="{{ route('admin.doctors.export.csv') }}">
+                        <i class="bi bi-filetype-csv me-2"></i> Xuất File CSV (UTF-8 BOM chia cột chuẩn)
+                    </a>
+                </li>
+            </ul>
+        </div>
         <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#importDoctorCsvModal">
-            <i class="bi bi-file-earmark-arrow-up"></i> Nhập CSV
+            <i class="bi bi-file-earmark-arrow-up"></i> Nhập Excel / CSV
         </button>
         <a href="{{ route('admin.roster') }}" class="btn btn-outline-info d-inline-flex align-items-center gap-1">
             <i class="bi bi-grid-3x3-gap-fill"></i> Ma trận ca trực
@@ -271,38 +285,53 @@
     </div>
 </div>
 
-<!-- Modal Import CSV -->
+<!-- Modal Import Excel / CSV -->
 <div class="modal fade" id="importDoctorCsvModal" tabindex="-1" aria-labelledby="importDoctorCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
             <form action="{{ route('admin.doctors.import.csv') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-bold text-dark" id="importDoctorCsvModalLabel">
-                        <i class="bi bi-file-earmark-arrow-up text-primary me-2"></i> Nhập Danh Bạ Bác Sĩ Từ File CSV
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="importDoctorCsvModalLabel">
+                        <i class="bi bi-file-earmark-arrow-up me-2"></i> Nhập Dữ Liệu Bác Sĩ Từ File Excel / CSV
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <p class="text-muted small mb-3">
-                        Hệ thống hỗ trợ nhập hàng loạt danh sách bác sĩ và tự động tạo tài khoản truy cập. Tải file mẫu bên dưới để xem định dạng các cột.
+                        Hệ thống hỗ trợ nhập hàng loạt danh sách bác sĩ, tự động phân khoa và tạo tài khoản đăng nhập. Tải file mẫu có sẵn bảng kẻ ô bên dưới để điền dữ liệu chính xác:
                     </p>
-                    <div class="mb-3 p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-semibold text-dark small d-block">File CSV Mẫu Chuẩn</span>
-                            <small class="text-muted">mau_nhap_lieu_bac_si.csv</small>
+
+                    <!-- Template Download Options -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <a href="{{ route('admin.doctors.import.template.excel') }}" class="btn btn-outline-success btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-excel fs-4 text-success"></i>
+                                <div>
+                                    <strong class="d-block text-dark" style="font-size: 0.78rem;">File Excel (.xls)</strong>
+                                    <span class="text-muted" style="font-size: 0.68rem;">Có bảng kẻ ô đẹp</span>
+                                </div>
+                            </a>
                         </div>
-                        <a href="{{ route('admin.doctors.import.template') }}" class="btn btn-sm btn-outline-primary rounded-pill">
-                            <i class="bi bi-download me-1"></i> Tải file mẫu
-                        </a>
+                        <div class="col-6">
+                            <a href="{{ route('admin.doctors.import.template') }}" class="btn btn-outline-primary btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center gap-2">
+                                <i class="bi bi-filetype-csv fs-4 text-primary"></i>
+                                <div>
+                                    <strong class="d-block text-dark" style="font-size: 0.78rem;">File CSV (.csv)</strong>
+                                    <span class="text-muted" style="font-size: 0.68rem;">Tự chia cột chuẩn</span>
+                                </div>
+                            </a>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="csv_file" class="form-label fw-semibold small">Chọn file CSV từ máy tính *</label>
-                        <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv,text/csv" required>
+
+                    <div class="mb-2">
+                        <label for="csv_file" class="form-label fw-semibold small text-dark">Chọn file từ máy tính (.xls, .csv, .txt) <span class="text-danger">*</span></label>
+                        <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv,.xls,.xlsx,.txt,text/csv,application/vnd.ms-excel" required>
+                        <small class="text-muted" style="font-size: 0.72rem;">* Dung lượng tối đa: 5MB. Hệ thống tự động khớp chuyên khoa và bóc tách dữ liệu thông minh.</small>
                     </div>
                 </div>
-                <div class="modal-footer border-top bg-light rounded-bottom-4">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                <div class="modal-footer border-top bg-light px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
                     <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
                         <i class="bi bi-cloud-upload me-1"></i> Bắt đầu Nhập dữ liệu
                     </button>

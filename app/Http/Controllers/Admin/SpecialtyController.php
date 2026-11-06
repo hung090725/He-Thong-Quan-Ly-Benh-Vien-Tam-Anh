@@ -185,6 +185,21 @@ class SpecialtyController extends Controller
     }
 
     /**
+     * Toggle emergency / Code-Red readiness status.
+     */
+    public function toggleEmergencyReadiness(Request $request, Specialty $specialty): RedirectResponse
+    {
+        $specialty->is_code_red_supported = !$specialty->is_code_red_supported;
+        if ($specialty->is_code_red_supported && $specialty->emergency_readiness_level === 'standard_outpatient') {
+            $specialty->emergency_readiness_level = 'icu_ecmo';
+        }
+        $specialty->save();
+
+        $state = $specialty->is_code_red_supported ? 'kích hoạt Báo động đỏ (Code-Red)' : 'chuyển về tiếp nhận thường';
+        return back()->with('success', "Đã {$state} cho chuyên khoa {$specialty->name} thành công!");
+    }
+
+    /**
      * Toggle active status of specialty.
      */
     public function toggleStatus(Specialty $specialty): RedirectResponse

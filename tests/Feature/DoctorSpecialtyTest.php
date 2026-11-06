@@ -534,4 +534,57 @@ class DoctorSpecialtyTest extends TestCase
         $response->assertSee('ĐANG NGHỈ PHÉP');
         $response->assertSee('NGHỈ:');
     }
+
+    public function test_admin_can_export_doctors_excel_table(): void
+    {
+        $this->actingAs($this->admin);
+        $response = $this->get(route('admin.doctors.export.excel'));
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+        $response->assertSee('HỆ THỐNG BỆNH VIỆN ĐA KHOA TÂM ANH');
+    }
+
+    public function test_admin_can_download_excel_template(): void
+    {
+        $this->actingAs($this->admin);
+        $response = $this->get(route('admin.doctors.import.template.excel'));
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+    }
+
+    public function test_admin_can_renew_doctor_cchn_license(): void
+    {
+        $this->actingAs($this->admin);
+        $doctor = Doctor::first();
+        if ($doctor) {
+            $response = $this->patch(route('admin.doctors.licenses.update', $doctor), [
+                'cchn_number' => '009999/BYT-CCHN',
+                'cchn_issuer' => 'Bộ Y Tế',
+                'cchn_issued_date' => now()->toDateString(),
+                'cchn_expiry_date' => now()->addYears(5)->toDateString(),
+                'cme_hours' => 48,
+            ]);
+            $response->assertRedirect(route('admin.doctors.licenses'));
+            $this->assertDatabaseHas('doctors', [
+                'id' => $doctor->id,
+                'cchn_number' => '009999/BYT-CCHN',
+            ]);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    public function test_admin_can_toggle_emergency_readiness_code_red(): void
+    {
+        $this->actingAs($this->admin);
+        $specialty = Specialty::first();
+        if ($specialty) {
+            $oldStatus = (bool)$specialty->is_code_red_supported;
+            $response = $this->patch(route('admin.specialties.emergency-toggle', $specialty));
+            $response->assertRedirect();
+            $this->assertEquals(!$oldStatus, (bool)$specialty->fresh()->is_code_red_supported);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
 }

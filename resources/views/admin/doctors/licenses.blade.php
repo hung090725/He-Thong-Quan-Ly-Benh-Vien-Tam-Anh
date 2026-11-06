@@ -159,9 +159,15 @@
                                 @endif
                             </td>
                             <td class="text-end pe-3">
-                                <a href="{{ route('admin.doctors.edit', $d) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                    <i class="bi bi-pencil-square me-1"></i> Gia hạn
-                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 btn-renew-license shadow-xs" 
+                                    data-doctor-id="{{ $d->id }}" 
+                                    data-doctor-name="{{ $d->full_name_with_title }}" 
+                                    data-cchn="{{ $d->cchn_number }}" 
+                                    data-issuer="{{ $d->cchn_issuer ?: 'Bộ Y Tế' }}" 
+                                    data-issued="{{ $d->cchn_issued_date ? $d->cchn_issued_date->format('Y-m-d') : date('Y-m-d') }}" 
+                                    data-expiry="{{ $d->cchn_expiry_date ? $d->cchn_expiry_date->format('Y-m-d') : date('Y-m-d', strtotime('+5 years')) }}">
+                                    <i class="bi bi-shield-check me-1"></i> Gia hạn
+                                </button>
                             </td>
                         </tr>
                     @endforeach
@@ -170,4 +176,133 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Gia Hạn & Cập Nhật CCHN Bác Sĩ -->
+<div class="modal fade" id="renewLicenseModal" tabindex="-1" aria-labelledby="renewLicenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fw-bold" id="renewLicenseModalLabel">
+                    <i class="bi bi-shield-check me-2"></i> Gia Hạn Chứng Chỉ Hành Nghề (CCHN)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="renewLicenseForm" method="POST" action="">
+                @csrf
+                @method('PATCH')
+                <div class="modal-body p-4">
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <span class="text-muted small d-block">Bác sĩ tiếp nhận gia hạn:</span>
+                        <h6 class="fw-bold text-primary mb-0" id="modalDoctorName">...</h6>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-dark">Số Chứng Chỉ Hành Nghề (CCHN) <span class="text-danger">*</span></label>
+                        <input type="text" name="cchn_number" id="modalCchnNumber" class="form-control font-monospace" placeholder="Ví dụ: 001245/BYT-CCHN" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-dark">Cơ quan cấp phép <span class="text-danger">*</span></label>
+                        <select name="cchn_issuer" id="modalCchnIssuer" class="form-select" required>
+                            <option value="Bộ Y Tế">Bộ Y Tế</option>
+                            <option value="Sở Y Tế TP. Hà Nội">Sở Y Tế TP. Hà Nội</option>
+                            <option value="Sở Y Tế TP. Hồ Chí Minh">Sở Y Tế TP. Hồ Chí Minh</option>
+                            <option value="Tổng Cục Hậu Cần - Bộ Quốc Phòng">Tổng Cục Hậu Cần - Bộ Quốc Phòng</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-dark">Ngày cấp CCHN <span class="text-danger">*</span></label>
+                            <input type="date" name="cchn_issued_date" id="modalCchnIssued" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-dark">Ngày hết hạn CCHN <span class="text-danger">*</span></label>
+                            <input type="date" name="cchn_expiry_date" id="modalCchnExpiry" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Quick Extend Buttons -->
+                    <div class="mb-3 p-3 bg-light bg-opacity-50 border rounded-3">
+                        <span class="d-block small text-muted mb-2 fw-semibold"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Gia hạn nhanh thời hạn hiệu lực:</span>
+                        <div class="btn-group btn-group-sm w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-add-years" data-years="1">+1 Năm</button>
+                            <button type="button" class="btn btn-outline-secondary btn-add-years" data-years="2">+2 Năm</button>
+                            <button type="button" class="btn btn-outline-primary btn-add-years" data-years="5">+5 Năm (Chuẩn Bộ Y Tế)</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold small text-dark">Số giờ đào tạo y khoa liên tục (CME) tích lũy</label>
+                        <div class="input-group">
+                            <input type="number" name="cme_hours" id="modalCmeHours" class="form-control" value="48" min="0" max="500">
+                            <span class="input-group-text bg-light text-muted small">giờ / 48 giờ tối thiểu</span>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.72rem;">* Thông tư 32/2023/TT-BYT: Bác sĩ cần tối thiểu 120 tiết / 5 năm để đủ điều kiện gia hạn giấy phép hành nghề.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light px-4 py-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="bi bi-check-circle me-1"></i> Xác Nhận Lưu & Gia Hạn CCHN
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('renewLicenseModal');
+    if (!modalEl) return;
+    const modal = new bootstrap.Modal(modalEl);
+    const form = document.getElementById('renewLicenseForm');
+    const nameEl = document.getElementById('modalDoctorName');
+    const cchnInput = document.getElementById('modalCchnNumber');
+    const issuerInput = document.getElementById('modalCchnIssuer');
+    const issuedInput = document.getElementById('modalCchnIssued');
+    const expiryInput = document.getElementById('modalCchnExpiry');
+
+    document.querySelectorAll('.btn-renew-license').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const docId = this.dataset.doctorId;
+            const docName = this.dataset.doctorName;
+            const cchn = this.dataset.cchn;
+            const issuer = this.dataset.issuer;
+            const issued = this.dataset.issued;
+            const expiry = this.dataset.expiry;
+
+            form.action = `/admin/doctors/${docId}/licenses`;
+            nameEl.textContent = docName;
+            cchnInput.value = (cchn && cchn !== 'Chưa cập nhật') ? cchn : `00${1000 + parseInt(docId)}/BYT-CCHN`;
+            if (issuer) issuerInput.value = issuer;
+            if (issued) issuedInput.value = issued;
+            if (expiry) expiryInput.value = expiry;
+
+            modal.show();
+        });
+    });
+
+    document.querySelectorAll('.btn-add-years').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const addYears = parseInt(this.dataset.years) || 1;
+            let baseDate = new Date();
+            if (expiryInput.value) {
+                const cur = new Date(expiryInput.value);
+                if (!isNaN(cur.getTime()) && cur > baseDate) {
+                    baseDate = cur;
+                }
+            }
+            baseDate.setFullYear(baseDate.getFullYear() + addYears);
+            const yyyy = baseDate.getFullYear();
+            const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(baseDate.getDate()).padStart(2, '0');
+            expiryInput.value = `${yyyy}-${mm}-${dd}`;
+        });
+    });
+});
+</script>
+@endpush
 @endsection

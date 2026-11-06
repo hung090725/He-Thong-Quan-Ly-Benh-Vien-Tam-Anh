@@ -91,6 +91,7 @@
                         <th>Hotline Cấp cứu</th>
                         <th>Bác sĩ Trực ban Hôm nay</th>
                         <th class="text-center">Trạng thái Tiếp nhận</th>
+                        <th class="text-end pe-3">Điều phối Khẩn cấp</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -138,7 +139,7 @@
                                     </div>
                                 @else
                                     <span class="badge bg-light text-muted border">
-                                        <i class="bi bi-clock-history me-1"></i> Thường trực trực ngoại viện
+                                        <i class="bi bi-clock-history me-1"></i> Thường trực ngoại viện
                                     </span>
                                 @endif
                             </td>
@@ -152,6 +153,16 @@
                                         <i class="bi bi-clock me-1"></i> Khám Giờ Hành Chính
                                     </span>
                                 @endif
+                            </td>
+                            <td class="text-end pe-3">
+                                <form method="POST" action="{{ route('admin.specialties.emergency-toggle', $sp) }}" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm {{ $sp->is_code_red_supported ? 'btn-outline-danger' : 'btn-outline-success' }} rounded-pill px-3 shadow-xs" title="Bấm để bật / tắt tiếp nhận Code-Red khẩn cấp">
+                                        <i class="bi {{ $sp->is_code_red_supported ? 'bi-shield-slash' : 'bi-shield-check' }} me-1"></i>
+                                        {{ $sp->is_code_red_supported ? 'Tắt Code-Red' : 'Bật Code-Red' }}
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

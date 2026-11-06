@@ -21,6 +21,11 @@ class StoreDoctorRequest extends FormRequest
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'bio' => ['nullable', 'string', 'max:2000'],
             'is_available' => ['nullable', 'boolean'],
+            'cchn_number' => ['nullable', 'string', 'max:50'],
+            'cchn_issuer' => ['nullable', 'string', 'max:100'],
+            'cchn_issued_date' => ['nullable', 'date'],
+            'cchn_expiry_date' => ['nullable', 'date'],
+            'cme_hours' => ['nullable', 'integer', 'min:0'],
         ];
 
         if ($this->filled('user_id')) {
