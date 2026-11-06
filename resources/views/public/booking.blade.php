@@ -27,6 +27,25 @@
 
         <div class="card shadow-sm border-0">
             <div class="card-body p-4 p-md-5">
+                <!-- Interactive 3-Step Visual Stepper -->
+                <div class="row g-2 mb-4 pb-3 border-bottom text-center">
+                    <div class="col-4">
+                        <div class="p-2 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 text-primary fw-semibold small" id="stepperIndicator1">
+                            <i class="bi bi-1-circle-fill me-1"></i>Chuyên khoa & Bác sĩ
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 rounded-3 bg-light border text-muted fw-semibold small" id="stepperIndicator2">
+                            <i class="bi bi-2-circle me-1"></i>Hồ sơ Bệnh nhân
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 rounded-3 bg-light border text-muted fw-semibold small" id="stepperIndicator3">
+                            <i class="bi bi-3-circle me-1"></i>Triệu chứng & Xác nhận
+                        </div>
+                    </div>
+                </div>
+
                 <form method="POST" action="{{ route('booking.store') }}" id="bookingForm">
                     @csrf
 
@@ -109,16 +128,26 @@
                     </div>
 
                     @if(isset($familyMembers) && $familyMembers->isNotEmpty())
-                        <div class="p-3 bg-light rounded-3 border mb-3">
-                            <label class="form-label fw-bold text-primary small mb-1"><i class="bi bi-people me-1"></i>Đặt lịch cho thành viên gia đình đã lưu:</label>
-                            <select class="form-select form-select-sm" id="familyMemberSelect" onchange="applyFamilyMember(this);">
-                                <option value="">-- Đặt cho bản thân ({{ $patientProfile->full_name ?? Auth::user()->name }}) --</option>
+                        <div class="p-3 bg-primary-subtle bg-opacity-25 rounded-3 border border-primary-subtle mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-bold text-primary small mb-0"><i class="bi bi-people-fill me-1"></i>Đặt lịch nhanh cho thành viên gia đình đã lưu:</label>
+                                <span id="familyAutoFillBadge" class="badge bg-success d-none"><i class="bi bi-magic me-1"></i>Đã tự động điền hồ sơ</span>
+                            </div>
+                            <select class="form-select form-select-sm" id="familyMemberSelect" name="family_member_id" onchange="window.applyFamilyMember(this);">
+                                <option value=""
+                                    data-name="{{ $patientProfile->full_name ?? Auth::user()->name ?? '' }}"
+                                    data-dob="{{ isset($patientProfile->dob) ? $patientProfile->dob->format('Y-m-d') : '' }}"
+                                    data-gender="{{ $patientProfile->gender ?? '' }}"
+                                    data-phone="{{ $patientProfile->phone ?? Auth::user()->phone ?? '' }}"
+                                    data-notes="">
+                                    -- Đặt cho bản thân ({{ $patientProfile->full_name ?? Auth::user()->name }}) --
+                                </option>
                                 @foreach($familyMembers as $fm)
-                                    <option value="{{ $fm->id }}" 
+                                    <option value="{{ $fm->id }}" {{ request('family_member_id') == $fm->id ? 'selected' : '' }}
                                         data-name="{{ $fm->full_name }}" 
                                         data-dob="{{ $fm->date_of_birth->format('Y-m-d') }}" 
                                         data-gender="{{ $fm->gender }}"
-                                        data-phone="{{ $fm->phone ?? '' }}"
+                                        data-phone="{{ $fm->phone ?: ($patientProfile->phone ?? Auth::user()->phone ?? '') }}"
                                         data-notes="{{ $fm->medical_notes ?? '' }}">
                                         {{ $fm->full_name }} ({{ $fm->relationship_label }} - {{ $fm->age }} tuổi)
                                     </option>
@@ -200,6 +229,14 @@
 
                     <div class="mb-4">
                         <label for="symptom_description" class="form-label fw-semibold">Mô tả chi tiết triệu chứng hoặc vấn đề sức khỏe đang gặp phải <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <span class="small text-muted me-1 align-self-center"><i class="bi bi-lightbulb text-warning me-1"></i>Chọn nhanh:</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 py-1 symptom-chip" onclick="appendSymptom('Khám sức khỏe tổng quát định kỳ')">+ Khám tổng quát định kỳ</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 py-1 symptom-chip" onclick="appendSymptom('Đau đầu, hoa mắt, chóng mặt kéo dài')">+ Đau đầu, chóng mặt</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 py-1 symptom-chip" onclick="appendSymptom('Sốt nhẹ về chiều, ho có đờm, đau rát họng')">+ Sốt, ho, đau họng</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 py-1 symptom-chip" onclick="appendSymptom('Đau tức ngực, hồi hộp đánh trống ngực')">+ Đau tức ngực, hồi hộp</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 py-1 symptom-chip" onclick="appendSymptom('Tái khám định kỳ theo lịch hẹn của Bác sĩ')">+ Tái khám theo hẹn</span>
+                        </div>
                         <textarea class="form-control @error('symptom_description') is-invalid @enderror" id="symptom_description" name="symptom_description" rows="4" required placeholder="Ví dụ: Đau đầu, sốt nhẹ về chiều kéo dài 3 ngày, ho có đờm, đã uống thuốc hạ sốt nhưng chưa đỡ...">{{ old('symptom_description') }}</textarea>
                         <small class="text-muted">Thông tin này giúp Bác sĩ chuyên khoa chuẩn bị tốt nhất trước khi tiếp nhận ca khám.</small>
                         @error('symptom_description')
@@ -235,6 +272,75 @@
 
 @push('scripts')
 <script>
+    window.applyFamilyMember = function(selectEl) {
+        if (!selectEl) return;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        if (!opt) return;
+
+        const nameInput = document.getElementById('full_name');
+        const dobInput = document.getElementById('dob');
+        const genderSelect = document.getElementById('gender');
+        const phoneInput = document.getElementById('phone');
+        const symptomInput = document.getElementById('symptom_description');
+        const badge = document.getElementById('familyAutoFillBadge');
+
+        if (nameInput && opt.getAttribute('data-name') !== null) {
+            nameInput.value = opt.getAttribute('data-name');
+        }
+        if (dobInput && opt.getAttribute('data-dob')) {
+            dobInput.value = opt.getAttribute('data-dob');
+        }
+        if (genderSelect && opt.getAttribute('data-gender')) {
+            genderSelect.value = opt.getAttribute('data-gender');
+        }
+        if (phoneInput && opt.getAttribute('data-phone')) {
+            phoneInput.value = opt.getAttribute('data-phone');
+        }
+        const notes = opt.getAttribute('data-notes');
+        if (symptomInput && notes && !symptomInput.value.includes(notes)) {
+            symptomInput.value = (symptomInput.value ? symptomInput.value + ' | ' : '') + '[Tiền sử y tế: ' + notes + '] ';
+        }
+        if (badge) {
+            if (selectEl.value) {
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+        }
+        updateBookingStepper();
+    };
+
+    window.appendSymptom = function(text) {
+        const el = document.getElementById('symptom_description');
+        if (!el) return;
+        if (!el.value.trim()) {
+            el.value = text;
+        } else if (!el.value.includes(text)) {
+            el.value = el.value.trim().replace(/[.,;]+$/, '') + ', ' + text.toLowerCase();
+        }
+        el.focus();
+        updateBookingStepper();
+    };
+
+    function updateBookingStepper() {
+        const s1 = document.getElementById('stepperIndicator1');
+        const s2 = document.getElementById('stepperIndicator2');
+        const s3 = document.getElementById('stepperIndicator3');
+        if (!s1 || !s2 || !s3) return;
+
+        const step1Done = document.getElementById('specialty_id')?.value && document.getElementById('doctor_id')?.value && document.getElementById('shift')?.value;
+        const step2Done = document.getElementById('full_name')?.value && document.getElementById('phone')?.value && document.getElementById('dob')?.value && document.getElementById('gender')?.value;
+        const step3Done = document.getElementById('symptom_description')?.value?.trim().length > 0;
+
+        const activeClass = 'p-2 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 text-primary fw-semibold small';
+        const doneClass = 'p-2 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 text-success fw-semibold small';
+        const idleClass = 'p-2 rounded-3 bg-light border text-muted fw-semibold small';
+
+        s1.className = step1Done ? doneClass : activeClass;
+        s2.className = step2Done ? doneClass : (step1Done ? activeClass : idleClass);
+        s3.className = step3Done ? doneClass : (step2Done ? activeClass : idleClass);
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const specialtySelect = document.getElementById('specialty_id');
         const doctorSelect = document.getElementById('doctor_id');
@@ -242,6 +348,21 @@
         const shiftSelect = document.getElementById('shift');
         const doctorHelp = document.getElementById('doctorHelp');
         const slotNotice = document.getElementById('slotNotice');
+
+        // Auto-apply family member if selected via URL query parameter ?family_member_id=X
+        const familySelect = document.getElementById('familyMemberSelect');
+        if (familySelect && familySelect.value) {
+            window.applyFamilyMember(familySelect);
+        }
+
+        ['specialty_id', 'doctor_id', 'shift', 'full_name', 'phone', 'dob', 'gender', 'symptom_description'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', updateBookingStepper);
+                el.addEventListener('input', updateBookingStepper);
+            }
+        });
+        updateBookingStepper();
 
         // Dynamic Doctors by Specialty
         specialtySelect.addEventListener('change', function () {

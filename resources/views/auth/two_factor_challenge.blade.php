@@ -33,8 +33,14 @@
                     <form action="{{ route('two-factor.verify') }}" method="POST" id="totpForm">
                         @csrf
                         <div id="totpGroup">
-                            <label class="form-label fw-bold text-dark">Mã xác thực TOTP (6 chữ số):</label>
-                            <input type="text" name="code" class="form-control form-control-lg text-center font-monospace tracking-widest fw-bold mb-3" placeholder="------" maxlength="6" autofocus pattern="[0-9]{6}" autocomplete="one-time-code">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-bold text-dark mb-0">Mã xác thực TOTP (6 chữ số):</label>
+                                <span class="badge bg-primary-subtle text-primary font-monospace" id="challengeTotpCountdown">--s</span>
+                            </div>
+                            <input type="text" name="code" class="form-control form-control-lg text-center font-monospace tracking-widest fw-bold mb-2" placeholder="------" maxlength="6" autofocus pattern="[0-9]{6}" autocomplete="one-time-code" style="letter-spacing: 0.4em; font-size: 1.4rem;">
+                            <div class="progress mb-2" style="height: 4px;">
+                                <div id="challengeTotpBar" class="progress-bar bg-primary" style="width: 100%; transition: width 1s linear;"></div>
+                            </div>
                             <p class="small text-muted mb-3 text-center">Mở ứng dụng Google/Microsoft Authenticator để lấy mã 6 chữ số.</p>
                         </div>
 
@@ -84,5 +90,17 @@
             btn.innerText = 'Sử dụng mã khôi phục dự phòng';
         }
     }
+
+    function updateChallengeTimer() {
+        const badge = document.getElementById('challengeTotpCountdown');
+        const bar = document.getElementById('challengeTotpBar');
+        if (!badge || !bar) return;
+        const sec = 30 - (Math.floor(Date.now() / 1000) % 30);
+        badge.textContent = 'Đổi mã sau ' + sec + 's';
+        bar.style.width = ((sec / 30) * 100) + '%';
+        bar.className = sec <= 5 ? 'progress-bar bg-danger' : 'progress-bar bg-primary';
+    }
+    updateChallengeTimer();
+    setInterval(updateChallengeTimer, 1000);
 </script>
 @endsection

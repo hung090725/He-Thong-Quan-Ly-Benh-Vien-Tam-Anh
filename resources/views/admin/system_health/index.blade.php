@@ -54,11 +54,17 @@
                 </span>
             </div>
             <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded">
+                <div class="d-flex align-items-center justify-content-between mb-2 p-3 bg-light rounded">
                     <span class="text-muted fw-semibold">Độ trễ truy vấn (Query Latency):</span>
                     <span class="fs-4 fw-bold {{ $report['database']['latency_ms'] < 100 ? 'text-success' : 'text-warning' }}">
                         {{ $report['database']['latency_ms'] }} ms
                     </span>
+                </div>
+                @php
+                    $latencyPct = min(100, max(5, round(($report['database']['latency_ms'] / 100) * 100)));
+                @endphp
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar {{ $report['database']['latency_ms'] < 50 ? 'bg-success' : 'bg-warning' }}" style="width: {{ $latencyPct }}%"></div>
                 </div>
                 <ul class="list-unstyled small mb-0">
                     <li class="mb-2"><strong>Driver:</strong> <span class="font-monospace">{{ $report['database']['driver'] }}</span></li>
@@ -79,12 +85,17 @@
                 </span>
             </div>
             <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded">
+                <div class="d-flex align-items-center justify-content-between mb-2 p-3 bg-light rounded">
                     <span class="text-muted fw-semibold">Dung lượng ổ cứng trống:</span>
                     <span class="fs-4 fw-bold text-info">
                         {{ $report['storage']['free_disk_gb'] ? $report['storage']['free_disk_gb'] . ' GB' : 'N/A' }}
                     </span>
                 </div>
+                @if(!empty($report['storage']['disk_usage_percent']))
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar {{ $report['storage']['disk_usage_percent'] < 85 ? 'bg-info' : 'bg-danger' }}" style="width: {{ min(100, $report['storage']['disk_usage_percent']) }}%"></div>
+                    </div>
+                @endif
                 <ul class="list-unstyled small mb-0">
                     <li class="mb-2"><strong>Tổng dung lượng ổ:</strong> {{ $report['storage']['total_disk_gb'] ? $report['storage']['total_disk_gb'] . ' GB' : 'N/A' }}</li>
                     <li class="mb-2"><strong>Quyền ghi thư mục Storage:</strong> 

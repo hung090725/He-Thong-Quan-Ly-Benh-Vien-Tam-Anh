@@ -74,8 +74,8 @@
                 <a href="{{ route('admin.security-audit.index') }}" class="btn btn-outline-secondary" title="Xóa bộ lọc">
                     <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
-                <a href="{{ route('admin.security-audit.export', request()->query()) }}" class="btn btn-outline-success" title="Xuất CSV">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV
+                <a href="{{ route('admin.security-audit.export', request()->query()) }}" class="btn btn-outline-success text-nowrap" title="Xuất CSV chuẩn UTF-8 BOM cho Excel">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất CSV (UTF-8)
                 </a>
             </div>
         </form>

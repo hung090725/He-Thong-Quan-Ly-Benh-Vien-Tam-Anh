@@ -4,6 +4,22 @@
 
 @section('content')
 <div class="container py-4">
+    <!-- Quick Patient Portal Navigation Bar -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a href="{{ route('patient.history') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-journal-medical me-1"></i> Lịch sử khám của tôi
+        </a>
+        <a href="{{ route('patient.family.index') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+            <i class="bi bi-people-fill me-1"></i> Hồ sơ người thân & gia đình
+        </a>
+        <a href="{{ route('booking.create') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+            <i class="bi bi-calendar-plus me-1"></i> Đặt lịch khám mới
+        </a>
+        <a href="{{ route('two-factor.setup') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-shield-lock me-1"></i> Bảo mật 2FA
+        </a>
+    </div>
+
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
             <h3 class="fw-bold mb-1"><i class="bi bi-people-fill text-primary me-2"></i>Hồ Sơ Sức Khỏe Người Thân & Gia Đình</h3>

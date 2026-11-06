@@ -31,26 +31,36 @@
                 @endif
 
                 <!-- Appointment Code Highlight Box -->
-                <div class="p-3 bg-light border border-2 border-primary rounded-3 text-center mb-4">
-                    <span class="text-muted small text-uppercase fw-semibold d-block">Mã tra cứu lịch hẹn của Quý khách</span>
-                    <div class="d-flex align-items-center justify-content-center gap-2 my-2">
-                        <span class="fs-2 fw-bold text-primary font-monospace" id="appointmentCodeText">{{ $appointment->appointment_code }}</span>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2" onclick="navigator.clipboard.writeText('{{ $appointment->appointment_code }}'); alert('Đã sao chép mã hẹn!');" title="Sao chép">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                    <small class="text-danger d-block mb-3">
-                        <i class="bi bi-exclamation-circle-fill me-1"></i> Quý khách vui lòng chụp lại màn hình hoặc ghi nhớ mã số này để làm thủ tục tiếp nhận tại quầy.
-                    </small>
+                <div class="p-3 p-md-4 bg-light border border-2 border-primary rounded-3 mb-4">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-8 text-center text-md-start">
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Mã tra cứu lịch hẹn của Quý khách</span>
+                            <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 my-2">
+                                <span class="fs-2 fw-bold text-primary font-monospace" id="appointmentCodeText">{{ $appointment->appointment_code }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print" onclick="window.copyWithFeedback('{{ $appointment->appointment_code }}', this, 'Đã sao chép mã lịch hẹn {{ $appointment->appointment_code }}!')" title="Sao chép">
+                                    <i class="bi bi-clipboard me-1"></i> Sao chép
+                                </button>
+                            </div>
+                            <small class="text-danger d-block mb-3">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i> Quý khách vui lòng chụp màn hình hoặc đưa mã QR bên cạnh vào Kiosk tự phục vụ tại sảnh để check-in.
+                            </small>
 
-                    <!-- Calendar Sync Quick Actions -->
-                    <div class="d-flex flex-wrap justify-content-center gap-2 pt-2 border-top">
-                        <a href="{{ $googleCalendarUrl ?? '#' }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-google me-1"></i> Thêm vào Google Calendar
-                        </a>
-                        <a href="{{ $icsDownloadUrl ?? route('calendar.ics', $appointment->appointment_code) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-calendar-plus me-1"></i> Tải file Lịch (.ics cho iPhone/Outlook)
-                        </a>
+                            <!-- Calendar Sync Quick Actions -->
+                            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2 pt-2 border-top no-print">
+                                <a href="{{ $googleCalendarUrl ?? '#' }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-google me-1"></i> Thêm vào Google Calendar
+                                </a>
+                                <a href="{{ $icsDownloadUrl ?? route('calendar.ics', $appointment->appointment_code) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-calendar-plus me-1"></i> Tải file Lịch (.ics cho iPhone/Outlook)
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center border-start-md">
+                            <div class="p-2 bg-white border rounded-3 d-inline-block shadow-sm">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ urlencode($appointment->appointment_code) }}" alt="QR Check-in {{ $appointment->appointment_code }}" style="width: 115px; height: 115px;" class="img-fluid">
+                            </div>
+                            <div class="small text-muted fw-semibold mt-1" style="font-size: 0.72rem;">MÃ QR KIOSK CHECK-IN</div>
+                        </div>
                     </div>
                 </div>
 

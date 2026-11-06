@@ -35,7 +35,10 @@
                         </div>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-muted"></i></span>
-                            <input type="password" class="form-control border-start-0 @error('password') is-invalid @enderror" id="password" name="password" required placeholder="Nhập mật khẩu của bạn">
+                            <input type="password" class="form-control border-start-0 border-end-0 @error('password') is-invalid @enderror" id="password" name="password" required placeholder="Nhập mật khẩu của bạn">
+                            <button class="btn btn-light border border-start-0 text-muted" type="button" id="togglePasswordBtn" title="Ẩn / Hiện mật khẩu">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
                         </div>
                         @error('password')
                             <div class="text-danger small mt-1">{{ $message }}</div>
@@ -54,28 +57,33 @@
                         </a>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
+                    <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
                         <i class="bi bi-box-arrow-in-right me-1"></i> ĐĂNG NHẬP
                     </button>
                 </form>
 
                 <!-- Quick Test Credentials Box (For Project Defense & Review) -->
                 <div class="mt-4 pt-3 border-top">
-                    <div class="text-center small text-muted fw-semibold mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
-                        Tài khoản mẫu để demo (Mật khẩu chung: <code>123456</code>)
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-muted fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Tài khoản mẫu Demo (Mật khẩu: <code>123456</code>)
+                        </span>
+                        <span id="quickLoginFeedback" class="badge bg-success-subtle text-success d-none" style="font-size: 0.68rem;">
+                            <i class="bi bi-check2-circle"></i> Đã điền!
+                        </span>
                     </div>
                     <div class="d-grid gap-2">
                         <div class="btn-group btn-group-sm w-100" role="group">
-                            <button type="button" class="btn btn-outline-danger btn-quick-login" data-email="admin@tamanh.vn">
+                            <button type="button" class="btn btn-outline-danger btn-quick-login" data-email="admin@tamanh.vn" data-role="Quản trị viên">
                                 <i class="bi bi-shield-check"></i> Admin
                             </button>
-                            <button type="button" class="btn btn-outline-info text-dark btn-quick-login" data-email="receptionist@tamanh.vn">
+                            <button type="button" class="btn btn-outline-info text-dark btn-quick-login" data-email="receptionist@tamanh.vn" data-role="Lễ tân">
                                 <i class="bi bi-person-badge"></i> Lễ tân
                             </button>
-                            <button type="button" class="btn btn-outline-primary btn-quick-login" data-email="vandat271205@gmail.com">
+                            <button type="button" class="btn btn-outline-primary btn-quick-login" data-email="vandat271205@gmail.com" data-role="Bác sĩ">
                                 <i class="bi bi-heart-pulse"></i> Bác sĩ
                             </button>
-                            <button type="button" class="btn btn-outline-success btn-quick-login" data-email="patient@gmail.com">
+                            <button type="button" class="btn btn-outline-success btn-quick-login" data-email="patient@gmail.com" data-role="Bệnh nhân">
                                 <i class="bi bi-person"></i> Bệnh nhân
                             </button>
                         </div>
@@ -93,10 +101,29 @@
 
 @push('scripts')
 <script>
+    const pwdInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+    if (toggleBtn && pwdInput) {
+        toggleBtn.addEventListener('click', function () {
+            const isPwd = pwdInput.type === 'password';
+            pwdInput.type = isPwd ? 'text' : 'password';
+            toggleIcon.className = isPwd ? 'bi bi-eye-slash text-primary' : 'bi bi-eye';
+        });
+    }
+
     document.querySelectorAll('.btn-quick-login').forEach(btn => {
         btn.addEventListener('click', function () {
             document.getElementById('email').value = this.getAttribute('data-email');
             document.getElementById('password').value = '123456';
+
+            const feedback = document.getElementById('quickLoginFeedback');
+            if (feedback) {
+                feedback.innerHTML = '<i class="bi bi-check2-circle"></i> Đã chọn: ' + (this.getAttribute('data-role') || '');
+                feedback.classList.remove('d-none');
+            }
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            if (submitBtn) submitBtn.focus();
         });
     });
 </script>

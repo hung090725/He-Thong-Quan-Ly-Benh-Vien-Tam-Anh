@@ -99,7 +99,6 @@ erDiagram
 - **Tiêu chí hoàn thành:** Toàn bộ 10 phân hệ kiến trúc đã hoạt động mượt mà, 11/11 automated tests trong `TechLeadInnovationSuiteTest` đạt 100% Green.
 
 ### 2. NGUYỄN VĂN ĐẠT (Chuyên khoa, Đội ngũ Bác sĩ & Smart Clinical Portal)
-- **Tài liệu báo cáo chuyên môn chi tiết:** [bao_cao_nang_cap_module_chuyen_khoa_bac_si.md](./bao_cao_nang_cap_module_chuyen_khoa_bac_si.md)
 - **Chi nhánh phát triển:** `feature/doctors-and-specialties` (Pull Request #1 & Pull Request #7 - Đã Merge 100% vào `main`)
 - **Kiểm thử tự động:** **23/23 tests pass 100% Green** (62 assertions, 0 errors)
 - **Phạm vi phụ trách mở rộng & Đóng góp toàn diện (20 Chức năng xuất sắc):**

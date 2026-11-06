@@ -35,16 +35,62 @@
             <!-- Single exact Appointment result -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center border-bottom">
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
                         <span class="text-muted small">Phiếu hẹn:</span>
-                        <strong class="fs-5 text-primary ms-1 font-monospace">{{ $appointment->appointment_code }}</strong>
+                        <strong class="fs-5 text-primary font-monospace">{{ $appointment->appointment_code }}</strong>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-2 py-0 small" onclick="window.copyWithFeedback('{{ $appointment->appointment_code }}', this, 'Đã sao chép mã hẹn!')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
                     </div>
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ route('calendar.ics', $appointment->appointment_code) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-calendar-plus me-1"></i> Tải lịch (.ics)
+                        </a>
                         <x-status-badge :status="$appointment->status" />
                     </div>
                 </div>
 
                 <div class="card-body p-4">
+                    <!-- 4-Step Visual Appointment Progress Timeline -->
+                    @if($appointment->status !== 'cancelled')
+                        @php
+                            $stepRank = match($appointment->status) {
+                                'waitlist', 'pending' => 1,
+                                'confirmed' => 2,
+                                'in_progress' => 3,
+                                'completed' => 4,
+                                default => 1,
+                            };
+                        @endphp
+                        <div class="p-3 bg-light rounded-3 border mb-4">
+                            <div class="row text-center g-2">
+                                <div class="col-3">
+                                    <div class="fw-bold small {{ $stepRank >= 1 ? 'text-primary' : 'text-muted' }}">
+                                        <i class="bi {{ $stepRank > 1 ? 'bi-check-circle-fill text-success' : 'bi-1-circle-fill' }} d-block fs-4 mb-1"></i>
+                                        {{ $appointment->status === 'waitlist' ? 'Danh sách chờ' : 'Đã đăng ký' }}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="fw-bold small {{ $stepRank >= 2 ? 'text-primary' : 'text-muted' }}">
+                                        <i class="bi {{ $stepRank > 2 ? 'bi-check-circle-fill text-success' : ($stepRank == 2 ? 'bi-2-circle-fill' : 'bi-2-circle') }} d-block fs-4 mb-1"></i>
+                                        Đã tiếp nhận
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="fw-bold small {{ $stepRank >= 3 ? 'text-info' : 'text-muted' }}">
+                                        <i class="bi {{ $stepRank > 3 ? 'bi-check-circle-fill text-success' : ($stepRank == 3 ? 'bi-3-circle-fill' : 'bi-3-circle') }} d-block fs-4 mb-1"></i>
+                                        Đang khám
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="fw-bold small {{ $stepRank >= 4 ? 'text-success' : 'text-muted' }}">
+                                        <i class="bi {{ $stepRank >= 4 ? 'bi-check-circle-fill text-success' : 'bi-4-circle' }} d-block fs-4 mb-1"></i>
+                                        Hoàn tất
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <span class="text-muted small d-block">Họ và tên bệnh nhân:</span>

@@ -2,6 +2,7 @@
 
 @php
     $badgeClass = match ($status) {
+        'waitlist' => 'bg-warning-subtle text-warning-emphasis border border-warning',
         'pending' => 'bg-warning text-dark',
         'confirmed' => 'bg-primary text-white',
         'in_progress' => 'bg-info text-white',
@@ -11,6 +12,7 @@
     };
 
     $label = match ($status) {
+        'waitlist' => 'Danh sách chờ (Waitlist)',
         'pending' => 'Chờ tiếp nhận',
         'confirmed' => 'Đã tiếp nhận (Chờ khám)',
         'in_progress' => 'Đang khám',
@@ -20,6 +22,7 @@
     };
 
     $icon = match ($status) {
+        'waitlist' => 'bi-hourglass-top',
         'pending' => 'bi-hourglass-split',
         'confirmed' => 'bi-calendar-check',
         'in_progress' => 'bi-activity',

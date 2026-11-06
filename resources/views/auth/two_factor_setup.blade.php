@@ -6,6 +6,30 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <!-- Quick Security Navigation Bar -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('two-factor.setup') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Xác thực 2 bước (2FA)
+                    </a>
+                    <a href="{{ route('sessions.index') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-display me-1"></i> Phiên thiết bị
+                    </a>
+                    <a href="{{ route('profile.password') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-key me-1"></i> Đổi mật khẩu
+                    </a>
+                </div>
+                @if(Auth::user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                        <i class="bi bi-speedometer2 me-1"></i> Về Dashboard Admin
+                    </a>
+                @elseif(Auth::user()->isPatient())
+                    <a href="{{ route('patient.history') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                        <i class="bi bi-journal-medical me-1"></i> Về Lịch sử khám
+                    </a>
+                @endif
+            </div>
+
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between py-3">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2"></i>Xác Thực 2 Bước (Two-Factor Authentication - 2FA)</h5>
@@ -50,12 +74,18 @@
                                 <div class="mt-2 text-muted small">Quét mã bằng Google Authenticator</div>
                             </div>
                             <div class="col-md-7">
-                                <label class="form-label fw-bold small text-muted">HOẶC NHẬP MÃ THỦ CÔNG (SECRET KEY):</label>
+                                <label class="form-label fw-bold small text-muted">HOẶC NHẬP MÃ THỦ CÔNG (SECRET KEY - BASE32):</label>
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control font-monospace fw-bold bg-light" value="{{ $secret }}" readonly id="secretKeyInput">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ $secret }}'); alert('Đã sao chép Secret Key!');">
+                                    <button class="btn btn-outline-primary" type="button" onclick="window.copyWithFeedback('{{ $secret }}', this, 'Đã sao chép khóa bí mật Secret Key (Base32)!')">
                                         <i class="bi bi-clipboard"></i> Sao chép
                                     </button>
+                                </div>
+
+                                <!-- Live RFC 6238 30s Window Countdown -->
+                                <div class="p-2 px-3 bg-light border rounded mb-3 d-flex align-items-center justify-content-between">
+                                    <span class="small text-muted"><i class="bi bi-clock-history text-primary me-1"></i>Chu kỳ mã TOTP RFC 6238 (30s):</span>
+                                    <span class="badge bg-primary rounded-pill font-monospace" id="totpTimerBadge">--s</span>
                                 </div>
 
                                 <form action="{{ route('two-factor.confirm') }}" method="POST">
@@ -67,14 +97,24 @@
                                             <i class="bi bi-check2-circle me-1"></i>Kích hoạt 2FA
                                         </button>
                                     </div>
-                                    <small class="text-muted d-block mt-1">Mã xác thực thay đổi sau mỗi 30 giây.</small>
+                                    <small class="text-muted d-block mt-1">Mã xác thực thay đổi tự động sau mỗi 30 giây theo chuẩn HMAC-SHA1.</small>
                                 </form>
                             </div>
                         </div>
 
                         @if(!empty($recoveryCodes))
                             <div class="mt-4 pt-3 border-top">
-                                <h6 class="fw-bold text-danger mb-2"><i class="bi bi-key-fill me-1"></i>Mã khôi phục dự phòng (Recovery Codes):</h6>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                    <h6 class="fw-bold text-danger mb-0"><i class="bi bi-key-fill me-1"></i>Mã khôi phục dự phòng (Recovery Codes):</h6>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.copyWithFeedback('{{ implode('\n', $recoveryCodes) }}', this, 'Đã sao chép toàn bộ mã khôi phục dự phòng!')">
+                                            <i class="bi bi-clipboard-check me-1"></i>Sao chép tất cả
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="downloadRecoveryTxt('{{ implode('\n', $recoveryCodes) }}')">
+                                            <i class="bi bi-download me-1"></i>Tải file (.txt)
+                                        </button>
+                                    </div>
+                                </div>
                                 <p class="small text-muted mb-2">Lưu lại các mã này ở nơi an toàn. Mỗi mã chỉ dùng được 01 lần khi bạn bị mất quyền truy cập thiết bị xác thực:</p>
                                 <div class="row g-2">
                                     @foreach($recoveryCodes as $rc)
@@ -132,4 +172,35 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function updateTotpCountdown() {
+        const badge = document.getElementById('totpTimerBadge');
+        if (!badge) return;
+        const sec = 30 - (Math.floor(Date.now() / 1000) % 30);
+        badge.textContent = 'Còn ' + sec + 's';
+        badge.className = sec <= 5
+            ? 'badge bg-danger rounded-pill font-monospace'
+            : 'badge bg-primary rounded-pill font-monospace';
+    }
+    updateTotpCountdown();
+    setInterval(updateTotpCountdown, 1000);
+
+    function downloadRecoveryTxt(codesText) {
+        const content = "MÃ KHÔI PHỤC KHẨN CẤP (2FA RECOVERY CODES) - BỆNH VIỆN TÂM ANH\n"
+            + "Tài khoản: {{ Auth::user()->email }}\n"
+            + "Ngày xuất: " + new Date().toLocaleString('vi-VN') + "\n"
+            + "------------------------------------------------------------\n"
+            + codesText + "\n"
+            + "------------------------------------------------------------\n"
+            + "Lưu ý: Mỗi mã chỉ sử dụng được 01 lần duy nhất.";
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'tamanh-2fa-recovery-codes.txt';
+        link.click();
+    }
+</script>
+@endpush
 @endsection
