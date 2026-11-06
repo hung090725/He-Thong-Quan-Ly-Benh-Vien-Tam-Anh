@@ -107,12 +107,23 @@
     <div class="card-body p-3">
         <form id="specialtyFilterForm" method="GET" action="{{ route('admin.specialties.index') }}" class="row g-2 align-items-center">
             <div class="col-md-7 col-lg-6">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" id="specialtySearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Nhập 1 chữ để tìm kiếm ngay lập tức..." autocomplete="off">
-                    <span id="specialtySearchSpinner" class="input-group-text bg-white border-start-0 d-none">
-                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
-                    </span>
+                <div class="position-relative">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="specialtySearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm theo tên chuyên khoa hoặc mô tả..." autocomplete="off">
+                        <button type="button" id="specialtyClearBtn" class="btn btn-outline-light text-muted border-start-0 border {{ request('search') ? '' : 'd-none' }}" title="Xóa tìm kiếm">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+
+                    <!-- Instant Dropdown Suggestions List -->
+                    <div id="specialtySuggestionsBox" class="position-absolute start-0 w-100 bg-white border rounded-3 shadow-lg mt-1 p-2 d-none" style="z-index: 1060; max-height: 320px; overflow-y: auto;">
+                        <div class="small fw-semibold text-muted px-2 py-1 border-bottom mb-1 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-list-check text-primary me-1"></i> Kết quả gợi ý nhanh</span>
+                            <span class="badge bg-light text-muted" id="specialtySuggestCount">0 chuyên khoa</span>
+                        </div>
+                        <div id="specialtySuggestionsList" class="list-group list-group-flush"></div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 col-lg-3">
@@ -299,13 +310,70 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 3. Tự Động Lọc & Tìm Kiếm Tức Thì (Instant Live Filter & Search)
+    // 3. Tự Động Lọc & Tìm Kiếm Tức Thì (Instant Live Filter & Search With Dropdown Suggestions)
     const filterForm = document.getElementById('specialtyFilterForm');
     const searchInput = document.getElementById('specialtySearchInput');
     const statusSelect = document.getElementById('specialtyStatusSelect');
     const tableContainer = document.getElementById('specialtiesTableContainer');
-    const searchSpinner = document.getElementById('specialtySearchSpinner');
+    const clearBtn = document.getElementById('specialtyClearBtn');
+    const suggestionsBox = document.getElementById('specialtySuggestionsBox');
+    const suggestionsList = document.getElementById('specialtySuggestionsList');
+    const suggestCount = document.getElementById('specialtySuggestCount');
     let debounceTimer = null;
+
+    function fetchSuggestions(query) {
+        if (!suggestionsBox || !suggestionsList) return;
+        if (!query || query.trim().length === 0) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+
+        const url = `${filterForm.action}?format=json&search=${encodeURIComponent(query)}`;
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(res => res.json())
+            .then(res => {
+                const items = res.data || [];
+                if (suggestCount) suggestCount.textContent = `${items.length} chuyên khoa`;
+
+                if (items.length === 0) {
+                    suggestionsList.innerHTML = `
+                        <div class="p-3 text-center text-muted small">
+                            <i class="bi bi-search me-1"></i> Không tìm thấy chuyên khoa nào khớp với "<strong>${query}</strong>"
+                        </div>`;
+                } else {
+                    suggestionsList.innerHTML = items.map(item => `
+                        <div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 border-0 rounded-2 mb-1 specialty-suggestion-item" style="cursor: pointer;" data-name="${item.name}">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                                    <i class="${item.icon}"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark small">${item.name}</div>
+                                    <small class="text-muted">${item.doctors_count} bác sĩ &bull; ${item.slug}</small>
+                                </div>
+                            </div>
+                            <span class="badge ${item.is_active ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'} small">
+                                ${item.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                            </span>
+                        </div>
+                    `).join('');
+
+                    // Bind click on suggestions
+                    suggestionsList.querySelectorAll('.specialty-suggestion-item').forEach(el => {
+                        el.addEventListener('click', function () {
+                            searchInput.value = this.dataset.name;
+                            suggestionsBox.classList.add('d-none');
+                            if (clearBtn) clearBtn.classList.remove('d-none');
+                            executeLiveSearch();
+                        });
+                    });
+                }
+                suggestionsBox.classList.remove('d-none');
+            })
+            .catch(() => {
+                suggestionsBox.classList.add('d-none');
+            });
+    }
 
     function executeLiveSearch() {
         if (!filterForm || !tableContainer) return;
@@ -314,9 +382,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const params = new URLSearchParams(formData);
         const targetUrl = filterForm.action + '?' + params.toString();
 
-        if (searchSpinner) searchSpinner.classList.remove('d-none');
-        tableContainer.style.opacity = '0.5';
-        tableContainer.style.transition = 'opacity 0.2s ease';
+        if (clearBtn) {
+            clearBtn.classList.toggle('d-none', !searchInput.value);
+        }
 
         fetch(targetUrl, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -333,25 +401,55 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(() => {
             filterForm.submit();
-        })
-        .finally(() => {
-            if (searchSpinner) searchSpinner.classList.add('d-none');
-            tableContainer.style.opacity = '1';
         });
     }
 
     if (searchInput) {
         searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(executeLiveSearch, 250);
+            debounceTimer = setTimeout(() => {
+                fetchSuggestions(query);
+                executeLiveSearch();
+            }, 180);
+        });
+
+        searchInput.addEventListener('focus', function () {
+            if (this.value.trim().length > 0) {
+                fetchSuggestions(this.value.trim());
+            }
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            clearBtn.classList.add('d-none');
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            executeLiveSearch();
+            searchInput.focus();
         });
     }
 
     if (statusSelect) {
         statusSelect.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
             executeLiveSearch();
         });
     }
+
+    // Close suggestions box on outside click or Escape
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#specialtyFilterForm')) {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && suggestionsBox) {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
 });
 </script>
 @endpush

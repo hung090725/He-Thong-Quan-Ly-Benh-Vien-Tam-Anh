@@ -75,12 +75,23 @@
     <div class="card-body p-3">
         <form id="doctorFilterForm" method="GET" action="{{ route('admin.doctors.index') }}" class="row g-2 align-items-center">
             <div class="col-md-5 col-lg-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" id="doctorSearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Nhập 1 chữ để tìm kiếm ngay lập tức..." autocomplete="off">
-                    <span id="doctorSearchSpinner" class="input-group-text bg-white border-start-0 d-none">
-                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
-                    </span>
+                <div class="position-relative">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="doctorSearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm tên bác sĩ, chuyên khoa, phòng khám..." autocomplete="off">
+                        <button type="button" id="doctorClearBtn" class="btn btn-outline-light text-muted border-start-0 border {{ request('search') ? '' : 'd-none' }}" title="Xóa tìm kiếm">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+
+                    <!-- Instant Dropdown Suggestions List -->
+                    <div id="doctorSuggestionsBox" class="position-absolute start-0 w-100 bg-white border rounded-3 shadow-lg mt-1 p-2 d-none" style="z-index: 1060; max-height: 340px; overflow-y: auto;">
+                        <div class="small fw-semibold text-muted px-2 py-1 border-bottom mb-1 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-person-check text-primary me-1"></i> Bác sĩ phù hợp</span>
+                            <span class="badge bg-light text-muted" id="doctorSuggestCount">0 bác sĩ</span>
+                        </div>
+                        <div id="doctorSuggestionsList" class="list-group list-group-flush"></div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 col-lg-3">
@@ -235,8 +246,64 @@ document.addEventListener('DOMContentLoaded', function () {
     const specialtySelect = document.getElementById('doctorSpecialtySelect');
     const availabilitySelect = document.getElementById('doctorAvailabilitySelect');
     const tableContainer = document.getElementById('doctorsTableContainer');
-    const searchSpinner = document.getElementById('doctorSearchSpinner');
+    const clearBtn = document.getElementById('doctorClearBtn');
+    const suggestionsBox = document.getElementById('doctorSuggestionsBox');
+    const suggestionsList = document.getElementById('doctorSuggestionsList');
+    const suggestCount = document.getElementById('doctorSuggestCount');
     let debounceTimer = null;
+
+    function fetchDoctorSuggestions(query) {
+        if (!suggestionsBox || !suggestionsList) return;
+        if (!query || query.trim().length === 0) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+
+        const url = `${filterForm.action}?format=json&search=${encodeURIComponent(query)}`;
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(res => res.json())
+            .then(res => {
+                const items = res.data || [];
+                if (suggestCount) suggestCount.textContent = `${items.length} bác sĩ`;
+
+                if (items.length === 0) {
+                    suggestionsList.innerHTML = `
+                        <div class="p-3 text-center text-muted small">
+                            <i class="bi bi-search me-1"></i> Không tìm thấy bác sĩ nào khớp với "<strong>${query}</strong>"
+                        </div>`;
+                } else {
+                    suggestionsList.innerHTML = items.map(item => `
+                        <div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 border-0 rounded-2 mb-1 doctor-suggestion-item" style="cursor: pointer;" data-name="${item.name}">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center overflow-hidden fw-bold" style="width: 36px; height: 36px; border: 1px solid #e2e8f0;">
+                                    ${item.avatar ? `<img src="${item.avatar}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="bi bi-person-fill"></i>'}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark small">${item.name}</div>
+                                    <small class="text-muted">${item.specialty} &bull; ${item.room} &bull; <span class="text-primary">${item.fee}</span></small>
+                                </div>
+                            </div>
+                            <span class="badge ${item.is_available ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'} small">
+                                ${item.is_available ? 'Sẵn sàng' : 'Tạm dừng'}
+                            </span>
+                        </div>
+                    `).join('');
+
+                    suggestionsList.querySelectorAll('.doctor-suggestion-item').forEach(el => {
+                        el.addEventListener('click', function () {
+                            searchInput.value = this.dataset.name;
+                            suggestionsBox.classList.add('d-none');
+                            if (clearBtn) clearBtn.classList.remove('d-none');
+                            executeLiveSearch();
+                        });
+                    });
+                }
+                suggestionsBox.classList.remove('d-none');
+            })
+            .catch(() => {
+                suggestionsBox.classList.add('d-none');
+            });
+    }
 
     function executeLiveSearch() {
         if (!filterForm || !tableContainer) return;
@@ -245,9 +312,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const params = new URLSearchParams(formData);
         const targetUrl = filterForm.action + '?' + params.toString();
 
-        if (searchSpinner) searchSpinner.classList.remove('d-none');
-        tableContainer.style.opacity = '0.5';
-        tableContainer.style.transition = 'opacity 0.2s ease';
+        if (clearBtn) {
+            clearBtn.classList.toggle('d-none', !searchInput.value);
+        }
 
         fetch(targetUrl, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -264,31 +331,61 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(() => {
             filterForm.submit();
-        })
-        .finally(() => {
-            if (searchSpinner) searchSpinner.classList.add('d-none');
-            tableContainer.style.opacity = '1';
         });
     }
 
     if (searchInput) {
         searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(executeLiveSearch, 250);
+            debounceTimer = setTimeout(() => {
+                fetchDoctorSuggestions(query);
+                executeLiveSearch();
+            }, 180);
+        });
+
+        searchInput.addEventListener('focus', function () {
+            if (this.value.trim().length > 0) {
+                fetchDoctorSuggestions(this.value.trim());
+            }
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            clearBtn.classList.add('d-none');
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            executeLiveSearch();
+            searchInput.focus();
         });
     }
 
     if (specialtySelect) {
         specialtySelect.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
             executeLiveSearch();
         });
     }
 
     if (availabilitySelect) {
         availabilitySelect.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
             executeLiveSearch();
         });
     }
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#doctorFilterForm')) {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && suggestionsBox) {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
 });
 </script>
 @endpush

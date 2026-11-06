@@ -51,6 +51,22 @@ class DoctorPublicController extends Controller
         $doctors = $query->paginate(9)->withQueryString();
         $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
 
+        if ($request->wantsJson() || $request->input('format') === 'json') {
+            return response()->json([
+                'data' => $doctors->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'name' => $doc->full_name_with_title,
+                        'specialty' => $doc->specialty ? $doc->specialty->name : '',
+                        'room' => $doc->room_number,
+                        'avatar' => $doc->avatar_url,
+                        'url' => route('public.doctors.show', $doc),
+                    ];
+                }),
+                'total' => $doctors->total(),
+            ]);
+        }
+
         if ($request->ajax()) {
             return view('public.doctors.partials.doctor_grid', compact('doctors'));
         }

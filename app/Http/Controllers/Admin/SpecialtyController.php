@@ -17,7 +17,7 @@ class SpecialtyController extends Controller
     /**
      * Display a listing of the specialties.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\JsonResponse
     {
         $query = Specialty::query()->withCount('doctors');
 
@@ -33,6 +33,24 @@ class SpecialtyController extends Controller
         }
 
         $specialties = $query->latest()->paginate(10)->withQueryString();
+
+        if ($request->wantsJson() || $request->input('format') === 'json') {
+            return response()->json([
+                'data' => $specialties->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'slug' => $item->slug,
+                        'description' => $item->description,
+                        'icon' => $item->icon ?: 'bi bi-heart-pulse',
+                        'doctors_count' => $item->doctors_count,
+                        'is_active' => (bool)$item->is_active,
+                        'url' => route('admin.specialties.show', $item),
+                    ];
+                }),
+                'total' => $specialties->total(),
+            ]);
+        }
 
         $stats = [
             'total' => Specialty::count(),
