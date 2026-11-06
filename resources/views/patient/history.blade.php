@@ -5,6 +5,9 @@
 @section('content')
 <x-page-header title="Lịch Sử Khám Bệnh" subtitle="Theo dõi danh sách các cuộc hẹn, tiến trình khám và kết quả điều trị của bạn">
     <x-slot:actions>
+        <a href="{{ route('patient.family.index') }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-1">
+            <i class="bi bi-people-fill"></i> Hồ sơ người thân
+        </a>
         <a href="{{ route('booking.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1">
             <i class="bi bi-calendar-plus-fill"></i> Đặt lịch khám mới
         </a>
@@ -35,7 +38,7 @@
                     <h5 class="fw-bold mb-1 text-dark">{{ $patientProfile->full_name }}</h5>
                     <div class="d-flex flex-wrap gap-3 small text-muted">
                         <span>Mã BN: <strong class="text-primary font-monospace">{{ $patientProfile->patient_code }}</strong></span>
-                        <span>Ngày sinh: <strong>{{ $patientProfile->dob->format('d/m/Y') }}</strong></span>
+                        <span>Ngày sinh: <strong>{{ $patientProfile->dob?->format('d/m/Y') ?? 'Chưa cập nhật' }}</strong></span>
                         <span>Giới tính: <strong>{{ $patientProfile->gender_name }}</strong></span>
                         <span>SĐT: <strong>{{ $patientProfile->phone }}</strong></span>
                     </div>
@@ -48,6 +51,9 @@
     <div class="d-flex flex-wrap gap-2 mb-3">
         <a href="{{ route('patient.history') }}" class="btn btn-sm {{ !request('status') ? 'btn-primary' : 'btn-outline-secondary' }} rounded-pill px-3">
             Tất cả
+        </a>
+        <a href="{{ route('patient.history', ['status' => 'waitlist']) }}" class="btn btn-sm {{ request('status') === 'waitlist' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark' }} rounded-pill px-3">
+            Danh sách chờ (Waitlist)
         </a>
         <a href="{{ route('patient.history', ['status' => 'pending']) }}" class="btn btn-sm {{ request('status') === 'pending' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark' }} rounded-pill px-3">
             Chờ tiếp nhận
@@ -112,7 +118,7 @@
                                                 <i class="bi bi-calendar2-range"></i> Đổi
                                             </a>
                                         @endif
-                                        @if($app->status === 'pending')
+                                        @if(in_array($app->status, ['pending', 'confirmed', 'waitlist']))
                                             <button type="button" class="btn btn-outline-danger" title="Hủy lịch hẹn" data-bs-toggle="modal" data-bs-target="#cancelModal-{{ $app->id }}">
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
@@ -120,7 +126,7 @@
                                     </div>
 
                                     <!-- Modal Cancel Appointment -->
-                                    @if($app->status === 'pending')
+                                    @if(in_array($app->status, ['pending', 'confirmed', 'waitlist']))
                                         <div class="modal fade" id="cancelModal-{{ $app->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content text-start">

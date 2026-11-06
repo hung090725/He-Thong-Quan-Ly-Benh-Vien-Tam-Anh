@@ -35,7 +35,10 @@
                         </div>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-muted"></i></span>
-                            <input type="password" class="form-control border-start-0 @error('password') is-invalid @enderror" id="password" name="password" required placeholder="Nhập mật khẩu của bạn">
+                            <input type="password" class="form-control border-start-0 border-end-0 @error('password') is-invalid @enderror" id="password" name="password" required placeholder="Nhập mật khẩu của bạn">
+                            <button class="btn btn-light border border-start-0 text-muted" type="button" id="togglePasswordBtn" title="Ẩn / Hiện mật khẩu">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
                         </div>
                         @error('password')
                             <div class="text-danger small mt-1">{{ $message }}</div>
@@ -54,33 +57,10 @@
                         </a>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
+                    <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm">
                         <i class="bi bi-box-arrow-in-right me-1"></i> ĐĂNG NHẬP
                     </button>
                 </form>
-
-                <!-- Quick Test Credentials Box (For Project Defense & Review) -->
-                <div class="mt-4 pt-3 border-top">
-                    <div class="text-center small text-muted fw-semibold mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
-                        Tài khoản mẫu để demo (Mật khẩu chung: <code>123456</code>)
-                    </div>
-                    <div class="d-grid gap-2">
-                        <div class="btn-group btn-group-sm w-100" role="group">
-                            <button type="button" class="btn btn-outline-danger btn-quick-login" data-email="admin@tamanh.vn">
-                                <i class="bi bi-shield-check"></i> Admin
-                            </button>
-                            <button type="button" class="btn btn-outline-info text-dark btn-quick-login" data-email="receptionist@tamanh.vn">
-                                <i class="bi bi-person-badge"></i> Lễ tân
-                            </button>
-                            <button type="button" class="btn btn-outline-primary btn-quick-login" data-email="doctor@tamanh.vn">
-                                <i class="bi bi-heart-pulse"></i> Bác sĩ
-                            </button>
-                            <button type="button" class="btn btn-outline-success btn-quick-login" data-email="patient@gmail.com">
-                                <i class="bi bi-person"></i> Bệnh nhân
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
             </div>
             <div class="card-footer bg-light text-center py-3 border-0 small text-muted">
@@ -93,11 +73,15 @@
 
 @push('scripts')
 <script>
-    document.querySelectorAll('.btn-quick-login').forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.getElementById('email').value = this.getAttribute('data-email');
-            document.getElementById('password').value = '123456';
+    const pwdInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+    if (toggleBtn && pwdInput) {
+        toggleBtn.addEventListener('click', function () {
+            const isPwd = pwdInput.type === 'password';
+            pwdInput.type = isPwd ? 'text' : 'password';
+            toggleIcon.className = isPwd ? 'bi bi-eye-slash text-primary' : 'bi bi-eye';
         });
-    });
+    }
 </script>
 @endpush

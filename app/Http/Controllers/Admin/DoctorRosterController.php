@@ -20,7 +20,7 @@ class DoctorRosterController extends Controller
         $selectedSpecialtyId = $request->input('specialty_id');
 
         $query = DoctorSchedule::query()
-            ->with(['doctor.user', 'doctor.specialty'])
+            ->with(['doctor.user', 'doctor.specialty', 'doctor.leaves.substituteDoctor.user'])
             ->where('is_active', true)
             ->whereHas('doctor', function ($dq) {
                 $dq->where('is_available', true);
@@ -33,6 +33,13 @@ class DoctorRosterController extends Controller
         }
 
         $allSchedules = $query->get();
+
+        $startOfWeek = now()->startOfWeek();
+        $weekDates = [];
+        $dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        foreach ($dayKeys as $idx => $dKey) {
+            $weekDates[$dKey] = $startOfWeek->copy()->addDays($idx)->toDateString();
+        }
 
         $days = [
             'monday' => 'Thứ Hai',
@@ -74,8 +81,35 @@ class DoctorRosterController extends Controller
         $coverageWarnings = [];
 
         foreach (array_keys($days) as $day) {
+            $dayDate = $weekDates[$day];
             foreach (array_keys($shifts) as $shift) {
                 $slotSchedules = $matrix[$day][$shift];
+
+                // Check for doctors on approved leave during this shift
+                foreach ($slotSchedules as $sched) {
+                    $doc = $sched->doctor;
+                    if (!$doc) continue;
+                    $leave = $doc->leaves
+                        ->where('status', 'approved')
+                        ->first(function ($l) use ($dayDate) {
+                            $s = \Carbon\Carbon::parse($l->start_date)->toDateString();
+                            $e = \Carbon\Carbon::parse($l->end_date)->toDateString();
+                            return $dayDate >= $s && $dayDate <= $e;
+                        });
+
+                    if ($leave) {
+                        $sub = $leave->substituteDoctor;
+                        $conflicts[] = [
+                            'type' => 'doctor_on_leave',
+                            'severity' => 'warning',
+                            'day' => $days[$day],
+                            'shift' => $shifts[$shift]['label'],
+                            'doctor_name' => $doc->full_name_with_title,
+                            'message' => "Bác sĩ {$doc->full_name_with_title} có ca trực {$shifts[$shift]['label']} ({$days[$day]}) nhưng ĐANG NGHỈ PHÉP: \"{$leave->reason}\"" . ($sub ? " (Đã có BS {$sub->full_name_with_title} trực thay)." : " (Chưa có bác sĩ trực thay!)."),
+                            'doctor_id' => $doc->id,
+                        ];
+                    }
+                }
 
                 // 1. Double Booking: Same doctor scheduled multiple times in same slot
                 $doctorCounts = $slotSchedules->groupBy('doctor_id');
@@ -152,7 +186,8 @@ class DoctorRosterController extends Controller
             'selectedSpecialtyId',
             'conflicts',
             'coverageWarnings',
-            'stats'
+            'stats',
+            'weekDates'
         ));
     }
 }

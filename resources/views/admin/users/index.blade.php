@@ -11,6 +11,71 @@
     </x-slot:actions>
 </x-page-header>
 
+@php
+    $roleCounts = [
+        'admin' => \App\Models\User::where('role', 'admin')->count(),
+        'doctor' => \App\Models\User::where('role', 'doctor')->count(),
+        'receptionist' => \App\Models\User::where('role', 'receptionist')->count(),
+        'patient' => \App\Models\User::where('role', 'patient')->count(),
+    ];
+@endphp
+
+<!-- Role Summary Quick-Filter KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="{{ route('admin.users.index', ['role' => 'admin']) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Quản trị viên (Admin)</span>
+                        <div class="fs-4 fw-bold text-danger mt-1">{{ number_format($roleCounts['admin']) }}</div>
+                    </div>
+                    <i class="bi bi-shield-lock-fill fs-2 text-danger opacity-50"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ route('admin.users.index', ['role' => 'doctor']) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-4 border-primary h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Bác sĩ (Doctor)</span>
+                        <div class="fs-4 fw-bold text-primary mt-1">{{ number_format($roleCounts['doctor']) }}</div>
+                    </div>
+                    <i class="bi bi-heart-pulse-fill fs-2 text-primary opacity-50"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ route('admin.users.index', ['role' => 'receptionist']) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-4 border-info h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Lễ tân & Điều dưỡng</span>
+                        <div class="fs-4 fw-bold text-info mt-1">{{ number_format($roleCounts['receptionist']) }}</div>
+                    </div>
+                    <i class="bi bi-person-badge-fill fs-2 text-info opacity-50"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ route('admin.users.index', ['role' => 'patient']) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-4 border-success h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Bệnh nhân (Patient)</span>
+                        <div class="fs-4 fw-bold text-success mt-1">{{ number_format($roleCounts['patient']) }}</div>
+                    </div>
+                    <i class="bi bi-people-fill fs-2 text-success opacity-50"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
 <!-- Filter & Search Card -->
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-3">

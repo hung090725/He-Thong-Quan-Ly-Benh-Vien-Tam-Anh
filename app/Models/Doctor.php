@@ -15,18 +15,31 @@ class Doctor extends Model
         'user_id',
         'specialty_id',
         'qualification',
+        'cchn_number',
+        'cchn_issued_date',
+        'cchn_expiry_date',
+        'cchn_issuer',
         'consultation_fee',
         'bio',
         'room_number',
+        'building',
+        'floor',
         'avatar',
         'is_available',
+        'rating_avg',
+        'rating_count',
+        'qualification_en',
+        'bio_en',
     ];
 
     protected function casts(): array
     {
         return [
             'consultation_fee' => 'decimal:2',
+            'rating_avg' => 'decimal:2',
             'is_available' => 'boolean',
+            'cchn_issued_date' => 'date',
+            'cchn_expiry_date' => 'date',
         ];
     }
 
@@ -55,11 +68,45 @@ class Doctor extends Model
         return $this->hasMany(MedicalRecord::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(DoctorReview::class);
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(DoctorAuditLog::class);
+    }
+
+    public function getIsCchnExpiringSoonAttribute(): bool
+    {
+        if (!$this->cchn_expiry_date) return false;
+        $days = now()->diffInDays($this->cchn_expiry_date, false);
+        return $days >= 0 && $days <= 30;
+    }
+
+    public function getIsCchnExpiredAttribute(): bool
+    {
+        if (!$this->cchn_expiry_date) return false;
+        return now()->isAfter($this->cchn_expiry_date);
+    }
+
+    public function getDaysUntilCchnExpiryAttribute(): ?int
+    {
+        if (!$this->cchn_expiry_date) return null;
+        return (int) now()->diffInDays($this->cchn_expiry_date, false);
+    }
+
+    public function getCleanNameAttribute(): string
+    {
+        $name = $this->user ? $this->user->name : 'Bác sĩ';
+        return preg_replace('/^(Bác\.|Bà\.|Cụ\.|Em\.|Ông\.|Chị\.|Cô\.|Anh\.)\s+/u', '', $name);
+    }
+
     public function getFullNameWithTitleAttribute(): string
     {
         $qualification = $this->qualification ? "{$this->qualification} " : '';
-        $name = $this->user ? $this->user->name : 'Bác sĩ';
-        return "{$qualification}{$name}";
+        return "{$qualification}{$this->clean_name}";
     }
 
     public function getAvatarUrlAttribute(): ?string
@@ -75,6 +122,9 @@ class Doctor extends Model
      */
     public function getIsOnDutyTodayAttribute(): bool
     {
+        if ($this->current_leave) {
+            return false;
+        }
         $today = strtolower(now()->format('l'));
         return $this->schedules->where('day_of_week', $today)->where('is_active', true)->isNotEmpty();
     }

@@ -38,9 +38,10 @@ class BookingController extends Controller
         $familyMembers = collect();
         if (Auth::check() && Auth::user()->isPatient()) {
             $patientProfile = PatientProfile::where('user_id', Auth::id())->first();
-            if ($patientProfile) {
-                $familyMembers = \App\Models\FamilyMember::where('patient_profile_id', $patientProfile->id)->get();
-            }
+            $familyMembers = \App\Models\FamilyMember::with('patientProfile')
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->get();
         }
 
         $doctors = collect();
@@ -247,8 +248,12 @@ class BookingController extends Controller
                 $appointment = null;
                 for ($attempt = 1; $attempt <= 3; $attempt++) {
                     try {
+                        $appointmentCode = $isWaitlist
+                            ? ('WL-' . Carbon::now()->format('Ymd') . '-' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 4)))
+                            : Appointment::generateAppointmentCode();
+
                         $appointment = Appointment::create([
-                            'appointment_code' => Appointment::generateAppointmentCode(),
+                            'appointment_code' => $appointmentCode,
                             'patient_profile_id' => $patientProfile->id,
                             'doctor_id' => $validated['doctor_id'],
                             'specialty_id' => $validated['specialty_id'],
@@ -329,12 +334,12 @@ class BookingController extends Controller
 
         if ($keyword) {
             $keyword = trim($keyword);
-            // Search by exact appointment code or phone number (Masking & Clinical isolation enforced)
-            if (str_starts_with(strtoupper($keyword), 'AP-')) {
-                $appointment = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
-                    ->where('appointment_code', strtoupper($keyword))
-                    ->first();
-            } else {
+            // Search by exact appointment code first (supports AP-, WL-, TA-, etc.), then fallback to phone or patient_code
+            $appointment = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
+                ->where('appointment_code', strtoupper($keyword))
+                ->first();
+
+            if (!$appointment && !str_starts_with(strtoupper($keyword), 'AP-') && !str_starts_with(strtoupper($keyword), 'WL-') && !str_starts_with(strtoupper($keyword), 'TA-')) {
                 $appointments = Appointment::with(['patientProfile', 'doctor.user', 'specialty'])
                     ->whereHas('patientProfile', function ($q) use ($keyword) {
                         $q->where('phone', $keyword)
@@ -439,6 +444,7 @@ class BookingController extends Controller
                 ->whereDate('appointment_date', $date->toDateString())
                 ->where('shift', $sched->shift)
                 ->where('status', '!=', Appointment::STATUS_CANCELLED)
+                ->where('status', '!=', 'waitlist')
                 ->count();
 
             $isAvailable = !$isPastCutoff && ($bookedCount < $sched->max_patients);

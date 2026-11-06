@@ -123,10 +123,7 @@
                 </div>
             </div>
 
-            <!-- Footer Fold Guideline -->
-            <div class="bg-light p-3 text-center border-top small text-muted">
-                <i class="bi bi-scissors me-1"></i> Đường gấp thẻ để bàn mica phòng khám (Kích thước chuẩn: A5 gập ngang / 15x21cm)
-            </div>
+
         </div>
     </div>
 </body>

@@ -17,7 +17,7 @@ class SpecialtyController extends Controller
     /**
      * Display a listing of the specialties.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\JsonResponse
     {
         $query = Specialty::query()->withCount('doctors');
 
@@ -33,6 +33,24 @@ class SpecialtyController extends Controller
         }
 
         $specialties = $query->latest()->paginate(10)->withQueryString();
+
+        if ($request->wantsJson() || $request->input('format') === 'json') {
+            return response()->json([
+                'data' => $specialties->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'slug' => $item->slug,
+                        'description' => $item->description,
+                        'icon' => $item->icon ?: 'bi bi-heart-pulse',
+                        'doctors_count' => $item->doctors_count,
+                        'is_active' => (bool)$item->is_active,
+                        'url' => route('admin.specialties.show', $item),
+                    ];
+                }),
+                'total' => $specialties->total(),
+            ]);
+        }
 
         $stats = [
             'total' => Specialty::count(),
@@ -145,6 +163,40 @@ class SpecialtyController extends Controller
 
         return redirect()->route('admin.specialties.index')
             ->with('success', 'Đã xóa chuyên khoa thành công!');
+    }
+
+    /**
+     * Display Emergency Readiness & Red-Code matrix across specialties.
+     */
+    public function emergencyReadiness(): View
+    {
+        $specialties = Specialty::with(['doctors.user', 'doctors.schedules'])
+            ->where('is_active', true)
+            ->get();
+
+        $stats = [
+            'total_specialties' => $specialties->count(),
+            'code_red_supported' => $specialties->where('is_code_red_supported', true)->count(),
+            'stemi_ready' => $specialties->where('emergency_readiness_level', 'level_1_stemi')->count(),
+            'icu_ecmo_ready' => $specialties->where('emergency_readiness_level', 'icu_ecmo')->count(),
+        ];
+
+        return view('admin.specialties.emergency_readiness', compact('specialties', 'stats'));
+    }
+
+    /**
+     * Toggle emergency / Code-Red readiness status.
+     */
+    public function toggleEmergencyReadiness(Request $request, Specialty $specialty): RedirectResponse
+    {
+        $specialty->is_code_red_supported = !$specialty->is_code_red_supported;
+        if ($specialty->is_code_red_supported && $specialty->emergency_readiness_level === 'standard_outpatient') {
+            $specialty->emergency_readiness_level = 'icu_ecmo';
+        }
+        $specialty->save();
+
+        $state = $specialty->is_code_red_supported ? 'kích hoạt Báo động đỏ (Code-Red)' : 'chuyển về tiếp nhận thường';
+        return back()->with('success', "Đã {$state} cho chuyên khoa {$specialty->name} thành công!");
     }
 
     /**

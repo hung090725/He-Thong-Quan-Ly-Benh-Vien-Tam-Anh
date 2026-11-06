@@ -128,6 +128,57 @@
                         </div>
                     </div>
 
+                    <!-- Hồ sơ Pháp lý & Chứng Chỉ Hành Nghề (CCHN) -->
+                    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">
+                        <i class="bi bi-patch-check text-success me-2"></i> 3. Giấy Phép Hành Nghề Y Tế (CCHN & Đào tạo CME)
+                    </h5>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="cchn_number" class="form-label fw-semibold">Số Chứng Chỉ Hành Nghề (CCHN)</label>
+                            <input type="text" class="form-control @error('cchn_number') is-invalid @enderror" id="cchn_number" name="cchn_number" value="{{ old('cchn_number', $doctor->cchn_number) }}" placeholder="Ví dụ: 004812/BYT-CCHN">
+                            @error('cchn_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="cchn_issuer" class="form-label fw-semibold">Cơ quan cấp CCHN</label>
+                            <input type="text" class="form-control @error('cchn_issuer') is-invalid @enderror" id="cchn_issuer" name="cchn_issuer" value="{{ old('cchn_issuer', $doctor->cchn_issuer ?? 'Bộ Y Tế') }}" placeholder="Ví dụ: Bộ Y Tế, Sở Y Tế Hà Nội...">
+                            @error('cchn_issuer')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="cchn_issued_date" class="form-label fw-semibold">Ngày cấp phép</label>
+                            <input type="date" class="form-control @error('cchn_issued_date') is-invalid @enderror" id="cchn_issued_date" name="cchn_issued_date" value="{{ old('cchn_issued_date', optional($doctor->cchn_issued_date)->format('Y-m-d')) }}">
+                            @error('cchn_issued_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="cchn_expiry_date" class="form-label fw-semibold">Ngày hết hạn CCHN</label>
+                            <input type="date" class="form-control @error('cchn_expiry_date') is-invalid @enderror" id="cchn_expiry_date" name="cchn_expiry_date" value="{{ old('cchn_expiry_date', optional($doctor->cchn_expiry_date)->format('Y-m-d')) }}">
+                            <small class="text-muted">Để trống nếu giấy phép không thời hạn</small>
+                            @error('cchn_expiry_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="cme_hours" class="form-label fw-semibold">Số giờ đào tạo CME liên tục</label>
+                            <div class="input-group">
+                                <input type="number" min="0" class="form-control @error('cme_hours') is-invalid @enderror" id="cme_hours" name="cme_hours" value="{{ old('cme_hours', $doctor->cme_hours ?? 48) }}">
+                                <span class="input-group-text">Giờ / chu kỳ</span>
+                            </div>
+                            @error('cme_hours')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 border-top pt-3">
                         <a href="{{ route('admin.doctors.index') }}" class="btn btn-light">Hủy bỏ</a>
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1">

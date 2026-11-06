@@ -5,20 +5,6 @@
 @section('content')
 <x-page-header title="Giám Sát Sức Khỏe Hạ Tầng Hệ Thống" subtitle="Kiểm tra thời gian thực trạng thái Cơ sở dữ liệu, Bộ nhớ, Ổ cứng, Bộ đệm Cache và Máy chủ Email" />
 
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-        <i class="bi bi-exclamation-octagon-fill me-2"></i>{{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-
 <!-- Overall System Health Status Banner -->
 <div class="card shadow-sm border-0 mb-4 {{ $report['status'] === 'healthy' ? 'bg-success text-white' : 'bg-warning text-dark' }}">
     <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -54,11 +40,17 @@
                 </span>
             </div>
             <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded">
+                <div class="d-flex align-items-center justify-content-between mb-2 p-3 bg-light rounded">
                     <span class="text-muted fw-semibold">Độ trễ truy vấn (Query Latency):</span>
                     <span class="fs-4 fw-bold {{ $report['database']['latency_ms'] < 100 ? 'text-success' : 'text-warning' }}">
                         {{ $report['database']['latency_ms'] }} ms
                     </span>
+                </div>
+                @php
+                    $latencyPct = min(100, max(5, round(($report['database']['latency_ms'] / 100) * 100)));
+                @endphp
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar {{ $report['database']['latency_ms'] < 50 ? 'bg-success' : 'bg-warning' }}" style="width: {{ $latencyPct }}%"></div>
                 </div>
                 <ul class="list-unstyled small mb-0">
                     <li class="mb-2"><strong>Driver:</strong> <span class="font-monospace">{{ $report['database']['driver'] }}</span></li>
@@ -79,12 +71,17 @@
                 </span>
             </div>
             <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded">
+                <div class="d-flex align-items-center justify-content-between mb-2 p-3 bg-light rounded">
                     <span class="text-muted fw-semibold">Dung lượng ổ cứng trống:</span>
                     <span class="fs-4 fw-bold text-info">
                         {{ $report['storage']['free_disk_gb'] ? $report['storage']['free_disk_gb'] . ' GB' : 'N/A' }}
                     </span>
                 </div>
+                @if(!empty($report['storage']['disk_usage_percent']))
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar {{ $report['storage']['disk_usage_percent'] < 85 ? 'bg-info' : 'bg-danger' }}" style="width: {{ min(100, $report['storage']['disk_usage_percent']) }}%"></div>
+                    </div>
+                @endif
                 <ul class="list-unstyled small mb-0">
                     <li class="mb-2"><strong>Tổng dung lượng ổ:</strong> {{ $report['storage']['total_disk_gb'] ? $report['storage']['total_disk_gb'] . ' GB' : 'N/A' }}</li>
                     <li class="mb-2"><strong>Quyền ghi thư mục Storage:</strong> 

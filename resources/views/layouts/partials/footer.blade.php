@@ -1,3 +1,16 @@
+@php
+    $footerHospitalName = 'BỆNH VIỆN TÂM ANH';
+    $footerHotline = '1800 6858';
+    $footerAddress = '108 Hoàng Như Tiếp, P. Bồ Đề, Q. Long Biên, TP. Hà Nội';
+    try {
+        if (class_exists(\App\Models\SystemSetting::class) && \Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $footerHospitalName = \App\Models\SystemSetting::get('hospital_name', $footerHospitalName) ?: $footerHospitalName;
+            $footerHotline = \App\Models\SystemSetting::get('hospital_hotline', $footerHotline) ?: $footerHotline;
+            $footerAddress = \App\Models\SystemSetting::get('hospital_address', $footerAddress) ?: $footerAddress;
+        }
+    } catch (\Throwable $e) {
+    }
+@endphp
 <footer class="bg-dark text-white pt-5 pb-4 mt-auto" style="background-color: #0f172a !important;">
     <div class="container">
         <div class="row g-4 mb-4">
@@ -6,7 +19,7 @@
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 38px; height: 38px; background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);">
                         <i class="bi bi-hospital fs-5"></i>
                     </div>
-                    <span class="fw-bold fs-5 text-white">BỆNH VIỆN TÂM ANH</span>
+                    <span class="fw-bold fs-5 text-white text-uppercase">{{ $footerHospitalName }}</span>
                 </div>
                 <p class="text-secondary small">
                     Hệ thống Bệnh viện Đa khoa Tâm Anh quy tụ đội ngũ chuyên gia đầu ngành, trang thiết bị tối tân, mang đến dịch vụ chăm sóc sức khỏe toàn diện và chuẩn mực quốc tế.
@@ -23,11 +36,11 @@
                 <ul class="list-unstyled text-secondary small mb-0 d-flex flex-column gap-2">
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
-                        <span>108 Hoàng Như Tiếp, P. Bồ Đề, Q. Long Biên, TP. Hà Nội</span>
+                        <span>{{ $footerAddress }}</span>
                     </li>
                     <li class="d-flex align-items-center gap-2">
                         <i class="bi bi-telephone-fill text-success"></i>
-                        <span>Tổng đài đặt lịch: <strong>1800 6858</strong> (Miễn phí)</span>
+                        <span>Tổng đài đặt lịch: <strong>{{ $footerHotline }}</strong> (Miễn phí)</span>
                     </li>
                     <li class="d-flex align-items-center gap-2">
                         <i class="bi bi-envelope-fill text-info"></i>

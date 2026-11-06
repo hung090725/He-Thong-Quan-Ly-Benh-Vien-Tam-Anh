@@ -1,3 +1,41 @@
+@php
+    $dynamicHospitalName = 'BỆNH VIỆN TÂM ANH';
+    $dynamicHotline = '1800 6858';
+    $dynamicAddress = '108 Hoàng Như Tiếp, P. Bồ Đề, Q. Long Biên, TP. Hà Nội';
+    $isBookingMaintenance = false;
+    try {
+        if (class_exists(\App\Models\SystemSetting::class) && \Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $dynamicHospitalName = \App\Models\SystemSetting::get('hospital_name', $dynamicHospitalName) ?: $dynamicHospitalName;
+            $dynamicHotline = \App\Models\SystemSetting::get('hospital_hotline', $dynamicHotline) ?: $dynamicHotline;
+            $dynamicAddress = \App\Models\SystemSetting::get('hospital_address', $dynamicAddress) ?: $dynamicAddress;
+            $isBookingMaintenance = \App\Models\SystemSetting::isTrue('booking_maintenance_mode');
+        }
+    } catch (\Throwable $e) {
+        // Fallback gracefully if table not migrated yet
+    }
+@endphp
+
+<!-- Topbar Medical Info -->
+<div class="topbar-medical bg-dark text-white py-1 small d-none d-lg-block" style="background-color: #0f172a !important; font-size: 0.78rem;">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3 text-white-50">
+            <span><i class="bi bi-geo-alt-fill text-info me-1"></i>{{ $dynamicAddress }}</span>
+            <span>&bull;</span>
+            <span><i class="bi bi-clock-fill text-warning me-1"></i>Khám ngoại trú: 07:30 - 17:00 (Thứ 2 - Chủ Nhật)</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span>
+                <i class="bi bi-telephone-inbound-fill text-success me-1"></i>Tổng đài CSKH: <strong class="text-white">{{ $dynamicHotline }}</strong>
+            </span>
+            @if($isBookingMaintenance)
+                <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-tools me-1"></i>Cổng đặt lịch đang bảo trì</span>
+            @else
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 rounded-pill"><i class="bi bi-dot"></i>Đặt lịch trực tuyến 24/7</span>
+            @endif
+        </div>
+    </div>
+</div>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm py-2">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url('/') }}">
@@ -5,7 +43,7 @@
                 <i class="bi bi-hospital fs-5"></i>
             </div>
             <div>
-                <span class="fw-bold d-block lh-1 text-primary" style="font-size: 1.15rem; color: #0284c7 !important;">BỆNH VIỆN TÂM ANH</span>
+                <span class="fw-bold d-block lh-1 text-primary text-uppercase" style="font-size: 1.15rem; color: #0284c7 !important;">{{ $dynamicHospitalName }}</span>
                 <small class="text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.8px;">Tận tâm - Chuyên nghiệp - Hiện đại</small>
             </div>
         </a>
