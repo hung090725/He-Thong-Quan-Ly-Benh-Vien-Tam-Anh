@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\DoctorReview;
 use App\Models\Specialty;
 use App\Services\DoctorVcardService;
 use App\Services\SymptomMatcherService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
@@ -51,6 +53,22 @@ class DoctorPublicController extends Controller
         $doctors = $query->paginate(9)->withQueryString();
         $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
 
+        if ($request->wantsJson() || $request->input('format') === 'json') {
+            return response()->json([
+                'data' => $doctors->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'name' => $doc->full_name_with_title,
+                        'specialty' => $doc->specialty ? $doc->specialty->name : '',
+                        'room' => $doc->room_number,
+                        'avatar' => $doc->avatar_url,
+                        'url' => route('public.doctors.show', $doc),
+                    ];
+                }),
+                'total' => $doctors->total(),
+            ]);
+        }
+
         if ($request->ajax()) {
             return view('public.doctors.partials.doctor_grid', compact('doctors'));
         }
@@ -61,13 +79,25 @@ class DoctorPublicController extends Controller
     /**
      * Display the specified doctor profile and weekly schedule.
      */
-    public function show(Doctor $doctor): View
+    public function show(Request $request, Doctor $doctor): View
     {
         $doctor->load(['user', 'specialty', 'schedules' => function ($q) {
             $q->where('is_active', true);
+        }, 'reviews' => function ($rq) {
+            $rq->where('is_approved', true)->latest();
         }]);
 
-        $days = [
+        $lang = $request->query('lang', 'vi');
+
+        $days = ($lang === 'en') ? [
+            'monday' => 'Monday',
+            'tuesday' => 'Tuesday',
+            'wednesday' => 'Wednesday',
+            'thursday' => 'Thursday',
+            'friday' => 'Friday',
+            'saturday' => 'Saturday',
+            'sunday' => 'Sunday',
+        ] : [
             'monday' => 'Thứ Hai',
             'tuesday' => 'Thứ Ba',
             'wednesday' => 'Thứ Tư',
@@ -79,7 +109,50 @@ class DoctorPublicController extends Controller
 
         $qrCodeUrl = DoctorVcardService::getQrCodeUrl($doctor, 200);
 
-        return view('public.doctors.show', compact('doctor', 'days', 'qrCodeUrl'));
+        return view('public.doctors.show', compact('doctor', 'days', 'qrCodeUrl', 'lang'));
+    }
+
+    /**
+     * ADVANCED 6: Generate dynamic doctor QR smart-badge page.
+     */
+    public function qrCode(Doctor $doctor): View
+    {
+        $doctor->load(['user', 'specialty', 'schedules']);
+        $qrCodeUrl = DoctorVcardService::getQrCodeUrl($doctor, 300);
+
+        return view('public.doctors.qr_code', compact('doctor', 'qrCodeUrl'));
+    }
+
+    /**
+     * ADVANCED 7: Clinic floor wayfinding and navigation guide for patients.
+     */
+    public function wayfinding(Doctor $doctor): View
+    {
+        $doctor->load(['user', 'specialty']);
+        return view('public.doctors.wayfinding', compact('doctor'));
+    }
+
+    /**
+     * ADVANCED 5: Public patient stores review for doctor.
+     */
+    public function storeReview(Request $request, Doctor $doctor): RedirectResponse
+    {
+        $validated = $request->validate([
+            'patient_name' => 'required|string|max:100',
+            'patient_phone' => 'nullable|string|max:20',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        $doctor->reviews()->create($validated);
+
+        // Recalculate doctor rating
+        $approvedReviews = $doctor->reviews()->where('is_approved', true);
+        $doctor->rating_avg = round($approvedReviews->avg('rating'), 2);
+        $doctor->rating_count = $approvedReviews->count();
+        $doctor->save();
+
+        return back()->with('success', 'Cảm ơn bạn đã gửi đánh giá! Ý kiến của bạn đã được ghi nhận vào hệ thống.');
     }
 
     /**

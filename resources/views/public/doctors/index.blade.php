@@ -26,12 +26,23 @@
     <div class="card-body p-3 p-md-4">
         <form method="GET" action="{{ route('public.doctors.index') }}" class="row g-3" id="doctor-filter-form">
             <div class="col-md-7 col-lg-8">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" id="doctor-search-input" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm kiếm bác sĩ theo tên, chuyên khoa, phòng khám..." autocomplete="off">
-                    <button type="button" id="publicDoctorClearBtn" class="btn btn-outline-light text-muted border-start-0 border {{ request('search') ? '' : 'd-none' }}" title="Xóa tìm kiếm">
-                        <i class="bi bi-x-circle"></i>
-                    </button>
+                <div class="position-relative">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" id="doctor-search-input" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm kiếm bác sĩ theo tên, chuyên khoa, phòng khám..." autocomplete="off">
+                        <button type="button" id="publicDoctorClearBtn" class="btn btn-outline-light text-muted border-start-0 border {{ request('search') ? '' : 'd-none' }}" title="Xóa tìm kiếm">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+
+                    <!-- Instant Dropdown Suggestions List -->
+                    <div id="publicDoctorSuggestionsBox" class="position-absolute start-0 w-100 bg-white border rounded-3 shadow-lg mt-1 p-2 d-none" style="z-index: 1060; max-height: 320px; overflow-y: auto;">
+                        <div class="small fw-semibold text-muted px-2 py-1 border-bottom mb-1 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-person-check text-primary me-1"></i> Bác sĩ gợi ý nhanh</span>
+                            <span class="badge bg-light text-muted" id="publicDoctorSuggestCount">0 bác sĩ</span>
+                        </div>
+                        <div id="publicDoctorSuggestionsList" class="list-group list-group-flush"></div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-5 col-lg-4 d-flex gap-2">
@@ -80,7 +91,64 @@ document.addEventListener('DOMContentLoaded', function () {
     const onDutyCheckbox = document.getElementById('on_duty_today');
     const container = document.getElementById('doctor-grid-container');
     const clearBtn = document.getElementById('publicDoctorClearBtn');
+    const suggestionsBox = document.getElementById('publicDoctorSuggestionsBox');
+    const suggestionsList = document.getElementById('publicDoctorSuggestionsList');
+    const suggestCount = document.getElementById('publicDoctorSuggestCount');
+
     let debounceTimer = null;
+
+    function fetchSuggestions(query) {
+        if (!suggestionsBox || !suggestionsList) return;
+        if (!query || query.trim().length === 0) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+
+        const url = `${window.location.pathname}?format=json&search=${encodeURIComponent(query)}`;
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(res => res.json())
+            .then(res => {
+                const items = res.data || [];
+                if (suggestCount) suggestCount.textContent = `${items.length} bác sĩ`;
+
+                if (items.length === 0) {
+                    suggestionsList.innerHTML = `
+                        <div class="p-3 text-center text-muted small">
+                            <i class="bi bi-search me-1"></i> Không tìm thấy bác sĩ nào khớp với "<strong>${query}</strong>"
+                        </div>`;
+                } else {
+                    suggestionsList.innerHTML = items.map(item => `
+                        <div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 border-0 rounded-2 mb-1 public-doctor-item" style="cursor: pointer;" data-name="${item.name}">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center overflow-hidden" style="width: 36px; height: 36px; border: 1px solid #e2e8f0;">
+                                    ${item.avatar ? `<img src="${item.avatar}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="bi bi-person-fill"></i>'}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark small">${item.name}</div>
+                                    <small class="text-muted">${item.specialty} &bull; ${item.room}</small>
+                                </div>
+                            </div>
+                            <span class="btn btn-sm btn-outline-primary rounded-pill px-2 py-0" style="font-size: 0.75rem;">
+                                Xem hồ sơ
+                            </span>
+                        </div>
+                    `).join('');
+
+                    suggestionsList.querySelectorAll('.public-doctor-item').forEach(el => {
+                        el.addEventListener('click', function () {
+                            searchInput.value = this.dataset.name;
+                            suggestionsBox.classList.add('d-none');
+                            if (clearBtn) clearBtn.classList.remove('d-none');
+                            triggerSearchNow();
+                        });
+                    });
+                }
+                suggestionsBox.classList.remove('d-none');
+            })
+            .catch(() => {
+                suggestionsBox.classList.add('d-none');
+            });
+    }
 
     function fetchDoctorsAjax(url) {
         fetch(url, {
@@ -122,10 +190,21 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchDoctorsAjax(targetUrl);
     }
 
+    function triggerSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const query = searchInput ? searchInput.value.trim() : '';
+            fetchSuggestions(query);
+            triggerSearchNow();
+        }, 180);
+    }
+
     if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(triggerSearchNow, 200);
+        searchInput.addEventListener('input', triggerSearch);
+        searchInput.addEventListener('focus', function () {
+            if (this.value.trim().length > 0) {
+                fetchSuggestions(this.value.trim());
+            }
         });
     }
 
@@ -133,18 +212,37 @@ document.addEventListener('DOMContentLoaded', function () {
         clearBtn.addEventListener('click', function () {
             searchInput.value = '';
             clearBtn.classList.add('d-none');
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
             triggerSearchNow();
             searchInput.focus();
         });
     }
 
     if (specialtySelect) {
-        specialtySelect.addEventListener('change', triggerSearchNow);
+        specialtySelect.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            triggerSearchNow();
+        });
     }
 
     if (onDutyCheckbox) {
-        onDutyCheckbox.addEventListener('change', triggerSearchNow);
+        onDutyCheckbox.addEventListener('change', function () {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+            triggerSearchNow();
+        });
     }
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#doctor-filter-form')) {
+            if (suggestionsBox) suggestionsBox.classList.add('d-none');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && suggestionsBox) {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
 
     // Intercept pagination clicks for smooth AJAX page switching
     document.addEventListener('click', function (e) {

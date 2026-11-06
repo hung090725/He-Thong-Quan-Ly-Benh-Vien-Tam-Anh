@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
 use App\Models\Doctor;
+use App\Models\DoctorAuditLog;
 use App\Models\DoctorLeave;
+use App\Models\DoctorReview;
 use App\Models\DoctorSchedule;
 use App\Models\Specialty;
 use App\Models\User;
@@ -16,13 +18,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DoctorManagementController extends Controller
 {
     /**
      * Display a listing of the doctors.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\JsonResponse
     {
         $query = Doctor::query()->with(['user', 'specialty', 'schedules']);
 
@@ -47,6 +50,25 @@ class DoctorManagementController extends Controller
         }
 
         $doctors = $query->latest()->paginate(10)->withQueryString();
+
+        if ($request->wantsJson() || $request->input('format') === 'json') {
+            return response()->json([
+                'data' => $doctors->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'name' => $doc->full_name_with_title,
+                        'email' => $doc->user ? $doc->user->email : '',
+                        'specialty' => $doc->specialty ? $doc->specialty->name : 'Chưa phân khoa',
+                        'room' => $doc->room_number,
+                        'fee' => number_format($doc->consultation_fee, 0, ',', '.') . ' đ',
+                        'avatar' => $doc->avatar_url,
+                        'is_available' => (bool)$doc->is_available,
+                        'url' => route('admin.doctors.show', $doc),
+                    ];
+                }),
+                'total' => $doctors->total(),
+            ]);
+        }
         $specialties = Specialty::where('is_active', true)->orderBy('name')->get();
 
         $stats = [
@@ -349,5 +371,265 @@ class DoctorManagementController extends Controller
 
         return redirect()->route('admin.doctors.leaves', $doctorId)
             ->with('success', 'Đã hủy lịch nghỉ phép thành công!');
+    }
+
+    /**
+     * ADVANCED 1: Bảng đánh giá KPI & Năng suất Khám Bác sĩ.
+     */
+    public function kpi(): View
+    {
+        $doctors = Doctor::with(['user', 'specialty', 'appointments', 'schedules'])->get()->map(function ($doc) {
+            $completedApps = $doc->appointments->where('status', 'completed')->count();
+            $totalApps = $doc->appointments->count();
+            $revenue = $completedApps * (float)$doc->consultation_fee;
+            $totalShiftSlots = $doc->schedules->sum('max_patients');
+            $occupancyRate = $totalShiftSlots > 0 ? round(($totalApps / $totalShiftSlots) * 100, 1) : 0;
+            
+            $tier = match (true) {
+                $completedApps >= 5 || (float)$doc->rating_avg >= 4.9 => 'Hạng A+ (Chuyên gia Xuất sắc)',
+                $completedApps >= 2 || (float)$doc->rating_avg >= 4.8 => 'Hạng A (Bác sĩ Ưu tú)',
+                default => 'Hạng B (Bác sĩ Tiêu chuẩn)',
+            };
+
+            return (object)[
+                'id' => $doc->id,
+                'name' => $doc->full_name_with_title,
+                'specialty' => $doc->specialty?->name ?? '—',
+                'fee' => (float)$doc->consultation_fee,
+                'completed_count' => $completedApps,
+                'revenue' => $revenue,
+                'rating_avg' => (float)$doc->rating_avg,
+                'rating_count' => (int)$doc->rating_count,
+                'occupancy_rate' => $occupancyRate,
+                'tier' => $tier,
+            ];
+        })->sortByDesc('revenue');
+
+        $totalRevenue = $doctors->sum('revenue');
+        $totalCompleted = $doctors->sum('completed_count');
+        $avgRating = round($doctors->avg('rating_avg'), 2);
+
+        return view('admin.doctors.kpi', compact('doctors', 'totalRevenue', 'totalCompleted', 'avgRating'));
+    }
+
+    /**
+     * ADVANCED 2: Xuất Danh bạ Bác sĩ ra file CSV chuẩn UTF-8 BOM.
+     */
+    public function exportCsv(): StreamedResponse
+    {
+        $doctors = Doctor::with(['user', 'specialty'])->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="danh_ba_bac_si_tam_anh_' . date('Ymd_His') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($doctors) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Excel opens Vietnamese characters without mojibake
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // CSV Header
+            fputcsv($handle, [
+                'Mã Bác Sĩ',
+                'Họ và Tên',
+                'Học Vị',
+                'Email Công Vụ',
+                'Số Điện Thoại',
+                'Số CCHN',
+                'Ngày Cấp CCHN',
+                'Hạn CCHN',
+                'Chuyên Khoa',
+                'Phòng Khám',
+                'Tòa Nhà',
+                'Tầng',
+                'Giá Khám (VNĐ)',
+                'Trạng Thái Khám',
+                'Điểm Đánh Giá Sao',
+            ]);
+
+            foreach ($doctors as $d) {
+                fputcsv($handle, [
+                    $d->id,
+                    $d->user?->name,
+                    $d->qualification,
+                    $d->user?->email,
+                    $d->user?->phone,
+                    $d->cchn_number ?: 'Chưa cập nhật',
+                    $d->cchn_issued_date ? $d->cchn_issued_date->format('d/m/Y') : '',
+                    $d->cchn_expiry_date ? $d->cchn_expiry_date->format('d/m/Y') : '',
+                    $d->specialty?->name,
+                    $d->room_number,
+                    $d->building,
+                    $d->floor,
+                    $d->consultation_fee,
+                    $d->is_available ? 'Sẵn sàng nhận khám' : 'Tạm dừng',
+                    $d->rating_avg,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * ADVANCED 2 (Template): Tải file mẫu CSV để import.
+     */
+    public function downloadTemplate(): StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="mau_nhap_lieu_bac_si.csv"',
+        ];
+
+        return response()->stream(function () {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, ['Họ và Tên', 'Email', 'Mật Khẩu', 'Mã Chuyên Khoa', 'Học Vị', 'Phòng Khám', 'Giá Khám']);
+            fputcsv($handle, ['Bác sĩ Mẫu A', 'bs.maua@tamanh.vn', '123456', '1', 'TS.BS', 'Phòng 101 - Tòa A', '400000']);
+            fputcsv($handle, ['Bác sĩ Mẫu B', 'bs.maub@tamanh.vn', '123456', '2', 'ThS.BS', 'Phòng 202 - Tòa B', '350000']);
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * ADVANCED 2 (Import): Nhập danh bạ bác sĩ hàng loạt từ file CSV.
+     */
+    public function importCsv(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        
+        // Skip BOM if present
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        $header = fgetcsv($handle);
+        $importedCount = 0;
+
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($row) < 7 || empty(trim($row[1]))) continue;
+
+            $name = trim($row[0]);
+            $email = trim($row[1]);
+            $password = trim($row[2]) ?: '123456';
+            $specialtyId = (int)trim($row[3]);
+            $qualification = trim($row[4]) ?: 'BS';
+            $roomNumber = trim($row[5]) ?: 'Phòng Khám';
+            $fee = (float)trim($row[6]) ?: 300000;
+
+            if (!Specialty::where('id', $specialtyId)->exists()) continue;
+
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => $name,
+                    'password' => Hash::make($password),
+                    'role' => User::ROLE_DOCTOR,
+                ]
+            );
+
+            Doctor::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'specialty_id' => $specialtyId,
+                    'qualification' => $qualification,
+                    'consultation_fee' => $fee,
+                    'room_number' => $roomNumber,
+                    'is_available' => true,
+                ]
+            );
+
+            $importedCount++;
+        }
+
+        fclose($handle);
+
+        DoctorAuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'import_doctors_csv',
+            'description' => "Đã import thành công {$importedCount} bác sĩ từ file CSV",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return redirect()->route('admin.doctors.index')
+            ->with('success', "Đã import thành công {$importedCount} hồ sơ bác sĩ vào hệ thống!");
+    }
+
+    /**
+     * ADVANCED 3: Quản lý Chứng Chỉ Hành Nghề (CCHN) & Cảnh báo hết hạn.
+     */
+    public function licenses(): View
+    {
+        $doctors = Doctor::with(['user', 'specialty'])->get();
+
+        $expiringSoon = $doctors->filter(fn($d) => $d->is_cchn_expiring_soon);
+        $expired = $doctors->filter(fn($d) => $d->is_cchn_expired);
+        $validCount = $doctors->count() - $expiringSoon->count() - $expired->count();
+
+        return view('admin.doctors.licenses', compact('doctors', 'expiringSoon', 'expired', 'validCount'));
+    }
+
+    /**
+     * ADVANCED 4: Ma trận Bản đồ Nhiệt Tải khám & Cân bằng Tải Bác sĩ.
+     */
+    public function workloadBalancer(): View
+    {
+        $specialties = Specialty::with(['doctors.user', 'doctors.appointments', 'doctors.schedules'])
+            ->where('is_active', true)
+            ->get();
+
+        return view('admin.doctors.workload_balancer', compact('specialties'));
+    }
+
+    /**
+     * ADVANCED 5: Quản lý Đánh giá & Bình luận Bác sĩ.
+     */
+    public function reviews(): View
+    {
+        $reviews = DoctorReview::with(['doctor.user', 'doctor.specialty'])->latest()->paginate(15);
+        $avgScore = round(DoctorReview::where('is_approved', true)->avg('rating'), 2);
+        $totalReviews = DoctorReview::count();
+
+        return view('admin.doctors.reviews', compact('reviews', 'avgScore', 'totalReviews'));
+    }
+
+    /**
+     * ADVANCED 5 (Action): Bật / Tắt duyệt hiển thị đánh giá.
+     */
+    public function toggleReviewApproval(DoctorReview $review): RedirectResponse
+    {
+        $review->is_approved = !$review->is_approved;
+        $review->save();
+
+        // Recalculate doctor rating_avg
+        $doc = $review->doctor;
+        $approvedReviews = $doc->reviews()->where('is_approved', true);
+        if ($approvedReviews->count() > 0) {
+            $doc->rating_avg = round($approvedReviews->avg('rating'), 2);
+            $doc->rating_count = $approvedReviews->count();
+        } else {
+            $doc->rating_avg = 5.00;
+            $doc->rating_count = 0;
+        }
+        $doc->save();
+
+        $state = $review->is_approved ? 'hiển thị' : 'ẩn';
+        return back()->with('success', "Đã {$state} đánh giá của bệnh nhân {$review->patient_name} thành công!");
+    }
+
+    /**
+     * ADVANCED 9: Nhật ký Kiểm toán Thay đổi Lịch trực & Hồ sơ Bác sĩ.
+     */
+    public function auditLogs(): View
+    {
+        $logs = DoctorAuditLog::with(['user', 'doctor.user'])->latest()->paginate(20);
+        return view('admin.doctors.audit_logs', compact('logs'));
     }
 }

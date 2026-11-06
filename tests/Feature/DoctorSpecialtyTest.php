@@ -351,4 +351,131 @@ class DoctorSpecialtyTest extends TestCase
             $this->assertTrue(true);
         }
     }
+
+    public function test_admin_can_view_emergency_readiness_matrix(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.specialties.emergency-readiness'));
+        $response->assertStatus(200);
+        $response->assertSee('Ma Trận Năng Lực Cấp Cứu & Báo Động Đỏ');
+        $response->assertSee('STEMI Can thiệp 24/7');
+    }
+
+    public function test_admin_can_view_doctor_kpi_scorecard(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.kpi'));
+        $response->assertStatus(200);
+        $response->assertSee('Bảng Điểm KPI & Năng Suất Bác Sĩ');
+        $response->assertSee('Bảng Xếp Hạng Thi Đua');
+    }
+
+    public function test_admin_can_export_doctors_csv(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.export.csv'));
+        $response->assertStatus(200);
+        $this->assertEquals('text/csv; charset=UTF-8', $response->headers->get('content-type'));
+    }
+
+    public function test_admin_can_download_csv_template(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.import.template'));
+        $response->assertStatus(200);
+        $this->assertEquals('text/csv; charset=UTF-8', $response->headers->get('content-type'));
+    }
+
+    public function test_admin_can_view_doctor_licenses_and_cchn(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.licenses'));
+        $response->assertStatus(200);
+        $response->assertSee('Quản Lý Chứng Chỉ Hành Nghề & Giấy Phép Y Tế');
+    }
+
+    public function test_admin_can_view_workload_balancer_heatmap(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.workload-balancer'));
+        $response->assertStatus(200);
+        $response->assertSee('Bản Đồ Nhiệt Tải Khám & Điều Phối Công Suất');
+    }
+
+    public function test_admin_can_view_and_moderate_doctor_reviews(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.reviews'));
+        $response->assertStatus(200);
+        $response->assertSee('Quản Lý Đánh Giá Bác Sĩ Từ Người Bệnh');
+    }
+
+    public function test_admin_can_view_doctor_audit_logs(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.doctors.audit-logs'));
+        $response->assertStatus(200);
+        $response->assertSee('Nhật Ký Kiểm Toán Hồ Sơ & Lịch Trực Bác Sĩ');
+    }
+
+    public function test_public_can_view_doctor_qr_code_smart_badge(): void
+    {
+        $doctor = Doctor::first();
+        if ($doctor) {
+            $response = $this->get(route('public.doctors.qr_code', $doctor));
+            $response->assertStatus(200);
+            $response->assertSee('Tiếp Đón Kiosk & Buồng Khám Thông Minh', false);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    public function test_public_can_view_clinic_wayfinding_guide(): void
+    {
+        $doctor = Doctor::first();
+        if ($doctor) {
+            $response = $this->get(route('public.doctors.wayfinding', $doctor));
+            $response->assertStatus(200);
+            $response->assertSee('Hệ Thống Điều Hướng Bệnh Viện Thông Minh');
+            $response->assertSee('Sảnh Tiếp Đón Trung Tâm');
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    public function test_public_can_switch_bilingual_doctor_profile(): void
+    {
+        $doctor = Doctor::first();
+        if ($doctor) {
+            $doctor->schedules()->firstOrCreate([
+                'day_of_week' => 'monday',
+                'shift' => 'morning',
+            ], [
+                'start_time' => '07:30:00',
+                'end_time' => '11:30:00',
+                'max_patients' => 20,
+                'is_active' => true,
+            ]);
+            $response = $this->get(route('public.doctors.show', ['doctor' => $doctor, 'lang' => 'en']));
+            $response->assertStatus(200);
+            $response->assertSee('English');
+            $response->assertSee('Weekly Consultation Schedule');
+            $response->assertSee('Monday');
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    public function test_public_can_submit_doctor_review(): void
+    {
+        $doctor = Doctor::first();
+        if ($doctor) {
+            $response = $this->post(route('public.doctors.reviews.store', $doctor), [
+                'patient_name' => 'Nguyễn Bệnh Nhân Test',
+                'patient_phone' => '0901234567',
+                'rating' => 5,
+                'comment' => 'Bác sĩ khám rất tận tâm và giải thích dễ hiểu.',
+            ]);
+            $response->assertRedirect();
+            $this->assertDatabaseHas('doctor_reviews', [
+                'doctor_id' => $doctor->id,
+                'patient_name' => 'Nguyễn Bệnh Nhân Test',
+                'rating' => 5,
+            ]);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
 }
