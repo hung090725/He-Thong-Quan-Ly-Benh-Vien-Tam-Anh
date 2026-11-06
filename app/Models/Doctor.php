@@ -55,11 +55,16 @@ class Doctor extends Model
         return $this->hasMany(MedicalRecord::class);
     }
 
+    public function getCleanNameAttribute(): string
+    {
+        $name = $this->user ? $this->user->name : 'Bác sĩ';
+        return preg_replace('/^(Bác\.|Bà\.|Cụ\.|Em\.|Ông\.|Chị\.|Cô\.|Anh\.)\s+/u', '', $name);
+    }
+
     public function getFullNameWithTitleAttribute(): string
     {
         $qualification = $this->qualification ? "{$this->qualification} " : '';
-        $name = $this->user ? $this->user->name : 'Bác sĩ';
-        return "{$qualification}{$name}";
+        return "{$qualification}{$this->clean_name}";
     }
 
     public function getAvatarUrlAttribute(): ?string

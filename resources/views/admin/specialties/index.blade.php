@@ -105,15 +105,18 @@
 <!-- Filter & Search Card -->
 <div class="card shadow-sm border-0 mb-4 rounded-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('admin.specialties.index') }}" class="row g-2 align-items-center">
+        <form id="specialtyFilterForm" method="GET" action="{{ route('admin.specialties.index') }}" class="row g-2 align-items-center">
             <div class="col-md-7 col-lg-6">
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm theo tên chuyên khoa hoặc mô tả...">
+                    <input type="text" id="specialtySearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Nhập 1 chữ để tìm kiếm ngay lập tức..." autocomplete="off">
+                    <span id="specialtySearchSpinner" class="input-group-text bg-white border-start-0 d-none">
+                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                    </span>
                 </div>
             </div>
             <div class="col-md-3 col-lg-3">
-                <select name="status" class="form-select">
+                <select id="specialtyStatusSelect" name="status" class="form-select">
                     <option value="">-- Tất cả trạng thái --</option>
                     <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Đang hoạt động</option>
                     <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Tạm dừng</option>
@@ -134,7 +137,7 @@
 </div>
 
 <!-- Specialties Table Card -->
-<div class="card shadow-sm border-0 rounded-4">
+<div class="card shadow-sm border-0 rounded-4" id="specialtiesTableContainer">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -180,7 +183,7 @@
                                     @method('PATCH')
                                     <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái">
                                         @if($specialty->is_active)
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
+                                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
                                                 <i class="bi bi-check-circle me-1"></i> Hoạt động
                                             </span>
                                         @else
@@ -202,7 +205,7 @@
                                     <a href="{{ route('admin.specialties.edit', $specialty) }}" class="btn btn-outline-primary" title="Chỉnh sửa">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.specialties.destroy', $specialty) }}" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chuyên khoa này? Thao tác không thể hoàn tác!');">
+                                    <form method="POST" action="{{ route('admin.specialties.destroy', $specialty) }}" class="d-inline" data-confirm="Bạn có chắc chắn muốn xóa chuyên khoa này? Thao tác không thể hoàn tác!">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline-danger" title="Xóa chuyên khoa">
@@ -293,6 +296,60 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 cutout: '65%'
             }
+        });
+    }
+
+    // 3. Tự Động Lọc & Tìm Kiếm Tức Thì (Instant Live Filter & Search)
+    const filterForm = document.getElementById('specialtyFilterForm');
+    const searchInput = document.getElementById('specialtySearchInput');
+    const statusSelect = document.getElementById('specialtyStatusSelect');
+    const tableContainer = document.getElementById('specialtiesTableContainer');
+    const searchSpinner = document.getElementById('specialtySearchSpinner');
+    let debounceTimer = null;
+
+    function executeLiveSearch() {
+        if (!filterForm || !tableContainer) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        const targetUrl = filterForm.action + '?' + params.toString();
+
+        if (searchSpinner) searchSpinner.classList.remove('d-none');
+        tableContainer.style.opacity = '0.5';
+        tableContainer.style.transition = 'opacity 0.2s ease';
+
+        fetch(targetUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('specialtiesTableContainer');
+            if (newTable) {
+                tableContainer.innerHTML = newTable.innerHTML;
+            }
+            window.history.replaceState({}, '', targetUrl);
+        })
+        .catch(() => {
+            filterForm.submit();
+        })
+        .finally(() => {
+            if (searchSpinner) searchSpinner.classList.add('d-none');
+            tableContainer.style.opacity = '1';
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(executeLiveSearch, 250);
+        });
+    }
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function () {
+            executeLiveSearch();
         });
     }
 });

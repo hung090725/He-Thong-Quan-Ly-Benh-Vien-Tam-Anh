@@ -71,17 +71,20 @@
 </div>
 
 <!-- Filter Card -->
-<div class="card shadow-sm border-0 mb-4">
+<div class="card shadow-sm border-0 mb-4 rounded-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('admin.doctors.index') }}" class="row g-2 align-items-center">
+        <form id="doctorFilterForm" method="GET" action="{{ route('admin.doctors.index') }}" class="row g-2 align-items-center">
             <div class="col-md-5 col-lg-4">
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Tìm tên bác sĩ, phòng khám, email...">
+                    <input type="text" id="doctorSearchInput" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Nhập 1 chữ để tìm kiếm ngay lập tức..." autocomplete="off">
+                    <span id="doctorSearchSpinner" class="input-group-text bg-white border-start-0 d-none">
+                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                    </span>
                 </div>
             </div>
             <div class="col-md-3 col-lg-3">
-                <select name="specialty_id" class="form-select">
+                <select id="doctorSpecialtySelect" name="specialty_id" class="form-select">
                     <option value="">-- Tất cả chuyên khoa --</option>
                     @foreach($specialties as $sp)
                         <option value="{{ $sp->id }}" {{ request('specialty_id') == $sp->id ? 'selected' : '' }}>
@@ -91,7 +94,7 @@
                 </select>
             </div>
             <div class="col-md-2 col-lg-2">
-                <select name="is_available" class="form-select">
+                <select id="doctorAvailabilitySelect" name="is_available" class="form-select">
                     <option value="">-- Trạng thái khám --</option>
                     <option value="1" {{ request('is_available') === '1' ? 'selected' : '' }}>Sẵn sàng nhận khám</option>
                     <option value="0" {{ request('is_available') === '0' ? 'selected' : '' }}>Tạm dừng nhận khám</option>
@@ -112,7 +115,7 @@
 </div>
 
 <!-- Doctors Table Card -->
-<div class="card shadow-sm border-0">
+<div class="card shadow-sm border-0 rounded-4" id="doctorsTableContainer">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -194,7 +197,7 @@
                                     <a href="{{ route('admin.doctors.edit', $doctor) }}" class="btn btn-outline-primary" title="Chỉnh sửa">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.doctors.destroy', $doctor) }}" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa hồ sơ bác sĩ này?');">
+                                    <form method="POST" action="{{ route('admin.doctors.destroy', $doctor) }}" class="d-inline" data-confirm="Bạn có chắc chắn muốn xóa hồ sơ bác sĩ này? Thao tác không thể hoàn tác!">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline-danger" title="Xóa bác sĩ">
@@ -223,4 +226,70 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filterForm = document.getElementById('doctorFilterForm');
+    const searchInput = document.getElementById('doctorSearchInput');
+    const specialtySelect = document.getElementById('doctorSpecialtySelect');
+    const availabilitySelect = document.getElementById('doctorAvailabilitySelect');
+    const tableContainer = document.getElementById('doctorsTableContainer');
+    const searchSpinner = document.getElementById('doctorSearchSpinner');
+    let debounceTimer = null;
+
+    function executeLiveSearch() {
+        if (!filterForm || !tableContainer) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        const targetUrl = filterForm.action + '?' + params.toString();
+
+        if (searchSpinner) searchSpinner.classList.remove('d-none');
+        tableContainer.style.opacity = '0.5';
+        tableContainer.style.transition = 'opacity 0.2s ease';
+
+        fetch(targetUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('doctorsTableContainer');
+            if (newTable) {
+                tableContainer.innerHTML = newTable.innerHTML;
+            }
+            window.history.replaceState({}, '', targetUrl);
+        })
+        .catch(() => {
+            filterForm.submit();
+        })
+        .finally(() => {
+            if (searchSpinner) searchSpinner.classList.add('d-none');
+            tableContainer.style.opacity = '1';
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(executeLiveSearch, 250);
+        });
+    }
+
+    if (specialtySelect) {
+        specialtySelect.addEventListener('change', function () {
+            executeLiveSearch();
+        });
+    }
+
+    if (availabilitySelect) {
+        availabilitySelect.addEventListener('change', function () {
+            executeLiveSearch();
+        });
+    }
+});
+</script>
+@endpush
 @endsection
