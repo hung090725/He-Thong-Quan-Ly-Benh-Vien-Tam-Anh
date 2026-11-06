@@ -55,14 +55,6 @@ class CalendarSyncService
     }
 
     /**
-     * Alias for getGoogleCalendarUrl to maintain backward compatibility.
-     */
-    public function generateGoogleCalendarUrl(Appointment $appointment): string
-    {
-        return $this->getGoogleCalendarUrl($appointment);
-    }
-
-    /**
      * Generate iCalendar RFC 5545 (.ics) file contents.
      */
     public function generateIcsContent(Appointment $appointment): string
