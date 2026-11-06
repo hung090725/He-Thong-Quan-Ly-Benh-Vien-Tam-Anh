@@ -20,22 +20,33 @@ class DoctorPublicController extends Controller
     /**
      * Display a public directory of doctors.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\JsonResponse
     {
         $query = Doctor::query()
-            ->with(['user', 'specialty', 'schedules'])
+            ->with(['user', 'specialty', 'schedules', 'leaves.substituteDoctor.user'])
             ->where('is_available', true)
             ->whereHas('specialty', function ($q) {
                 $q->where('is_active', true);
             });
 
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
+        if ($search = trim($request->input('search', ''))) {
+            $numOnly = preg_replace('/[^0-9]/', '', $search);
+            $query->where(function ($q) use ($search, $numOnly) {
                 $q->where('qualification', 'LIKE', "%{$search}%")
                   ->orWhere('room_number', 'LIKE', "%{$search}%")
+                  ->orWhere('building', 'LIKE', "%{$search}%")
+                  ->orWhere('floor', 'LIKE', "%{$search}%")
+                  ->orWhereHas('specialty', function ($sq) use ($search) {
+                      $sq->where('name', 'LIKE', "%{$search}%")
+                         ->orWhere('description', 'LIKE', "%{$search}%");
+                  })
                   ->orWhereHas('user', function ($uq) use ($search) {
                       $uq->where('name', 'LIKE', "%{$search}%");
                   });
+
+                if (!empty($numOnly)) {
+                    $q->orWhere('room_number', 'LIKE', "%{$numOnly}%");
+                }
             });
         }
 
@@ -56,12 +67,16 @@ class DoctorPublicController extends Controller
         if ($request->wantsJson() || $request->input('format') === 'json') {
             return response()->json([
                 'data' => $doctors->map(function ($doc) {
+                    $currentLeave = $doc->current_leave;
                     return [
                         'id' => $doc->id,
                         'name' => $doc->full_name_with_title,
                         'specialty' => $doc->specialty ? $doc->specialty->name : '',
                         'room' => $doc->room_number,
                         'avatar' => $doc->avatar_url,
+                        'is_on_leave' => (bool)$currentLeave,
+                        'leave_reason' => $currentLeave ? $currentLeave->reason : null,
+                        'substitute_name' => $currentLeave && $currentLeave->substituteDoctor ? $currentLeave->substituteDoctor->clean_name : null,
                         'url' => route('public.doctors.show', $doc),
                     ];
                 }),
@@ -85,7 +100,7 @@ class DoctorPublicController extends Controller
             $q->where('is_active', true);
         }, 'reviews' => function ($rq) {
             $rq->where('is_approved', true)->latest();
-        }]);
+        }, 'leaves.substituteDoctor.user']);
 
         $lang = $request->query('lang', 'vi');
 

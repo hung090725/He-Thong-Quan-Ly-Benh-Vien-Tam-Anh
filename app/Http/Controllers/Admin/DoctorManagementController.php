@@ -27,17 +27,28 @@ class DoctorManagementController extends Controller
      */
     public function index(Request $request): View|\Illuminate\Http\JsonResponse
     {
-        $query = Doctor::query()->with(['user', 'specialty', 'schedules']);
+        $query = Doctor::query()->with(['user', 'specialty', 'schedules', 'leaves.substituteDoctor.user']);
 
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
+        if ($search = trim($request->input('search', ''))) {
+            $numOnly = preg_replace('/[^0-9]/', '', $search);
+            $query->where(function ($q) use ($search, $numOnly) {
                 $q->where('qualification', 'LIKE', "%{$search}%")
                   ->orWhere('room_number', 'LIKE', "%{$search}%")
+                  ->orWhere('building', 'LIKE', "%{$search}%")
+                  ->orWhere('floor', 'LIKE', "%{$search}%")
+                  ->orWhereHas('specialty', function ($sq) use ($search) {
+                      $sq->where('name', 'LIKE', "%{$search}%")
+                         ->orWhere('description', 'LIKE', "%{$search}%");
+                  })
                   ->orWhereHas('user', function ($uq) use ($search) {
                       $uq->where('name', 'LIKE', "%{$search}%")
                          ->orWhere('email', 'LIKE', "%{$search}%")
                          ->orWhere('phone', 'LIKE', "%{$search}%");
                   });
+
+                if (!empty($numOnly)) {
+                    $q->orWhere('room_number', 'LIKE', "%{$numOnly}%");
+                }
             });
         }
 
@@ -54,6 +65,7 @@ class DoctorManagementController extends Controller
         if ($request->wantsJson() || $request->input('format') === 'json') {
             return response()->json([
                 'data' => $doctors->map(function ($doc) {
+                    $currentLeave = $doc->current_leave;
                     return [
                         'id' => $doc->id,
                         'name' => $doc->full_name_with_title,
@@ -63,6 +75,9 @@ class DoctorManagementController extends Controller
                         'fee' => number_format($doc->consultation_fee, 0, ',', '.') . ' đ',
                         'avatar' => $doc->avatar_url,
                         'is_available' => (bool)$doc->is_available,
+                        'is_on_leave' => (bool)$currentLeave,
+                        'leave_reason' => $currentLeave ? $currentLeave->reason : null,
+                        'substitute_name' => $currentLeave && $currentLeave->substituteDoctor ? $currentLeave->substituteDoctor->clean_name : null,
                         'url' => route('admin.doctors.show', $doc),
                     ];
                 }),

@@ -122,6 +122,9 @@ class Doctor extends Model
      */
     public function getIsOnDutyTodayAttribute(): bool
     {
+        if ($this->current_leave) {
+            return false;
+        }
         $today = strtolower(now()->format('l'));
         return $this->schedules->where('day_of_week', $today)->where('is_active', true)->isNotEmpty();
     }

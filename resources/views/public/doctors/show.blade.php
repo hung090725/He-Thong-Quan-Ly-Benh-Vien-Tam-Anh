@@ -35,10 +35,23 @@
                     @endif
                 </div>
                 <h3 class="fw-bold text-dark mb-1">{{ $doctor->full_name_with_title }}</h3>
-                <div class="mb-3">
+                <div class="mb-3 d-flex justify-content-center gap-1 flex-wrap">
                     @if($doctor->specialty)
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
                             <i class="{{ $doctor->specialty->icon ?: 'bi bi-tag' }} me-1"></i> {{ $doctor->specialty->name }}
+                        </span>
+                    @endif
+                    @if($doctor->current_leave)
+                        <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-1 fw-bold">
+                            <i class="bi bi-calendar2-x-fill me-1"></i> Đang Nghỉ Phép
+                        </span>
+                    @elseif($doctor->is_available)
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                            <i class="bi bi-check-circle-fill me-1"></i> Sẵn sàng nhận khám
+                        </span>
+                    @else
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-1">
+                            <i class="bi bi-slash-circle me-1"></i> Tạm dừng nhận khám
                         </span>
                     @endif
                 </div>
@@ -55,9 +68,19 @@
                 </div>
 
                 <div class="d-grid mb-3">
-                    <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->id }}&specialty_id={{ $doctor->specialty_id }}" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
-                        <i class="bi bi-calendar-check me-1"></i> Đặt lịch khám với Bác sĩ
-                    </a>
+                    @if($doctor->current_leave && $doctor->current_leave->substituteDoctor)
+                        <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->current_leave->substitute_doctor_id }}&specialty_id={{ $doctor->specialty_id }}" class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm text-dark">
+                            <i class="bi bi-arrow-repeat me-1"></i> Đặt lịch BS trực thay ({{ $doctor->current_leave->substituteDoctor->clean_name }})
+                        </a>
+                    @elseif($doctor->current_leave)
+                        <button class="btn btn-secondary btn-lg rounded-pill fw-bold shadow-sm" disabled>
+                            <i class="bi bi-calendar2-x me-1"></i> Bác sĩ đang tạm vắng mặt
+                        </button>
+                    @else
+                        <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->id }}&specialty_id={{ $doctor->specialty_id }}" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-calendar-check me-1"></i> Đặt lịch khám với Bác sĩ
+                        </a>
+                    @endif
                 </div>
 
                 <!-- Digital Business Card & Smart QR -->
@@ -177,13 +200,19 @@
                             @forelse($doctor->schedules->sortBy('id') as $sched)
                                 @php
                                     $isToday = (strtolower(now()->format('l')) === $sched->day_of_week);
+                                    $isLeaveSlot = $isToday && $doctor->current_leave;
                                 @endphp
-                                <tr class="{{ $isToday ? 'table-warning bg-opacity-25' : '' }}">
+                                <tr class="{{ $isLeaveSlot ? 'table-warning bg-opacity-50' : ($isToday ? 'table-warning bg-opacity-25' : '') }}">
                                     <td class="ps-4 fw-bold text-dark">
                                         {{ $days[$sched->day_of_week] ?? $sched->day_name }}
                                         @if($isToday)
                                             <span class="badge bg-warning text-dark border border-warning ms-1" style="font-size: 0.7rem;">
                                                 <i class="bi bi-star-fill me-1"></i> {{ ($lang ?? 'vi') === 'en' ? 'Today' : 'Hôm nay' }}
+                                            </span>
+                                        @endif
+                                        @if($isLeaveSlot)
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 0.7rem;">
+                                                <i class="bi bi-calendar2-x-fill me-1"></i> {{ ($lang ?? 'vi') === 'en' ? 'On Leave' : 'Nghỉ phép' }}
                                             </span>
                                         @endif
                                     </td>
@@ -200,9 +229,19 @@
                                         <span class="text-secondary fw-medium">{{ substr($sched->start_time, 0, 5) }} - {{ substr($sched->end_time, 0, 5) }}</span>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->id }}&specialty_id={{ $doctor->specialty_id }}&shift={{ $sched->shift }}" class="btn btn-sm btn-outline-primary rounded-pill">
-                                            {{ ($lang ?? 'vi') === 'en' ? 'Book this slot' : 'Chọn ca này' }}
-                                        </a>
+                                        @if($isLeaveSlot && $doctor->current_leave && $doctor->current_leave->substituteDoctor)
+                                            <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->current_leave->substitute_doctor_id }}&specialty_id={{ $doctor->specialty_id }}&shift={{ $sched->shift }}" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-xs">
+                                                <i class="bi bi-arrow-repeat me-1"></i> {{ ($lang ?? 'vi') === 'en' ? 'Substitute: ' . $doctor->current_leave->substituteDoctor->clean_name : 'BS ' . $doctor->current_leave->substituteDoctor->clean_name . ' trực thay' }}
+                                            </a>
+                                        @elseif($isLeaveSlot)
+                                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1">
+                                                {{ ($lang ?? 'vi') === 'en' ? 'Slot Paused' : 'Tạm dừng ca này' }}
+                                            </span>
+                                        @else
+                                            <a href="{{ route('booking.create') }}?doctor_id={{ $doctor->id }}&specialty_id={{ $doctor->specialty_id }}&shift={{ $sched->shift }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                {{ ($lang ?? 'vi') === 'en' ? 'Book this slot' : 'Chọn ca này' }}
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

@@ -478,4 +478,60 @@ class DoctorSpecialtyTest extends TestCase
             $this->assertTrue(true);
         }
     }
+
+    public function test_admin_can_search_doctor_by_specialty_and_room(): void
+    {
+        $this->actingAs($this->admin);
+        $doctor = Doctor::with(['specialty', 'user'])->whereNotNull('specialty_id')->latest()->first();
+        if ($doctor && $doctor->specialty) {
+            $response = $this->get(route('admin.doctors.index', ['search' => $doctor->specialty->name]));
+            $response->assertStatus(200);
+            $response->assertSee($doctor->full_name_with_title);
+
+            $responseJson = $this->get(route('admin.doctors.index', ['search' => $doctor->specialty->name, 'format' => 'json']));
+            $responseJson->assertStatus(200);
+            $responseJson->assertJsonFragment(['name' => $doctor->full_name_with_title]);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    public function test_doctor_on_leave_shows_on_leave_status_and_substitute_on_public_and_admin(): void
+    {
+        $doctor = Doctor::find(45) ?: Doctor::first();
+        if ($doctor) {
+            $subDoctor = Doctor::where('id', '!=', $doctor->id)->first();
+            \App\Models\DoctorLeave::updateOrCreate([
+                'doctor_id' => $doctor->id,
+                'start_date' => now()->toDateString(),
+                'end_date' => now()->addDays(2)->toDateString(),
+            ], [
+                'substitute_doctor_id' => $subDoctor?->id,
+                'reason' => 'Nghỉ ốm / Khám sức khỏe định kỳ',
+                'status' => 'approved',
+            ]);
+
+            // Test Admin list
+            $this->actingAs($this->admin);
+            $adminResponse = $this->get(route('admin.doctors.index'));
+            $adminResponse->assertStatus(200);
+            $adminResponse->assertSee('Nghỉ phép');
+
+            // Test Public profile
+            $publicResponse = $this->get(route('public.doctors.show', $doctor));
+            $publicResponse->assertStatus(200);
+            $publicResponse->assertSee('Đang Nghỉ Phép');
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    public function test_roster_matrix_detects_doctor_leave_anomaly_and_shows_leave_badge(): void
+    {
+        $this->actingAs($this->admin);
+        $response = $this->get(route('admin.roster'));
+        $response->assertStatus(200);
+        $response->assertSee('ĐANG NGHỈ PHÉP');
+        $response->assertSee('NGHỈ:');
+    }
 }

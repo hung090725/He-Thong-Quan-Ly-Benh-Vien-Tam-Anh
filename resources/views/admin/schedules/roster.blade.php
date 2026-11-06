@@ -169,7 +169,24 @@
                                     @if($slotDocs->isNotEmpty())
                                         <div class="d-flex flex-column gap-2">
                                             @foreach($slotDocs as $item)
-                                                <div class="p-2 rounded-3 border bg-white shadow-xs">
+                                                @php
+                                                    $targetDate = $weekDates[$dayKey] ?? null;
+                                                    $slotLeave = null;
+                                                    if ($targetDate && $item->doctor && $item->doctor->leaves) {
+                                                        $slotLeave = $item->doctor->leaves->where('status', 'approved')->first(function ($l) use ($targetDate) {
+                                                            $s = \Carbon\Carbon::parse($l->start_date)->toDateString();
+                                                            $e = \Carbon\Carbon::parse($l->end_date)->toDateString();
+                                                            return $targetDate >= $s && $targetDate <= $e;
+                                                        });
+                                                    }
+                                                @endphp
+                                                <div class="p-2 rounded-3 border {{ $slotLeave ? 'border-warning shadow-xs bg-warning bg-opacity-10 position-relative' : 'border-light-subtle bg-white shadow-xs' }}">
+                                                    @if($slotLeave)
+                                                        <div class="badge bg-warning text-dark border border-warning mb-1 py-1 px-2 w-100 d-flex align-items-center justify-content-center gap-1 text-truncate" style="font-size: 0.68rem;" title="Lý do nghỉ: {{ $slotLeave->reason }}">
+                                                            <i class="bi bi-calendar2-x-fill text-danger"></i> NGHỈ: {{ Str::limit($slotLeave->reason, 15) }}
+                                                        </div>
+                                                    @endif
+
                                                     <div class="d-flex align-items-center gap-2 mb-1">
                                                         <div class="rounded-circle overflow-hidden bg-light flex-shrink-0" style="width: 28px; height: 28px;">
                                                             @if($item->doctor->avatar_url)
@@ -179,7 +196,7 @@
                                                             @endif
                                                         </div>
                                                         <div class="overflow-hidden">
-                                                            <a href="{{ route('admin.doctors.show', $item->doctor) }}" class="text-decoration-none fw-bold text-dark small d-block text-truncate" title="{{ $item->doctor->full_name_with_title }}">
+                                                            <a href="{{ route('admin.doctors.show', $item->doctor) }}" class="text-decoration-none fw-bold {{ $slotLeave ? 'text-dark text-decoration-line-through opacity-75' : 'text-dark' }} small d-block text-truncate" title="{{ $item->doctor->full_name_with_title }}">
                                                                 {{ $item->doctor->full_name_with_title }}
                                                             </a>
                                                         </div>
@@ -198,6 +215,18 @@
                                                                 {{ $item->doctor->specialty->name }}
                                                             </span>
                                                         </div>
+                                                    @endif
+
+                                                    @if($slotLeave)
+                                                        @if($slotLeave->substituteDoctor)
+                                                            <div class="mt-1 p-1 bg-white rounded border border-warning text-success small fw-bold d-flex align-items-center gap-1" style="font-size: 0.68rem;" title="Bác sĩ trực thay: {{ $slotLeave->substituteDoctor->full_name_with_title }}">
+                                                                <i class="bi bi-arrow-repeat text-primary"></i> BS thay: {{ $slotLeave->substituteDoctor->clean_name }}
+                                                            </div>
+                                                        @else
+                                                            <div class="mt-1 text-danger small fw-bold d-flex align-items-center gap-1" style="font-size: 0.68rem;">
+                                                                <i class="bi bi-exclamation-triangle-fill"></i> Chưa có BS trực thay!
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             @endforeach

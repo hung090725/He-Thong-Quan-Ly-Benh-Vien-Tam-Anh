@@ -199,21 +199,36 @@
                                 {{ number_format($doctor->consultation_fee, 0, ',', '.') }} đ
                             </td>
                             <td class="text-center">
-                                <form method="POST" action="{{ route('admin.doctors.toggle-availability', $doctor) }}" class="d-inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái nhận khám">
-                                        @if($doctor->is_available)
+                                @if($doctor->current_leave)
+                                    <span class="badge bg-warning text-dark border border-warning px-2 py-1 rounded-pill" title="Đang trong kỳ nghỉ phép: {{ $doctor->current_leave->reason }}">
+                                        <i class="bi bi-calendar2-x-fill me-1"></i> Nghỉ phép
+                                    </span>
+                                    @if($doctor->current_leave->substituteDoctor)
+                                        <small class="d-block text-muted" style="font-size: 0.68rem;">
+                                            BS thay: {{ $doctor->current_leave->substituteDoctor->clean_name }}
+                                        </small>
+                                    @endif
+                                @elseif($doctor->is_available)
+                                    <form method="POST" action="{{ route('admin.doctors.toggle-availability', $doctor) }}" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái nhận khám">
                                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
                                                 <i class="bi bi-check-circle me-1"></i> Sẵn sàng
                                             </span>
-                                        @else
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('admin.doctors.toggle-availability', $doctor) }}" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Bấm để đổi trạng thái nhận khám">
                                             <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded-pill">
                                                 <i class="bi bi-slash-circle me-1"></i> Tạm dừng
                                             </span>
-                                        @endif
-                                    </button>
-                                </form>
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                             <td class="text-end pe-3">
                                 <div class="btn-group btn-group-sm">
@@ -342,8 +357,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <small class="text-muted">${item.specialty} &bull; ${item.room} &bull; <span class="text-primary">${item.fee}</span></small>
                                 </div>
                             </div>
-                            <span class="badge ${item.is_available ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'} small">
-                                ${item.is_available ? 'Sẵn sàng' : 'Tạm dừng'}
+                            <span class="badge ${item.is_on_leave ? 'bg-warning text-dark border border-warning' : (item.is_available ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary')} small">
+                                ${item.is_on_leave ? '<i class="bi bi-calendar2-x me-1"></i>Nghỉ phép' : (item.is_available ? 'Sẵn sàng' : 'Tạm dừng')}
                             </span>
                         </div>
                     `).join('');
