@@ -595,13 +595,16 @@ class DoctorManagementController extends Controller
                         foreach ($xml->sheetData->row as $r) {
                             $rowCols = [];
                             foreach ($r->c as $c) {
-                                $val = (string)$c->v;
-                                $type = (string)$c['t'];
-                                if ($type === 's' && isset($strings[(int)$val])) {
-                                    $rowCols[] = trim($strings[(int)$val]);
+                                $type = (string)($c['t'] ?? '');
+                                if ($type === 's') {
+                                    $sIdx = (int)($c->v ?? 0);
+                                    $val = $strings[$sIdx] ?? '';
+                                } elseif ($type === 'inlineStr' && isset($c->is)) {
+                                    $val = (string)($c->is->t ?? '');
                                 } else {
-                                    $rowCols[] = trim($val);
+                                    $val = (string)($c->v ?? '');
                                 }
+                                $rowCols[] = trim($val);
                             }
                             if (count($rowCols) >= 2) {
                                 $rows[] = $rowCols;
@@ -652,17 +655,49 @@ class DoctorManagementController extends Controller
                 $line = trim($line);
                 if (empty($line)) continue;
                 $cols = str_getcsv($line, $delimiter);
-                if (count($cols) >= 2 && !empty($cols[0]) && !empty($cols[1])) {
+                if (count($cols) >= 2) {
                     $rows[] = $cols;
                 }
             }
         }
 
         foreach ($rows as $row) {
-            $name = trim($row[0] ?? '');
-            $email = trim($row[1] ?? '');
+            // Smart column detection: identify email column
+            $emailColIdx = -1;
+            foreach ($row as $idx => $val) {
+                $valClean = trim($val);
+                if (filter_var($valClean, FILTER_VALIDATE_EMAIL) || (str_contains($valClean, '@') && str_contains($valClean, '.'))) {
+                    $emailColIdx = $idx;
+                    break;
+                }
+            }
 
-            // Skip headers or lines without valid email
+            // If no column matches email format, fallback to column 1 if valid
+            if ($emailColIdx === -1) {
+                if (isset($row[1]) && str_contains($row[1], '@')) {
+                    $emailColIdx = 1;
+                } else {
+                    continue;
+                }
+            }
+
+            $email = trim($row[$emailColIdx]);
+
+            // Name is preceding column, or column 0, or first non-numeric column
+            if ($emailColIdx > 0 && !is_numeric(trim($row[$emailColIdx - 1]))) {
+                $name = trim($row[$emailColIdx - 1]);
+            } else {
+                $name = '';
+                foreach ($row as $idx => $val) {
+                    $valClean = trim($val);
+                    if ($idx !== $emailColIdx && !is_numeric($valClean) && strlen($valClean) >= 2) {
+                        $name = $valClean;
+                        break;
+                    }
+                }
+            }
+
+            // Skip headers or invalid lines
             if (empty($name) || empty($email) || !str_contains($email, '@')) {
                 continue;
             }
@@ -670,11 +705,11 @@ class DoctorManagementController extends Controller
                 continue;
             }
 
-            $password = !empty($row[2]) ? trim($row[2]) : '123456';
-            $specialtyRaw = trim($row[3] ?? '');
-            $qualification = !empty($row[4]) ? trim($row[4]) : 'BS.CKI';
-            $roomNumber = !empty($row[5]) ? trim($row[5]) : 'Phòng 201 - Tòa A';
-            $feeRaw = !empty($row[6]) ? str_replace(['.', ',', ' ', 'đ', 'VND'], '', trim($row[6])) : '350000';
+            $password = !empty($row[$emailColIdx + 1]) ? trim($row[$emailColIdx + 1]) : '123456';
+            $specialtyRaw = trim($row[$emailColIdx + 2] ?? '');
+            $qualification = !empty($row[$emailColIdx + 3]) ? trim($row[$emailColIdx + 3]) : 'BS.CKI';
+            $roomNumber = !empty($row[$emailColIdx + 4]) ? trim($row[$emailColIdx + 4]) : 'Phòng 201 - Tòa A';
+            $feeRaw = !empty($row[$emailColIdx + 5]) ? str_replace(['.', ',', ' ', 'đ', 'VND'], '', trim($row[$emailColIdx + 5])) : '350000';
             $fee = is_numeric($feeRaw) ? (float)$feeRaw : 350000;
 
             // Smart resolve specialty by ID, Name or Slug
@@ -755,6 +790,11 @@ class DoctorManagementController extends Controller
             'description' => "Đã import thành công {$importedCount} bác sĩ từ file dữ liệu",
             'ip_address' => $request->ip(),
         ]);
+
+        if ($importedCount === 0) {
+            return redirect()->route('admin.doctors.index')
+                ->with('warning', 'Không tìm thấy hồ sơ bác sĩ hợp lệ để nạp vào hệ thống. Vui lòng kiểm tra file có cột Họ tên và Email hợp lệ (hoặc tải "File Mẫu" có sẵn để điền)!');
+        }
 
         return redirect()->route('admin.doctors.index')
             ->with('success', "Đã import thành công {$importedCount} hồ sơ bác sĩ vào hệ thống!");
