@@ -14,19 +14,27 @@ class CalendarSyncService
     {
         $appointment->loadMissing(['doctor.user', 'specialty']);
 
-        $title = rawurlencode("Lịch Khám Y Tế: {$appointment->specialty->name} - BS. {$appointment->doctor->full_name_with_title}");
+        $specialtyName = $appointment->specialty?->name ?? 'Đa khoa';
+        $doctorName = $appointment->doctor?->full_name_with_title ?? 'Bác sĩ phụ trách';
+        $roomNumber = $appointment->doctor?->room_number ?? '1';
+
+        $title = rawurlencode("Lịch Khám Y Tế: {$specialtyName} - BS. {$doctorName}");
         $details = rawurlencode(
             "Mã lịch hẹn: {$appointment->appointment_code}\n" .
-            "Bác sĩ phụ trách: {$appointment->doctor->full_name_with_title}\n" .
-            "Chuyên khoa: {$appointment->specialty->name}\n" .
+            "Bác sĩ phụ trách: {$doctorName}\n" .
+            "Chuyên khoa: {$specialtyName}\n" .
             "Ca khám: {$appointment->shift_name}\n" .
-            "Phòng khám: {$appointment->doctor->room_number}\n" .
+            "Phòng khám: {$roomNumber}\n" .
             "Lưu ý: Quý khách vui lòng mang theo CMND/CCCD hoặc BHYT (nếu có) và có mặt trước giờ khám 15 phút."
         );
-        $location = rawurlencode("Bệnh viện Đa khoa Tâm Anh, Phòng {$appointment->doctor->room_number}");
+        $location = rawurlencode("Bệnh viện Đa khoa Tâm Anh, Phòng {$roomNumber}");
 
-        // Format dates
-        $dateStr = $appointment->appointment_date->format('Ymd');
+        // Format dates safely
+        $date = $appointment->appointment_date instanceof \DateTimeInterface
+            ? Carbon::parse($appointment->appointment_date)
+            : Carbon::today();
+        $dateStr = $date->format('Ymd');
+
         if ($appointment->shift === Appointment::SHIFT_MORNING) {
             $start = "{$dateStr}T073000";
             $end = "{$dateStr}T113000";
@@ -39,13 +47,29 @@ class CalendarSyncService
     }
 
     /**
+     * Alias for getGoogleCalendarUrl to maintain backward compatibility.
+     */
+    public function generateGoogleCalendarUrl(Appointment $appointment): string
+    {
+        return $this->getGoogleCalendarUrl($appointment);
+    }
+
+    /**
      * Generate iCalendar RFC 5545 (.ics) file contents.
      */
     public function generateIcsContent(Appointment $appointment): string
     {
         $appointment->loadMissing(['doctor.user', 'specialty', 'patientProfile']);
 
-        $dateStr = $appointment->appointment_date->format('Ymd');
+        $specialtyName = $appointment->specialty?->name ?? 'Đa khoa';
+        $doctorName = $appointment->doctor?->full_name_with_title ?? 'Bác sĩ phụ trách';
+        $roomNumber = $appointment->doctor?->room_number ?? '1';
+
+        $date = $appointment->appointment_date instanceof \DateTimeInterface
+            ? Carbon::parse($appointment->appointment_date)
+            : Carbon::today();
+        $dateStr = $date->format('Ymd');
+
         if ($appointment->shift === Appointment::SHIFT_MORNING) {
             $start = "{$dateStr}T073000";
             $end = "{$dateStr}T113000";
@@ -55,8 +79,8 @@ class CalendarSyncService
         }
 
         $summary = "Lịch Khám Bệnh Viện Tâm Anh - " . $appointment->appointment_code;
-        $description = "Lịch khám chuyên khoa " . $appointment->specialty->name . " với " . $appointment->doctor->full_name_with_title . ". Phòng khám: " . $appointment->doctor->room_number;
-        $location = "Bệnh viện Đa khoa Tâm Anh - Phòng " . $appointment->doctor->room_number;
+        $description = "Lịch khám chuyên khoa " . $specialtyName . " với " . $doctorName . ". Phòng khám: " . $roomNumber;
+        $location = "Bệnh viện Đa khoa Tâm Anh - Phòng " . $roomNumber;
         $now = gmdate('Ymd\THis\Z');
         $uid = "APPOINTMENT-" . $appointment->appointment_code . "@tamanh.vn";
 

@@ -69,9 +69,22 @@ class BookingTest extends TestCase
         $this->assertStringStartsWith('AP-', $appointment->appointment_code);
         $this->assertEquals(Appointment::STATUS_PENDING, $appointment->status);
 
+        // Verify booking success screen renders with calendar sync
+        $successPage = $this->get(route('booking.success', ['code' => $appointment->appointment_code]));
+        $successPage->assertOk();
+        $successPage->assertSee($appointment->appointment_code);
+        $successPage->assertSee('ĐẶT LỊCH KHÁM THÀNH CÔNG');
+
         $patient = PatientProfile::where('phone', $uniquePhone)->first();
         $this->assertNotNull($patient);
         $this->assertEquals('Trần Văn Kiểm Thử', $patient->full_name);
+
+        // Verify ICS calendar download
+        $icsResponse = $this->get(route('calendar.ics', ['code' => $appointment->appointment_code]));
+        $icsResponse->assertOk();
+        $icsResponse->assertHeader('content-type', 'text/calendar; charset=utf-8');
+        $this->assertStringContainsString('BEGIN:VCALENDAR', $icsResponse->getContent());
+        $this->assertStringContainsString($appointment->appointment_code, $icsResponse->getContent());
     }
 
     public function test_cannot_overbook_when_max_patients_reached(): void
