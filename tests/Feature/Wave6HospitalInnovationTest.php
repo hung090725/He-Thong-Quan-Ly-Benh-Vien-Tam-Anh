@@ -54,7 +54,7 @@ class Wave6HospitalInnovationTest extends TestCase
 
     private function createDoctor(): Doctor
     {
-        $specialty = Specialty::firstOrCreate(
+        $specialty = Specialty::first() ?? Specialty::firstOrCreate(
             ['slug' => 'hoi-suc-wave-6'],
             ['name' => 'Hồi Sức Cấp Cứu Wave 6', 'description' => 'Khoa Hồi sức tích cực và chống độc BV Đa Khoa Tâm Anh']
         );

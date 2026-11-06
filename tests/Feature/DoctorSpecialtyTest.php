@@ -47,7 +47,7 @@ class DoctorSpecialtyTest extends TestCase
             ]
         );
 
-        $this->specialty = Specialty::firstOrCreate(
+        $this->specialty = Specialty::first() ?? Specialty::firstOrCreate(
             ['slug' => 'chuyen-khoa-test'],
             [
                 'name' => 'Chuyên khoa Test',
@@ -83,18 +83,28 @@ class DoctorSpecialtyTest extends TestCase
 
         $response->assertRedirect(route('admin.specialties.index'));
         $this->assertDatabaseHas('specialties', ['name' => $uniqueName]);
+        // Cleanup test data to prevent database pollution
+        Specialty::where('name', $uniqueName)->delete();
     }
 
     public function test_admin_can_toggle_specialty_status(): void
     {
-        $initialStatus = $this->specialty->is_active;
+        $tempSpecialty = Specialty::create([
+            'name' => 'Chuyên Khoa Tạm ' . uniqid(),
+            'slug' => 'chuyen-khoa-tam-' . uniqid(),
+            'is_active' => true,
+        ]);
+
+        $initialStatus = $tempSpecialty->is_active;
 
         $response = $this->actingAs($this->admin)
-            ->patch(route('admin.specialties.toggle-status', $this->specialty));
+            ->patch(route('admin.specialties.toggle-status', $tempSpecialty));
 
         $response->assertStatus(302);
-        $this->specialty->refresh();
-        $this->assertEquals(!$initialStatus, $this->specialty->is_active);
+        $tempSpecialty->refresh();
+        $this->assertEquals(!$initialStatus, $tempSpecialty->is_active);
+
+        $tempSpecialty->delete();
     }
 
     public function test_admin_cannot_delete_specialty_if_doctors_exist(): void

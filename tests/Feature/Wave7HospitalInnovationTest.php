@@ -49,7 +49,7 @@ class Wave7HospitalInnovationTest extends TestCase
 
     private function createDoctor(): Doctor
     {
-        $specialty = Specialty::firstOrCreate(
+        $specialty = Specialty::first() ?? Specialty::firstOrCreate(
             ['slug' => 'ung-thu-hoi-suc-w7'],
             ['name' => 'Khoa Ung Thư & Hồi Sức Tích Cực Wave 7', 'description' => 'Khoa Đột phá Công nghệ Y học BV Đa Khoa Tâm Anh']
         );

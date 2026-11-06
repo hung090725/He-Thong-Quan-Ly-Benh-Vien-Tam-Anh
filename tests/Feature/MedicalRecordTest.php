@@ -41,7 +41,7 @@ class MedicalRecordTest extends TestCase
         );
 
         // 2. Chuyên khoa
-        $this->specialty = Specialty::firstOrCreate(
+        $this->specialty = Specialty::first() ?? Specialty::firstOrCreate(
             ['slug' => 'chuyen-khoa-noi-bao'],
             [
                 'name' => 'Chuyên Khoa Nội Test',

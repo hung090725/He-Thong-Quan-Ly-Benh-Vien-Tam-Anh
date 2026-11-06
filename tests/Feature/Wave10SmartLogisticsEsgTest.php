@@ -49,7 +49,7 @@ class Wave10SmartLogisticsEsgTest extends TestCase
 
     private function createDoctor(): Doctor
     {
-        $specialty = Specialty::firstOrCreate(
+        $specialty = Specialty::first() ?? Specialty::firstOrCreate(
             ['slug' => 'chuyen-khoa-w10'],
             ['name' => 'Khoa Vận Hành & An Ninh Bệnh Viện W10', 'description' => 'Khoa Vận Hành Tòa Nhà Thông Minh']
         );
