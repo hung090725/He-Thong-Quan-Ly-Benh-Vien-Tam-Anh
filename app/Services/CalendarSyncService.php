@@ -16,7 +16,7 @@ class CalendarSyncService
 
         $specialtyName = $appointment->specialty?->name ?? 'Đa khoa';
         $doctorName = $appointment->doctor?->full_name_with_title ?? 'Bác sĩ phụ trách';
-        $roomNumber = $appointment->doctor?->room_number ?? '1';
+        $roomNumber = $appointment->doctor?->room_display ?? ($appointment->doctor?->room_number ? (str_starts_with($appointment->doctor->room_number, 'Phòng') ? $appointment->doctor->room_number : 'Phòng ' . $appointment->doctor->room_number) : 'Phòng khám Tâm Anh');
 
         $title = rawurlencode("Lịch Khám Y Tế: {$specialtyName} - BS. {$doctorName}");
         $details = rawurlencode(
@@ -27,7 +27,7 @@ class CalendarSyncService
             "Phòng khám: {$roomNumber}\n" .
             "Lưu ý: Quý khách vui lòng mang theo CMND/CCCD hoặc BHYT (nếu có) và có mặt trước giờ khám 15 phút."
         );
-        $location = rawurlencode("Bệnh viện Đa khoa Tâm Anh, Phòng {$roomNumber}");
+        $location = rawurlencode("Bệnh viện Đa khoa Tâm Anh, {$roomNumber}");
 
         // Format dates safely
         $date = $appointment->appointment_date instanceof \DateTimeInterface
@@ -63,7 +63,7 @@ class CalendarSyncService
 
         $specialtyName = $appointment->specialty?->name ?? 'Đa khoa';
         $doctorName = $appointment->doctor?->full_name_with_title ?? 'Bác sĩ phụ trách';
-        $roomNumber = $appointment->doctor?->room_number ?? '1';
+        $roomNumber = $appointment->doctor?->room_display ?? ($appointment->doctor?->room_number ? (str_starts_with($appointment->doctor->room_number, 'Phòng') ? $appointment->doctor->room_number : 'Phòng ' . $appointment->doctor->room_number) : 'Phòng khám Tâm Anh');
 
         $date = $appointment->appointment_date instanceof \DateTimeInterface
             ? Carbon::parse($appointment->appointment_date)
@@ -79,8 +79,8 @@ class CalendarSyncService
         }
 
         $summary = "Lịch Khám Bệnh Viện Tâm Anh - " . $appointment->appointment_code;
-        $description = "Lịch khám chuyên khoa " . $specialtyName . " với " . $doctorName . ". Phòng khám: " . $roomNumber;
-        $location = "Bệnh viện Đa khoa Tâm Anh - Phòng " . $roomNumber;
+        $description = "Lịch khám chuyên khoa " . $specialtyName . " với " . $doctorName . ". " . $roomNumber;
+        $location = "Bệnh viện Đa khoa Tâm Anh - " . $roomNumber;
         $now = gmdate('Ymd\THis\Z');
         $uid = "APPOINTMENT-" . $appointment->appointment_code . "@tamanh.vn";
 

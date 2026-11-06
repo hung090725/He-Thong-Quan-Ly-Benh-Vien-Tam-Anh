@@ -51,6 +51,15 @@ class MedicalAttachmentTest extends TestCase
         ]);
     }
 
+    protected function tearDown(): void
+    {
+        if (isset($this->appointment) && $this->appointment->exists) {
+            MedicalRecord::where('appointment_id', $this->appointment->id)->delete();
+            $this->appointment->delete();
+        }
+        parent::tearDown();
+    }
+
     public function test_doctor_can_upload_attachments_during_consultation(): void
     {
         $fakeXray = UploadedFile::fake()->create('chest_xray.jpg', 500, 'image/jpeg');
